@@ -598,6 +598,7 @@
 
             const bgmAudio = document.getElementById('bgm');
             const logContainer = document.querySelector('.log-panel, #logPanel, #logContainer, .message-box');
+            const weatherSelect = document.getElementById('weatherSelect');
 
             const rawData = {
                 entities: typeof entities !== 'undefined' ? entities : [],
@@ -611,14 +612,13 @@
                 isBattleActive: typeof isBattleActive !== 'undefined' ? isBattleActive : false,
                 activeSkill: typeof activeSkill !== 'undefined' ? activeSkill : null,
                 isDarkMode: document.body.classList.contains('dark-mode') || (typeof isDarkMode !== 'undefined' && isDarkMode),
-                isRaining: typeof rainReq !== 'undefined' && rainReq !== null,
+                currentWeather: weatherSelect ? weatherSelect.value : '',
                 isBgmPlaying: bgmAudio ? !bgmAudio.paused : false,
                 bgmSrc: bgmAudio ? bgmAudio.src : '',
                 logs: logContainer ? logContainer.innerHTML : ''
             };
 
             const cleanData = JSON.parse(JSON.stringify(rawData));
-            
             battleDataRef.set(cleanData).catch(err => console.error("데이터 동기화 실패:", err));
         }
 
@@ -692,21 +692,21 @@
                 if (typeof activeSkill !== 'undefined') activeSkill = data.activeSkill || null;
 
                 if (typeof renderGrid === 'function') renderGrid();
-                if (typeof updateTurnDisplay === 'function') updateTurnDisplay();
+                if (typeof updateBattleUI === 'function') updateBattleUI();
                 if (typeof updateSkillDisplay === 'function') updateSkillDisplay();
                 if (typeof renderStatusCatalog === 'function') renderStatusCatalog();
                 if (typeof renderItemCatalog === 'function') renderItemCatalog();
                 if (typeof renderEquipCatalog === 'function') renderEquipCatalog();
 
-                const roundDisplay = document.getElementById('roundDisplay');
-                if (roundDisplay) {
-                    roundDisplay.innerText = data.isBattleActive ? "[전투 진행중] 라운드: " + data.globalRound : "대기 중";
-                }
-
-                if (data.isRaining) {
-                    if (typeof createRain === 'function' && (typeof rainReq === 'undefined' || rainReq === null)) createRain();
-                } else {
-                    if (typeof stopRain === 'function') stopRain();
+                const weatherSelect = document.getElementById('weatherSelect');
+                if (weatherSelect && data.currentWeather !== undefined) {
+                    weatherSelect.value = data.currentWeather;
+                    
+                    if (data.currentWeather === '비') {
+                        if (typeof createRain === 'function' && (typeof rainReq === 'undefined' || rainReq === null)) createRain();
+                    } else {
+                        if (typeof stopRain === 'function') stopRain();
+                    }
                 }
 
                 if (data.isDarkMode) {
