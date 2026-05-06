@@ -574,6 +574,7 @@
         let terrains = [];
         let currentTerrainMode = null;
 
+        // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyB_UC8HGdBzdW_a21Sv4b7u5ewJT8Q6Rvo",
             authDomain: "sadss2.firebaseapp.com",
@@ -584,15 +585,30 @@
             appId: "1:799445690849:web:45f654c58f89d24a948aa0"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        // 중복 초기화 방지
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const database = firebase.database();
         const battleDataRef = database.ref('battleData');
 
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('mode') === 'admin';
 
+        // 1. 동기화 함수 (관리자 전용: 현재 화면의 모든 상태를 긁어모아 서버로 전송)
         function syncToFirebase() {
             if (!isAdmin) return;
+
+            // BGM 상태 스캔
+            const bgmAudio = document.getElementById('bgm');
+            const isBgmPlaying = bgmAudio && !bgmAudio.paused;
+
+            // 다크모드 상태 스캔
+            const isDarkModeOn = document.body.classList.contains('dark-mode') || (typeof isDarkMode !== 'undefined' && isDarkMode);
+
+            // 날씨(비) 상태 스캔
+            const isRaining = typeof rainReq !== 'undefined' && rainReq !== null;
+
             battleDataRef.set({
                 entities: typeof entities !== 'undefined' ? entities : [],
                 globalStatusList: typeof globalStatusList !== 'undefined' ? globalStatusList : [],
@@ -602,10 +618,14 @@
                 globalRound: typeof globalRound !== 'undefined' ? globalRound : 0,
                 turnOrder: typeof turnOrder !== 'undefined' ? turnOrder : [],
                 currentTurnIndex: typeof currentTurnIndex !== 'undefined' ? currentTurnIndex : 0,
-                isBattleActive: typeof isBattleActive !== 'undefined' ? isBattleActive : false
+                isBattleActive: typeof isBattleActive !== 'undefined' ? isBattleActive : false,
+                isDarkMode: isDarkModeOn,
+                isRaining: isRaining,
+                isBgmPlaying: isBgmPlaying
             });
         }
 
+        // 2. 수신 함수 (관전자 전용: 서버에서 데이터를 받아와서 내 화면에 그리기)
         if (!isAdmin) {
             battleDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -615,55 +635,97 @@
                     if (typeof itemCatalog !== 'undefined') itemCatalog = data.itemCatalog || [];
                     if (typeof equipCatalog !== 'undefined') equipCatalog = data.equipCatalog || [];
                     if (typeof terrains !== 'undefined') terrains = data.terrains || [];
+
                     if (typeof globalRound !== 'undefined') globalRound = data.globalRound || 0;
                     if (typeof turnOrder !== 'undefined') turnOrder = data.turnOrder || [];
                     if (typeof currentTurnIndex !== 'undefined') currentTurnIndex = data.currentTurnIndex || 0;
                     if (typeof isBattleActive !== 'undefined') isBattleActive = data.isBattleActive || false;
-                    
+
+                    // 기본 렌더링 함수들 실행
                     if (typeof renderGrid === 'function') renderGrid();
+                    if (typeof updateTurnDisplay === 'function') updateTurnDisplay();
+                    
+                    // 도감 렌더링 함수 실행 (뷰어가 도감 버튼을 눌렀을 때 최신 정보가 보이도록)
+                    if (typeof renderStatusCatalog === 'function') renderStatusCatalog();
+                    if (typeof renderItemCatalog === 'function') renderItemCatalog();
+                    if (typeof renderEquipCatalog === 'function') renderEquipCatalog();
+
+                    // 라운드/전투 상태 UI 강제 갱신
+                    try {
+                        const roundDisplay = document.getElementById('roundDisplay');
+                        if (roundDisplay) {
+                            roundDisplay.innerText = data.isBattleActive ? `[전투 진행중] 라운드: ${data.globalRound}` : "대기 중";
+                        }
+                    } catch(e) {}
+
+                    // 다크모드 화면 연동
+                    if (data.isDarkMode) {
+                        document.body.classList.add('dark-mode');
+                        if (typeof isDarkMode !== 'undefined') isDarkMode = true;
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        if (typeof isDarkMode !== 'undefined') isDarkMode = false;
+                    }
+
+                    // 날씨 연동
+                    if (data.isRaining) {
+                        if (typeof createRain === 'function' && (typeof rainReq === 'undefined' || rainReq === null)) createRain();
+                    } else {
+                        if (typeof stopRain === 'function') stopRain();
+                    }
+
+                    // BGM 연동
+                    const bgmAudio = document.getElementById('bgm');
+                    if (bgmAudio) {
+                        if (data.isBgmPlaying && bgmAudio.paused) {
+                            bgmAudio.play().catch(() => console.log("뷰어의 화면 클릭이 필요합니다."));
+                        } else if (!data.isBgmPlaying && !bgmAudio.paused) {
+                            bgmAudio.pause();
+                        }
+                    }
                 }
             });
-            
+
+            // 관전자는 타일 클릭이나 유닛 조작 금지
             const _originalHandleTileClick = typeof handleTileClick === 'function' ? handleTileClick : function(){};
-            window.handleTileClick = function(cx, cy) {
-                return;
-            };
+            window.handleTileClick = function(cx, cy) { return; };
         }
 
+        // 3. UI 가리기 규칙 및 관리자 자동 스캔 기능 설정
         window.addEventListener('DOMContentLoaded', () => {
             if (!isAdmin) {
                 const style = document.createElement('style');
+                // topMenu는 살려두어 도감을 볼 수 있게 하되, 조작 버튼들만 정밀하게 가립니다.
                 style.innerHTML = `
-                    .card-actions, #topMenu, .control-panel { display: none !important; }
+                    .card-actions, .control-panel, #adminPanel { display: none !important; }
                     .action-btn { display: none !important; }
                     .hp-input { pointer-events: none !important; border: none; background: transparent; }
+                    
+                    /* 메뉴바에 있는 관리자용 버튼들 숨기기 (도감 버튼은 제외) */
+                    button[onclick*="startBattle"], 
+                    button[onclick*="nextTurn"], 
+                    button[onclick*="toggleRain"], 
+                    button[onclick*="toggleDarkMode"], 
+                    button[onclick*="openModal"], 
+                    button[onclick*="playBgm"] { display: none !important; }
                 `;
                 document.head.appendChild(style);
+
+                // 첫 입장 시 오디오 재생 권한 획득용 이벤트
+                document.body.addEventListener('click', function unlockAudio() {
+                    document.body.removeEventListener('click', unlockAudio);
+                }, { once: true });
             } else {
-                battleDataRef.once('value').then((snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        if (typeof entities !== 'undefined') entities = data.entities || [];
-                        if (typeof globalStatusList !== 'undefined') globalStatusList = data.globalStatusList || [];
-                        if (typeof itemCatalog !== 'undefined') itemCatalog = data.itemCatalog || [];
-                        if (typeof equipCatalog !== 'undefined') equipCatalog = data.equipCatalog || [];
-                        if (typeof terrains !== 'undefined') terrains = data.terrains || [];
-                        if (typeof globalRound !== 'undefined') globalRound = data.globalRound || 0;
-                        if (typeof turnOrder !== 'undefined') turnOrder = data.turnOrder || [];
-                        if (typeof currentTurnIndex !== 'undefined') currentTurnIndex = data.currentTurnIndex || 0;
-                        if (typeof isBattleActive !== 'undefined') isBattleActive = data.isBattleActive || false;
-                        if (typeof renderGrid === 'function') renderGrid();
-                    }
-                });
+                // 관리자는 0.5초(500밀리초)마다 자동으로 모든 상태(턴, 날씨, BGM 등)를 스캔하여 동기화
+                setInterval(syncToFirebase, 500);
             }
         });
 
+        // 캐릭터 배치/이동 시 강제 동기화 (기존 유지)
         const _originalRenderGridForSync = typeof renderGrid === 'function' ? renderGrid : function(){};
         window.renderGrid = function() {
             _originalRenderGridForSync();
-            if (isAdmin) {
-                syncToFirebase();
-            }
+            if (isAdmin) syncToFirebase();
         };
 
         function openTerrainModal() {
