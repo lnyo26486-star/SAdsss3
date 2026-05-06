@@ -589,6 +589,7 @@
         }
         const database = firebase.database();
         const battleDataRef = database.ref('battleData');
+        const eventRef = database.ref('battleEvent'); 
 
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('mode') === 'admin';
@@ -598,6 +599,8 @@
 
             const bgmAudio = document.getElementById('bgm');
             const isBgmPlaying = bgmAudio && !bgmAudio.paused;
+            const bgmSource = bgmAudio ? bgmAudio.src : '';
+            
             const isDarkModeOn = document.body.classList.contains('dark-mode') || (typeof isDarkMode !== 'undefined' && isDarkMode);
             const isRaining = typeof rainReq !== 'undefined' && rainReq !== null;
             
@@ -614,12 +617,47 @@
                 turnOrder: typeof turnOrder !== 'undefined' ? turnOrder : [],
                 currentTurnIndex: typeof currentTurnIndex !== 'undefined' ? currentTurnIndex : 0,
                 isBattleActive: typeof isBattleActive !== 'undefined' ? isBattleActive : false,
+                activeSkill: typeof activeSkill !== 'undefined' ? activeSkill : null,
                 isDarkMode: isDarkModeOn,
                 isRaining: isRaining,
                 isBgmPlaying: isBgmPlaying,
+                bgmSrc: bgmSource,
                 logs: currentLogs
             });
         }
+
+        function broadcastEvent(funcName, args) {
+            if (!isAdmin) return;
+            eventRef.set({
+                func: funcName,
+                args: args,
+                timestamp: Date.now()
+            });
+        }
+
+        const _originalAddLog = typeof addLog === 'function' ? addLog : function(){};
+        window.addLog = function(msg, type, isViewerSync) {
+            _originalAddLog(msg, type);
+            if (isAdmin && !isViewerSync) {
+                broadcastEvent('addLog', [msg, type]);
+            }
+        };
+
+        const _originalShowPopup = typeof showPopup === 'function' ? showPopup : function(){};
+        window.showPopup = function(msg, type, isViewerSync) {
+            _originalShowPopup(msg, type);
+            if (isAdmin && !isViewerSync) {
+                broadcastEvent('showPopup', [msg, type]);
+            }
+        };
+
+        const _originalShowAlert = typeof showAlert === 'function' ? showAlert : function(){};
+        window.showAlert = function(msg, type, isViewerSync) {
+            _originalShowAlert(msg, type);
+            if (isAdmin && !isViewerSync) {
+                broadcastEvent('showAlert', [msg, type]);
+            }
+        };
 
         if (!isAdmin) {
             battleDataRef.on('value', (snapshot) => {
@@ -634,9 +672,12 @@
                     if (typeof turnOrder !== 'undefined') turnOrder = data.turnOrder || [];
                     if (typeof currentTurnIndex !== 'undefined') currentTurnIndex = data.currentTurnIndex || 0;
                     if (typeof isBattleActive !== 'undefined') isBattleActive = data.isBattleActive || false;
+                    
+                    if (typeof activeSkill !== 'undefined') activeSkill = data.activeSkill || null;
 
                     if (typeof renderGrid === 'function') renderGrid();
                     if (typeof updateTurnDisplay === 'function') updateTurnDisplay();
+                    if (typeof updateSkillDisplay === 'function') updateSkillDisplay();
                     
                     if (typeof renderStatusCatalog === 'function') renderStatusCatalog();
                     if (typeof renderItemCatalog === 'function') renderItemCatalog();
@@ -665,6 +706,9 @@
 
                     const bgmAudio = document.getElementById('bgm');
                     if (bgmAudio) {
+                        if (data.bgmSrc && bgmAudio.src !== data.bgmSrc) {
+                            bgmAudio.src = data.bgmSrc;
+                        }
                         if (data.isBgmPlaying && bgmAudio.paused) {
                             bgmAudio.play().catch(() => console.log("뷰어 화면 클릭 필요"));
                         } else if (!data.isBgmPlaying && !bgmAudio.paused) {
@@ -673,9 +717,24 @@
                     }
 
                     const logContainer = document.querySelector('.log-panel, #logPanel, #logContainer, .message-box');
-                    if (logContainer && data.logs) {
+                    if (logContainer && data.logs && logContainer.innerHTML.length < data.logs.length) {
                         logContainer.innerHTML = data.logs;
                         logContainer.scrollTop = logContainer.scrollHeight;
+                    }
+                }
+            });
+
+            let lastEventTime = 0;
+            eventRef.on('value', (snapshot) => {
+                const event = snapshot.val();
+                if (event && event.timestamp > lastEventTime) {
+                    lastEventTime = event.timestamp;
+                    if (event.func === 'addLog' && typeof window.addLog === 'function') {
+                        window.addLog(event.args[0], event.args[1], true);
+                    } else if (event.func === 'showPopup' && typeof window.showPopup === 'function') {
+                        window.showPopup(event.args[0], event.args[1], true);
+                    } else if (event.func === 'showAlert' && typeof window.showAlert === 'function') {
+                        window.showAlert(event.args[0], event.args[1], true);
                     }
                 }
             });
@@ -689,8 +748,9 @@
             if (!isAdmin) {
                 const style = document.createElement('style');
                 style.innerHTML = `
-                    .card-actions, #adminPanel { display: none !important; }
-                    .hp-input { pointer-events: none !important; border: none; background: transparent; }
+                    .card-actions, #adminPanel, .control-panel { display: none !important; }
+                    .hp-input { pointer-events: none !important; border: none; background: transparent; width: 40px; }
+                    input[type="file"], input[type="text"] { display: none !important; }
                     button[onclick*="startBattle"], 
                     button[onclick*="nextTurn"], 
                     button[onclick*="toggleRain"], 
