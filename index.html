@@ -587,11 +587,11 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const battleDataRef = database.ref('battleData');
-        const eventsRef = database.ref('battleEvents'); // 팝업/애니메이션 전용 실시간 통신망
+        const eventsRef = database.ref('battleEvents'); 
 
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('mode') === 'admin';
-        const viewerJoinTime = Date.now(); // 관전자 접속 시간
+        const viewerJoinTime = Date.now(); 
 
         function syncToFirebase() {
             if (!isAdmin) return;
@@ -599,7 +599,7 @@
             const bgmAudio = document.getElementById('bgm');
             const logContainer = document.querySelector('.log-panel, #logPanel, #logContainer, .message-box');
 
-            battleDataRef.set({
+            const rawData = {
                 entities: typeof entities !== 'undefined' ? entities : [],
                 globalStatusList: typeof globalStatusList !== 'undefined' ? globalStatusList : [],
                 itemCatalog: typeof itemCatalog !== 'undefined' ? itemCatalog : [],
@@ -609,21 +609,23 @@
                 turnOrder: typeof turnOrder !== 'undefined' ? turnOrder : [],
                 currentTurnIndex: typeof currentTurnIndex !== 'undefined' ? currentTurnIndex : 0,
                 isBattleActive: typeof isBattleActive !== 'undefined' ? isBattleActive : false,
-                activeSkill: typeof activeSkill !== 'undefined' ? activeSkill : null, // 스킬 장전 상태 연동
+                activeSkill: typeof activeSkill !== 'undefined' ? activeSkill : null,
                 isDarkMode: document.body.classList.contains('dark-mode') || (typeof isDarkMode !== 'undefined' && isDarkMode),
                 isRaining: typeof rainReq !== 'undefined' && rainReq !== null,
                 isBgmPlaying: bgmAudio ? !bgmAudio.paused : false,
                 bgmSrc: bgmAudio ? bgmAudio.src : '',
                 logs: logContainer ? logContainer.innerHTML : ''
-            });
+            };
+
+            const cleanData = JSON.parse(JSON.stringify(rawData));
+            
+            battleDataRef.set(cleanData).catch(err => console.error("데이터 동기화 실패:", err));
         }
 
-        // 🎯 핵심: 관리자 화면에서 팝업이나 알림이 뜨면 서버로 신호를 보냄
         function broadcast(funcName, args) {
             if (isAdmin) eventsRef.push({ func: funcName, args: args, time: Date.now() });
         }
 
-        // 기존 알림 함수들에 방송(broadcast) 기능 몰래 추가하기
         const _origAddLog = typeof addLog === 'function' ? addLog : null;
         if (_origAddLog) {
             window.addLog = function() {
@@ -648,12 +650,35 @@
             };
         }
 
+        const _origSpawnHealEffect = typeof spawnHealEffect === 'function' ? spawnHealEffect : null;
+        if (_origSpawnHealEffect) {
+            window.spawnHealEffect = function() {
+                _origSpawnHealEffect.apply(this, arguments);
+                if (isAdmin) broadcast('spawnHealEffect', Array.from(arguments));
+            };
+        }
+
+        const _origPlayHealSound = typeof playHealSound === 'function' ? playHealSound : null;
+        if (_origPlayHealSound) {
+            window.playHealSound = function() {
+                _origPlayHealSound.apply(this, arguments);
+                if (isAdmin) broadcast('playHealSound', Array.from(arguments));
+            };
+        }
+
+        const _origPlayHitSound = typeof playHitSound === 'function' ? playHitSound : null;
+        if (_origPlayHitSound) {
+            window.playHitSound = function() {
+                _origPlayHitSound.apply(this, arguments);
+                if (isAdmin) broadcast('playHitSound', Array.from(arguments));
+            };
+        }
+
         if (!isAdmin) {
             battleDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
 
-                // 데이터 동기화
                 if (typeof entities !== 'undefined') entities = data.entities || [];
                 if (typeof globalStatusList !== 'undefined') globalStatusList = data.globalStatusList || [];
                 if (typeof itemCatalog !== 'undefined') itemCatalog = data.itemCatalog || [];
@@ -664,10 +689,8 @@
                 if (typeof currentTurnIndex !== 'undefined') currentTurnIndex = data.currentTurnIndex || 0;
                 if (typeof isBattleActive !== 'undefined') isBattleActive = data.isBattleActive || false;
                 
-                // 장전된 스킬 동기화
                 if (typeof activeSkill !== 'undefined') activeSkill = data.activeSkill || null;
 
-                // 화면 갱신 (모든 패널이 보이되 내용만 최신화)
                 if (typeof renderGrid === 'function') renderGrid();
                 if (typeof updateTurnDisplay === 'function') updateTurnDisplay();
                 if (typeof updateSkillDisplay === 'function') updateSkillDisplay();
@@ -675,18 +698,17 @@
                 if (typeof renderItemCatalog === 'function') renderItemCatalog();
                 if (typeof renderEquipCatalog === 'function') renderEquipCatalog();
 
-                // 턴 & 라운드 표시 텍스트 강제 갱신
                 const roundDisplay = document.getElementById('roundDisplay');
-                if (roundDisplay) roundDisplay.innerText = data.isBattleActive ? `[전투 진행중] 라운드: ${data.globalRound}` : "대기 중";
+                if (roundDisplay) {
+                    roundDisplay.innerText = data.isBattleActive ? "[전투 진행중] 라운드: " + data.globalRound : "대기 중";
+                }
 
-                // 날씨 (비) 동기화
                 if (data.isRaining) {
                     if (typeof createRain === 'function' && (typeof rainReq === 'undefined' || rainReq === null)) createRain();
                 } else {
                     if (typeof stopRain === 'function') stopRain();
                 }
 
-                // 다크모드 동기화
                 if (data.isDarkMode) {
                     document.body.classList.add('dark-mode');
                     if (typeof isDarkMode !== 'undefined') isDarkMode = true;
@@ -695,7 +717,6 @@
                     if (typeof isDarkMode !== 'undefined') isDarkMode = false;
                 }
 
-                // BGM 동기화 (관전자가 클릭해야 소리나는 브라우저 정책 대응 포함)
                 const bgmAudio = document.getElementById('bgm');
                 if (bgmAudio) {
                     if (data.bgmSrc && bgmAudio.src !== data.bgmSrc) bgmAudio.src = data.bgmSrc;
@@ -713,19 +734,18 @@
                 }
             });
 
-            // 🎯 관리자가 띄운 팝업을 관전자 화면에서도 똑같이 띄워주는 리스너
             eventsRef.on('child_added', (snapshot) => {
                 const ev = snapshot.val();
-                // 관전자가 방에 들어온 이후에 발생한 알림만 띄움 (새로고침 시 과거 알림 폭탄 방지)
                 if (ev && ev.time > viewerJoinTime - 2000) {
-                    // 관전자 화면에 팝업 띄울 때는 broadcast 안 타도록 원래 함수만 실행
                     if (ev.func === 'addLog' && _origAddLog) _origAddLog.apply(null, ev.args);
                     if (ev.func === 'showPopup' && _origShowPopup) _origShowPopup.apply(null, ev.args);
                     if (ev.func === 'showAlert' && _origShowAlert) _origShowAlert.apply(null, ev.args);
+                    if (ev.func === 'spawnHealEffect' && _origSpawnHealEffect) _origSpawnHealEffect.apply(null, ev.args);
+                    if (ev.func === 'playHealSound' && _origPlayHealSound) _origPlayHealSound.apply(null, ev.args);
+                    if (ev.func === 'playHitSound' && _origPlayHitSound) _origPlayHitSound.apply(null, ev.args);
                 }
             });
 
-            // 관전자 조작 완전 차단 (함수를 빈 껍데기로 만듦)
             window.handleTileClick = function(){ return false; };
             window.selectSkill = function(){ return false; };
             window.updateHp = function(){ return false; };
@@ -733,18 +753,12 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             if (!isAdmin) {
-                // UI를 숨기는 대신, 클릭을 아예 무시하게 만드는 마법의 CSS (pointer-events)
                 const style = document.createElement('style');
                 style.innerHTML = `
-                    /* 맵, 타일, 스킬, 체력 입력칸 클릭 무력화 */
                     .grid-container, #battleGrid, .battle-grid { pointer-events: none !important; }
                     .skill-box { pointer-events: none !important; cursor: default !important; }
                     .hp-input { pointer-events: none !important; border: none; background: transparent; }
-                    
-                    /* 카드 안의 배치, 회수, 수정 등 세부 조작 버튼만 숨기기 */
                     .card-actions { display: none !important; }
-                    
-                    /* 관리자용 핵심 진행 버튼들만 콕 집어서 숨기기 (도감이나 패널은 다 보임) */
                     button[onclick*="startBattle"], 
                     button[onclick*="nextTurn"], 
                     button[onclick*="endBattle"],
@@ -758,7 +772,6 @@
                 `;
                 document.head.appendChild(style);
 
-                // BGM 정책용 클릭 유도 (관전자가 화면 아무 곳이나 클릭하면 바로 BGM 재생)
                 document.body.addEventListener('click', function unlockAudio() {
                     const bgmAudio = document.getElementById('bgm');
                     if (bgmAudio && bgmAudio.paused) {
@@ -767,7 +780,6 @@
                     document.body.removeEventListener('click', unlockAudio);
                 }, { once: true });
             } else {
-                // 관리자는 0.3초마다 아주 촘촘하게 동기화 (버튼 누르자마자 갱신되도록 빡세게 설정)
                 setInterval(syncToFirebase, 300);
                 document.body.addEventListener('click', () => setTimeout(syncToFirebase, 50));
             }
