@@ -2073,18 +2073,14 @@
                     const resonanceValue = entity.resonance || 0;
                     const resonanceWidth = Math.min(100, Math.max(0, resonanceValue));
                     const resonanceHtml = `
-                        <div style="margin-top:8px;">
-                            <div style="font-size:11px; font-weight:bold; color:#805ad5; display:flex; justify-content:space-between;">
-                                <span>공명도</span>
-                                <span>${resonanceValue} / 100</span>
-                            </div>
-                            <div style="width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top:2px;">
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div style="font-size: 11px; font-weight: bold; color: #805ad5; white-space: nowrap;">공명도 ${resonanceValue} / 100</div>
+                            <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
                                 <div style="width: ${resonanceWidth}%; height: 100%; background: linear-gradient(90deg, #b794f4, #805ad5); transition: width 0.3s ease;"></div>
                             </div>
-                            ${resonanceValue >= 100 ? `<div style="font-size:11px; color:#d53f8c; font-weight:bold; margin-top:4px; text-align:center;">✨ 성좌 스킬 활성화 가능!</div>` : ''}
                         </div>
+                        ${resonanceValue >= 100 ? `<div style="font-size:11px; color:#d53f8c; font-weight:bold; margin-top:4px; text-align:center;">✨ 성좌 스킬 활성화 가능!</div>` : ''}
                     `;
-                    hpDisplay += resonanceHtml;
 
                     let itemButtons = (entity.inventory || []).map((item, idx) =>
                         `<button class="action-btn" style="font-size:10px; margin-right:2px; margin-bottom:2px;" title="${item.desc}&#10;효과: ${item.effect}" onclick="promptUseItem('${entity.id}', ${idx})">💊 ${item.name} (x${item.quantity})</button>`
@@ -2182,6 +2178,7 @@
                         <div class="hp-bar-fill" style="width: ${hpPct}%; background-color: ${barColor};"></div>
                         <div class="shield-bar-fill" style="width: ${shieldPct}%;"></div>
                     </div>
+                    ${resonanceHtml}
                     ${itemContainerHtml}
                     <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div><div class="skill-box" style="cursor:default;"><span class="skill-title">[이능력] ${abilityName}</span><span class="skill-desc">${abilityDesc}</span></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '공격')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" onclick="selectSkill('constBless', '${blessRange}', '${entity.id}', '그 외')"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge">${blessRange}</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
                     
