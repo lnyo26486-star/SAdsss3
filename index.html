@@ -650,6 +650,14 @@
             };
         }
 
+        const _origShowToast = typeof showToast === 'function' ? showToast : null;
+        if (_origShowToast) {
+            window.showToast = function() {
+                _origShowToast.apply(this, arguments);
+                if (isAdmin) broadcast('showToast', Array.from(arguments));
+            };
+        }
+
         const _origSpawnHealEffect = typeof spawnHealEffect === 'function' ? spawnHealEffect : null;
         if (_origSpawnHealEffect) {
             window.spawnHealEffect = function() {
@@ -699,13 +707,13 @@
                 if (typeof renderEquipCatalog === 'function') renderEquipCatalog();
 
                 const weatherSelect = document.getElementById('weatherSelect');
-                if (weatherSelect && data.currentWeather !== undefined) {
+                if (weatherSelect && data.currentWeather !== undefined && weatherSelect.value !== data.currentWeather) {
                     weatherSelect.value = data.currentWeather;
-                    
-                    if (data.currentWeather === '비') {
-                        if (typeof createRain === 'function' && (typeof rainReq === 'undefined' || rainReq === null)) createRain();
-                    } else {
-                        if (typeof stopRain === 'function') stopRain();
+                    if (typeof changeWeather === 'function') {
+                        const tempToast = window.showToast;
+                        window.showToast = function(){}; 
+                        changeWeather();
+                        window.showToast = tempToast;
                     }
                 }
 
@@ -740,6 +748,7 @@
                     if (ev.func === 'addLog' && _origAddLog) _origAddLog.apply(null, ev.args);
                     if (ev.func === 'showPopup' && _origShowPopup) _origShowPopup.apply(null, ev.args);
                     if (ev.func === 'showAlert' && _origShowAlert) _origShowAlert.apply(null, ev.args);
+                    if (ev.func === 'showToast' && _origShowToast) _origShowToast.apply(null, ev.args);
                     if (ev.func === 'spawnHealEffect' && _origSpawnHealEffect) _origSpawnHealEffect.apply(null, ev.args);
                     if (ev.func === 'playHealSound' && _origPlayHealSound) _origPlayHealSound.apply(null, ev.args);
                     if (ev.func === 'playHitSound' && _origPlayHitSound) _origPlayHitSound.apply(null, ev.args);
@@ -758,14 +767,25 @@
                     .grid-container, #battleGrid, .battle-grid { pointer-events: none !important; }
                     .skill-box { pointer-events: none !important; cursor: default !important; }
                     .hp-input { pointer-events: none !important; border: none; background: transparent; }
+                    #weatherSelect { pointer-events: none !important; appearance: none; }
                     .card-actions { display: none !important; }
+                    
                     button[onclick*="startBattle"], 
                     button[onclick*="nextTurn"], 
                     button[onclick*="endBattle"],
                     button[onclick*="toggleRain"], 
                     button[onclick*="toggleDarkMode"], 
                     button[onclick*="playBgm"],
-                    button[onclick*="addCharacter"],
+                    button[onclick*="add"], 
+                    button[onclick*="Add"], 
+                    button[onclick*="save"], 
+                    button[onclick*="Save"], 
+                    button[onclick*="edit"], 
+                    button[onclick*="Edit"], 
+                    button[onclick*="delete"], 
+                    button[onclick*="Delete"], 
+                    button[onclick*="remove"], 
+                    button[onclick*="Remove"], 
                     button[onclick*="clearTokens"],
                     button[onclick*="exportData"],
                     button[onclick*="importData"] { display: none !important; }
@@ -782,6 +802,11 @@
             } else {
                 setInterval(syncToFirebase, 300);
                 document.body.addEventListener('click', () => setTimeout(syncToFirebase, 50));
+                
+                const weatherSelect = document.getElementById('weatherSelect');
+                if(weatherSelect) {
+                    weatherSelect.addEventListener('change', () => setTimeout(syncToFirebase, 50));
+                }
             }
         });
 
@@ -2935,7 +2960,5 @@
         }
 
     </script>
-</body>
-</html>
 </body>
 </html>
