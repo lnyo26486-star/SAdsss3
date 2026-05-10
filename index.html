@@ -396,48 +396,51 @@
             <p style="font-size:12px; color:#718096; margin-bottom:15px;">등록된 상태이상은 턴 진행과 전투 계산에 자동으로 반영됩니다.</p>
             <div id="globalStatusListContainer" style="margin-bottom: 20px; max-height: 200px; overflow-y: auto;"></div>
             
-            <div class="form-section-title">새 상태이상 엔진 추가 및 수정</div>
-            <div class="form-group"><label>기호/이모지</label><input type="text" id="inputGlobalStatusIcon" placeholder="예: 🔥" style="width: 70%;"></div>
-            <div class="form-group"><label>이름</label><input type="text" id="inputGlobalStatusName" placeholder="예: 화상" style="width: 70%;"></div>
-            <div class="form-group"><label>설명</label><input type="text" id="inputGlobalStatusDesc" placeholder="예: 매 턴 10 피해" style="width: 70%;"></div>
+            <button onclick="const x = document.getElementById('globalStatusAddSection'); x.style.display = x.style.display === 'none' ? 'block' : 'none';" style="width: 100%; margin-bottom: 10px; padding: 8px; background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">새 상태이상 엔진 추가 및 수정 펼치기 / 접기 ▼</button>
             
-            <div class="form-group">
-                <label>효과 유형</label>
-                <select id="inputGlobalStatusType" onchange="toggleStatusUI()" style="width: 70%;">
-                    <option value="none">효과 없음 (텍스트 표시만)</option>
-                    <option value="dot">지속 피해 (매 턴 최대 체력 비례 % 감소)</option>
-                    <option value="hot">지속 회복 (매 턴 최대 체력 비례 % 회복)</option>
-                    <option value="stun">행동 불능 (턴 강제 스킵)</option>
-                    <option value="stat">스탯 증감 (전투 중 수치 변화)</option>
-                    <option value="shield">보호막 (입력한 수치만큼 데미지 1회성 흡수 / 시간만료 없음)</option>
-                    <option value="vampire">흡혈 (가한 피해의 %만큼 체력 회복)</option>
-                    <option value="reflect">반사 (받은 피해의 %만큼 공격자에게 피해)</option>
-                    <option value="vulnerable">취약 (받는 피해 % 증가)</option>
-                    <option value="doom">즉사 (지속시간 종료 시 최대 체력 비례 % 피해)</option>
-                    <option value="silence">침묵 (기본 스킬 장전 및 사용 불가)</option>
-                    <option value="seal">봉인 (특수/성좌 스킬 장전 및 사용 불가)</option>
-                    <option value="unhealable">치유 불가 (모든 체력 회복 무시)</option>
-                    <option value="immune">면역 (새로운 상태이상 부여 무시)</option>
-                    <option value="immortal">불사 (체력이 0이 될 때 1로 생존)</option>
-                </select>
+            <div id="globalStatusAddSection" style="display: none; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <div class="form-group"><label>기호/이모지</label><input type="text" id="inputGlobalStatusIcon" placeholder="예: 🔥" style="width: 70%;"></div>
+                <div class="form-group"><label>이름</label><input type="text" id="inputGlobalStatusName" placeholder="예: 화상" style="width: 70%;"></div>
+                <div class="form-group"><label>설명</label><input type="text" id="inputGlobalStatusDesc" placeholder="예: 매 턴 10 피해" style="width: 70%;"></div>
+                
+                <div class="form-group">
+                    <label>효과 유형</label>
+                    <select id="inputGlobalStatusType" onchange="toggleStatusUI()" style="width: 70%;">
+                        <option value="none">효과 없음 (텍스트 표시만)</option>
+                        <option value="dot">지속 피해 (매 턴 최대 체력 비례 % 감소)</option>
+                        <option value="hot">지속 회복 (매 턴 최대 체력 비례 % 회복)</option>
+                        <option value="stun">행동 불능 (턴 강제 스킵)</option>
+                        <option value="stat">스탯 증감 (전투 중 수치 변화)</option>
+                        <option value="shield">보호막 (입력한 수치만큼 데미지 1회성 흡수)</option>
+                        <option value="vampire">흡혈 (가한 피해의 %만큼 체력 회복)</option>
+                        <option value="reflect">반사 (받은 피해의 %만큼 공격자에게 피해)</option>
+                        <option value="vulnerable">취약 (받는 피해 % 증가)</option>
+                        <option value="reduce_damage">피해 감소 (받는 피해 % 감소, 50 입력 시 반감)</option>
+                        <option value="doom">즉사 (지속시간 종료 시 최대 체력 비례 % 피해)</option>
+                        <option value="silence">침묵 (기본 스킬 장전 및 사용 불가)</option>
+                        <option value="seal">봉인 (특수/성좌 스킬 장전 및 사용 불가)</option>
+                        <option value="unhealable">치유 불가 (모든 체력 회복 무시)</option>
+                        <option value="immune">면역 (새로운 상태이상 부여 무시)</option>
+                        <option value="immortal">불사 (체력이 0이 될 때 1로 생존)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="statusValueGroup" style="display:none;">
+                    <label>효과 수치</label>
+                    <input type="number" id="inputGlobalStatusValue" placeholder="비례 % 또는 고정 방어량" value="0" style="width: 70%;">
+                </div>
+                <div class="form-group" id="statusStatGroup" style="display:none;">
+                    <label>대상 스탯</label>
+                    <select id="inputGlobalStatusTargetStat" style="width: 70%;">
+                        <option value="str">근력</option>
+                        <option value="agi">민첩</option>
+                        <option value="int">지능</option>
+                        <option value="men">정신</option>
+                        <option value="luk">행운</option>
+                    </select>
+                </div>
+                <button id="globalStatusSubmitBtn" class="success-btn" style="width: 100%; margin-top: 10px;" onclick="addGlobalStatus()">도감에 추가하기</button>
             </div>
-            <div class="form-group" id="statusValueGroup" style="display:none;">
-                <label>효과 수치</label>
-                <input type="number" id="inputGlobalStatusValue" placeholder="수치 입력 (비례 % 또는 고정 방어량)" value="0" style="width: 70%;">
-            </div>
-            <div class="form-group" id="statusStatGroup" style="display:none;">
-                <label>대상 스탯</label>
-                <select id="inputGlobalStatusTargetStat" style="width: 70%;">
-                    <option value="str">근력</option>
-                    <option value="agi">민첩</option>
-                    <option value="int">지능</option>
-                    <option value="men">정신</option>
-                    <option value="luk">행운</option>
-                </select>
-            </div>
-
-            <button id="globalStatusSubmitBtn" class="success-btn" onclick="addGlobalStatus()" style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 8px; font-weight:bold; cursor:pointer;">도감에 추가하기</button>
-            <button onclick="closeGlobalStatusModal()" style="width: 100%; margin-top: 8px;">닫기</button>
+            <button onclick="closeGlobalStatusModal()" style="width: 100%;">닫기</button>
         </div>
     </div>
 
@@ -458,14 +461,17 @@
             <h3 style="margin-top: 0; color: #1a202c;">아이템 도감 설정</h3>
             <div id="itemCatalogList" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
             
-            <div class="form-section-title">새 아이템 추가</div>
-            <div class="form-group"><label>이름</label><input type="text" id="inputItemName" placeholder="예: 고농축 포션"></div>
-            <div class="form-group"><label>설명</label><input type="text" id="inputItemDesc" placeholder="예: 체력을 500 회복합니다."></div>
-            <div class="form-group"><label>효과 키워드</label>
-                <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]"></textarea>
+            <button onclick="const x = document.getElementById('itemCatalogAddSection'); x.style.display = x.style.display === 'none' ? 'block' : 'none';" style="width: 100%; margin-bottom: 10px; padding: 8px; background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">새 아이템 추가 펼치기 / 접기 ▼</button>
+            
+            <div id="itemCatalogAddSection" style="display: none; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <div class="form-group"><label>이름</label><input type="text" id="inputItemName" placeholder="예: 고농축 포션"></div>
+                <div class="form-group"><label>설명</label><input type="text" id="inputItemDesc" placeholder="예: 체력을 500 회복합니다."></div>
+                <div class="form-group"><label>효과 키워드</label>
+                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]"></textarea>
+                </div>
+                <button class="success-btn" style="width:100%" onclick="addItemToCatalog()">도감에 아이템 추가</button>
             </div>
-            <button class="success-btn" style="width:100%" onclick="addItemToCatalog()">도감에 아이템 추가</button>
-            <button onclick="closeItemCatalogModal()" style="width:100%; margin-top:8px;">닫기</button>
+            <button onclick="closeItemCatalogModal()" style="width:100%;">닫기</button>
         </div>
     </div>
 
@@ -484,33 +490,41 @@
             <h3 style="margin-top: 0; color: #1a202c;">장비 도감 설정</h3>
             <div id="equipCatalogList" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
             
-            <div class="form-section-title">새 장비 추가</div>
-            <div class="form-group"><label>이름</label><input type="text" id="inputEquipName" placeholder="예: 강철 검"></div>
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1;"><label>부위</label>
-                    <select id="inputEquipSlot">
-                        <option value="head">머리</option>
-                        <option value="body">몸</option>
-                        <option value="shoes">신발</option>
-                        <option value="acc1">장신구 1</option>
-                        <option value="acc2">장신구 2</option>
-                        <option value="relic">유물</option>
-                    </select>
+            <button onclick="const x = document.getElementById('equipCatalogAddSection'); x.style.display = x.style.display === 'none' ? 'block' : 'none';" style="width: 100%; margin-bottom: 10px; padding: 8px; background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">새 장비 추가 펼치기 / 접기 ▼</button>
+            
+            <div id="equipCatalogAddSection" style="display: none; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <div class="form-group"><label>이름</label><input type="text" id="inputEquipName" placeholder="예: 강철 검"></div>
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;"><label>부위</label>
+                        <select id="inputEquipSlot">
+                            <option value="head">머리</option>
+                            <option value="body">몸</option>
+                            <option value="shoes">신발</option>
+                            <option value="acc1">장신구 1</option>
+                            <option value="acc2">장신구 2</option>
+                            <option value="relic">유물</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1;"><label>등급</label>
+                        <select id="inputEquipGrade">
+                            <option value="F">F</option>
+                            <option value="E">E</option>
+                            <option value="D">D</option>
+                            <option value="C">C</option>
+                            <option value="B">B</option>
+                            <option value="A">A</option>
+                            <option value="S">S</option>
+                            <option value="SS">SS</option>
+                            <option value="L">L</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group" style="flex:1;"><label>등급</label>
-                    <select id="inputEquipGrade">
-                        <option value="F">F</option>
-                        <option value="E">E</option>
-                        <option value="D">D</option>
-                        <option value="C">C</option>
-                        <option value="B">B</option>
-                        <option value="A">A</option>
-                        <option value="S">S</option>
-                        <option value="SS">SS</option>
-                        <option value="L">L</option>
-                    </select>
-                </div>
+                <button class="success-btn" style="width:100%" onclick="addEquipToCatalog()">도감에 장비 추가</button>
             </div>
+            <button onclick="closeEquipCatalogModal()" style="width:100%;">닫기</button>
+        </div>
+    </div>
+
             <div class="form-group"><label>설명</label><input type="text" id="inputEquipDesc" placeholder="예: 평범하게 제련된 강철 검입니다."></div>
             <div class="form-group"><label>효과 스탯</label><input type="text" id="inputEquipEffect" placeholder="[근력:+20]"></div>
             <button class="action-blue-btn" style="width:100%" onclick="addEquipToCatalog()">도감에 장비 추가</button>
@@ -842,14 +856,35 @@
             
             if (currentTerrainMode !== 'erase') {
                 let newTerrain = { x: x, y: y, type: currentTerrainMode };
+                let isConsumed = false;
+
                 if (currentTerrainMode === 'trap') {
                     newTerrain.turnsLeft = parseInt(document.getElementById('trapTurnsInput').value) || 3;
                     newTerrain.damage = parseInt(document.getElementById('trapDamageInput').value) || 30;
                 } else if (currentTerrainMode === 'reward') {
                     const effStr = document.getElementById('rewardEffectsInput').value;
                     newTerrain.effects = effStr.split(',').map(s => s.trim()).filter(s => s);
+
+                    const occupiedEnt = entities.find(e => e.x === x && e.y === y && e.stats.currentHp > 0);
+                    if (occupiedEnt && newTerrain.effects.length > 0) {
+                        const randomEffectName = newTerrain.effects[Math.floor(Math.random() * newTerrain.effects.length)];
+                        let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === randomEffectName) : null;
+                        
+                        if (!globalStatus) {
+                            globalStatus = { id: 'auto_' + Date.now(), icon: '✨', name: randomEffectName, desc: '보상 발판 획득 효과', type: 'none', value: 0 };
+                        }
+                        
+                        occupiedEnt.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 3 })));
+                        if (typeof addLog === 'function') {
+                            addLog(`&nbsp;&nbsp;🎁 <b>[보상 획득]</b> <b>${occupiedEnt.name}</b>이(가) 발밑에 생성된 보상 발판에서 [${randomEffectName}] 효과를 얻었습니다!`, 'log-heal');
+                        }
+                        isConsumed = true;
+                    }
                 }
-                terrains.push(newTerrain);
+                
+                if (!isConsumed) {
+                    terrains.push(newTerrain);
+                }
             }
             renderGrid();
         }
@@ -1612,9 +1647,11 @@
 
         function toggleStatusUI() {
             const type = document.getElementById('inputGlobalStatusType').value;
-            const showValue = ['dot', 'hot', 'stat', 'shield', 'vampire', 'reflect', 'vulnerable', 'doom'].includes(type);
-            document.getElementById('statusValueGroup').style.display = showValue ? 'flex' : 'none';
-            document.getElementById('statusStatGroup').style.display = (type === 'stat') ? 'flex' : 'none';
+            const valGroup = document.getElementById('statusValueGroup');
+            const statGroup = document.getElementById('statusStatGroup');
+            const needsValue = ['dot', 'hot', 'shield', 'vampire', 'reflect', 'vulnerable', 'doom', 'stat', 'reduce_damage'].includes(type);
+            if(valGroup) valGroup.style.display = needsValue ? 'block' : 'none';
+            if(statGroup) statGroup.style.display = type === 'stat' ? 'block' : 'none';
         }
 
         function openGlobalStatusModal() { 
@@ -1646,10 +1683,10 @@
             const container = document.getElementById('globalStatusListContainer'); container.innerHTML = ''; 
             if (globalStatusList.length === 0) { container.innerHTML = '<div style="color: #a0aec0; font-size: 13px; padding: 10px 0;">도감에 등록된 상태이상이 없습니다.</div>'; return; } 
             globalStatusList.forEach((status) => { 
-                const tLabel = typeLabels[status.type || 'none'];
-                const valStr = (status.type === 'stat') ? `(${status.targetStat} ${status.value})` : ['dot', 'hot', 'vampire', 'reflect', 'vulnerable', 'doom'].includes(status.type) ? `(${status.value}%)` : (status.type === 'shield') ? `(방어량: ${status.value})` : '';
+                const tLabel = typeof typeLabels !== 'undefined' && typeLabels[status.type] ? typeLabels[status.type] : status.type;
+                const valStr = (status.type === 'stat') ? `(${status.targetStat} ${status.value})` : ['dot', 'hot', 'vampire', 'reflect', 'vulnerable', 'doom', 'reduce_damage'].includes(status.type) ? `(${status.value}%)` : (status.type === 'shield') ? `(방어량: ${status.value})` : '';
                 const item = document.createElement('div'); item.className = 'status-list-item'; 
-                item.innerHTML = `<div style="flex: 1;"><span style="font-size:16px;">${status.icon}</span> <b>${status.name}</b> <span class="status-type-badge">${tLabel}${valStr}</span> <div style="font-size:11px; color:#718096; margin-top:3px;">${status.desc}</div></div>
+                item.innerHTML = `<div style="flex: 1;"><span style="font-size:16px;">${status.icon}</span> <span style="font-weight:bold;">${status.name}</span> <span class="status-type-badge">${tLabel}${valStr}</span> <div style="font-size:11px; color:#718096; margin-top:3px;">${status.desc}</div></div>
                 <div style="display:flex; gap:4px; align-items:center;">
                     <button onclick="editGlobalStatus('${status.id}')" style="padding:4px 8px; background:#3182ce; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px;">수정</button>
                     <button onclick="deleteGlobalStatus('${status.id}')" style="padding:4px 8px; background:#e53e3e; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
@@ -2275,7 +2312,29 @@
                 placementMode = { active: false, entityId: null };
                 const colLetter = String.fromCharCode(65 + cx);
                 if (typeof addLog === 'function') addLog(`<b>[배치]</b> <b>${ent.name}</b>이(가) [${colLetter}${cy + 1}] 위치로 이동했습니다.`, "");
+                
+                // 🌟 보상 발판 체크 로직 추가
+                const rewardIndex = terrains.findIndex(t => t.x === cx && t.y === cy && t.type === 'reward');
+                if (rewardIndex !== -1) {
+                    const rewardTerrain = terrains[rewardIndex];
+                    if (rewardTerrain.effects && rewardTerrain.effects.length > 0) {
+                        const randomEffectName = rewardTerrain.effects[Math.floor(Math.random() * rewardTerrain.effects.length)];
+                        
+                        let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === randomEffectName) : null;
+                        if (!globalStatus) {
+                            globalStatus = { id: 'auto_' + Date.now(), icon: '✨', name: randomEffectName, desc: '보상 발판 획득 효과', type: 'none', value: 0 };
+                        }
+                        
+                        ent.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 3 }))); // 기본 지속시간 3턴
+                        if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;🎁 <b>[보상 획득]</b> <b>${ent.name}</b>이(가) 보상 발판을 밟아 [${randomEffectName}] 효과를 얻었습니다!`, 'log-heal');
+                        
+                        // 밟은 보상 발판 삭제
+                        terrains.splice(rewardIndex, 1);
+                    }
+                }
+                
                 if (typeof renderTokens === 'function') renderTokens();
+                if (typeof renderGrid === 'function') renderGrid(); // 상태이상 아이콘 갱신 및 발판 이미지 제거를 위해 그리드 재렌더링
                 return;
             }
 
@@ -2362,10 +2421,17 @@
             const critProb = getEffectiveStat(attacker, 'luk') / 10;
 
             const charGrade = (attacker.stats && attacker.stats.charGrade) ? attacker.stats.charGrade : 'F';
-            const gradeMultipliers = { 'S': 2.5, 'A': 2.0, 'B': 1.7, 'C': 1.4, 'D': 1.2, 'E': 1.0, 'F': 1.0 };
+            const gradeMultipliers = { 'S': 1.5, 'A': 1.35, 'B': 1.2, 'C': 1.1, 'D': 1.05, 'E': 1.0, 'F': 1.0 };
             const gradeMultiplier = gradeMultipliers[charGrade] || 1.0;
 
-            const attackerStat = isHeal ? intStat : (strStat + intStat);
+            let attackerStat = 0;
+            if (isHeal) {
+                attackerStat = intStat;
+            } else {
+                const mainStat = Math.max(strStat, intStat);
+                const subStat = Math.min(strStat, intStat);
+                attackerStat = mainStat + (subStat * 0.3);
+            }
 
             if (!attacker.resonance) attacker.resonance = 0;
             attacker.resonance += 10;
@@ -2421,10 +2487,20 @@
                             let damage = Math.floor(baseDamage) + equipDmgBonus;
                             
                             if (isCrit) damage = Math.floor(damage * 1.7);
+
+                            const targetStr = getEffectiveStat(target, 'str');
+                            const targetMen = getEffectiveStat(target, 'men');
+                            const targetDefense = (targetStr + targetMen) * 0.4;
+                            damage = Math.max(1, Math.floor(damage - targetDefense));
                             
                             let vulnerableEffect = target.statusEffects.find(s => s.type === 'vulnerable');
                             if (vulnerableEffect) {
                                 damage = Math.floor(damage * (1 + vulnerableEffect.value / 100));
+                            }
+
+                            let reduceEffect = target.statusEffects.find(s => s.type === 'reduce_damage');
+                            if (reduceEffect) {
+                                damage = Math.floor(damage * (1 - reduceEffect.value / 100));
                             }
                             
                             let actualDamageDealt = typeof processDamage === 'function' ? processDamage(target, Math.max(0, damage)) : Math.max(0, damage);
