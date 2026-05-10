@@ -2448,20 +2448,31 @@
             if (attacker.resonance > 100) attacker.resonance = 100;
 
             let equipDmgBonus = 0;
+            let equipHpBonus = 0;
             if (!isHeal && attacker.equippedSlots && typeof equipCatalog !== 'undefined') {
                 Object.values(attacker.equippedSlots).forEach(equipName => {
                     if (equipName) {
                         const eq = equipCatalog.find(e => e && e.name === equipName);
                         if (eq) {
-                            const regex = /\[피해\s*증가\s*:\s*([+-]?\d+)\]/g;
-                            let match;
-                            while ((match = regex.exec(eq.effect)) !== null) {
-                                equipDmgBonus += parseInt(match[1]) || 0;
+                            // 기존 피해 증가 정규식
+                            const dmgRegex = /\[피해\s*증가\s*:\s*([+-]?\d+)\]/g;
+                            let dmgMatch;
+                            while ((dmgMatch = dmgRegex.exec(eq.effect)) !== null) {
+                                equipDmgBonus += parseInt(dmgMatch[1]) || 0;
+                            }
+
+                            // 🌟 체력 증가 정규식 추가
+                            const hpRegex = /\[체력\s*증가\s*:\s*([+-]?\d+)\]/g;
+                            let hpMatch;
+                            while ((hpMatch = hpRegex.exec(eq.effect)) !== null) {
+                                equipHpBonus += parseInt(hpMatch[1]) || 0;
                             }
                         }
                     }
                 });
             }
+
+
 
             validTargets.forEach(target => {
                 if (isEtc) {
