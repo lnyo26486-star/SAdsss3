@@ -492,8 +492,9 @@
             
             <button onclick="const x = document.getElementById('equipCatalogAddSection'); x.style.display = x.style.display === 'none' ? 'block' : 'none';" style="width: 100%; margin-bottom: 10px; padding: 8px; background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer;">새 장비 추가 펼치기 / 접기 ▼</button>
             
-            <div id="equipCatalogAddSection" style="display: none; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+            <div id="equipCatalogAddSection" style="display: none; border: 1px solid #e2e8f0; padding: 15px; border-radius: 4px; margin-bottom: 10px; background-color: #f8fafc;">
                 <div class="form-group"><label>이름</label><input type="text" id="inputEquipName" placeholder="예: 강철 검"></div>
+                
                 <div style="display:flex; gap:10px;">
                     <div class="form-group" style="flex:1;"><label>부위</label>
                         <select id="inputEquipSlot">
@@ -519,12 +520,19 @@
                         </select>
                     </div>
                 </div>
-                <button class="success-btn" style="width:100%" onclick="addEquipToCatalog()">도감에 장비 추가</button>
+    
+                <div class="form-group">
+                    <label>장비 효과 (키워드)</label>
+                    <textarea id="inputEquipEffect" placeholder="[공격력:10] [방어력:5]" style="width: 100%; min-height: 60px;"></textarea>
+                </div>
+    
+                <button class="success-btn" style="width:100%; margin-top: 5px;" onclick="addEquipToCatalog()">도감에 장비 추가</button>
             </div>
-            <button onclick="closeEquipCatalogModal()" style="width:100%;">닫기</button>
+    
+            <button onclick="closeEquipCatalogModal()" style="width:100%; padding: 8px; background: #a0aec0; color: white; border: none; border-radius: 4px; cursor: pointer;">닫기</button>
         </div>
     </div>
-    
+
     <div id="terrainPanel" style="display: none; position: fixed; top: 20px; right: 20px; width: 200px; background: white; border: 1px solid #cbd5e0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; padding: 10px;">
         <div style="font-size: 13px; margin-bottom: 8px;">지형지물 설치</div>
         <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
@@ -831,6 +839,13 @@
         function closeTerrainPanel() {
             document.getElementById('terrainPanel').style.display = 'none';
             setTerrainMode(null);
+        }
+
+        function closeEquipCatalogModal() {
+            const modal = document.getElementById('equipCatalogModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
 
         function setTerrainMode(mode) {
