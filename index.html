@@ -1268,13 +1268,24 @@
             availCol.innerHTML = '<div style="font-weight:bold; color:#2d3748; margin-bottom:10px; border-bottom:2px solid #edf2f7; padding-bottom:5px;">📋 생존 개체 목록</div>';
             currCol.innerHTML = '<div style="font-weight:bold; color:#3182ce; margin-bottom:10px; border-bottom:2px solid #ebf8ff; padding-bottom:5px;">⚔️ 현재 턴 설정 큐</div>';
             
+            // 🌟 관리자 권한 확인 변수
+            const isUserAdmin = typeof isAdmin !== 'undefined' && isAdmin;
+            
             const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
             if(aliveEntities.length === 0) { availCol.innerHTML += '<div style="font-size:12px; color:#a0aec0;">생존한 개체가 없습니다.</div>'; } 
             else {
                 aliveEntities.forEach(ent => {
-                    const div = document.createElement('div'); div.className = 'turn-setup-item'; div.style.cursor = 'pointer';
-                    div.innerHTML = `<span>${ent.type === '사도' ? '🟦' : '🟥'} ${ent.name}</span> <span style="color:#a0aec0; font-size:11px;">+ 추가</span>`;
-                    div.onclick = () => addTempTurn(ent.id); div.onmouseover = () => div.style.borderColor = '#3182ce'; div.onmouseout = () => div.style.borderColor = '#cbd5e0';
+                    const div = document.createElement('div'); div.className = 'turn-setup-item';
+                    div.innerHTML = `<span>${ent.type === '사도' ? '🟦' : '🟥'} ${ent.name}</span>`;
+                    
+                    // 🌟 관전자에게는 클릭 이벤트와 '추가' 텍스트를 부여하지 않음
+                    if (isUserAdmin) {
+                        div.innerHTML += ` <span style="color:#a0aec0; font-size:11px;">+ 추가</span>`;
+                        div.style.cursor = 'pointer';
+                        div.onclick = () => addTempTurn(ent.id); 
+                        div.onmouseover = () => div.style.borderColor = '#3182ce'; 
+                        div.onmouseout = () => div.style.borderColor = '#cbd5e0';
+                    }
                     availCol.appendChild(div);
                 });
             }
@@ -1284,7 +1295,14 @@
                 tempTurnOrder.forEach((id, idx) => {
                     const ent = entities.find(e => e.id === id); if(!ent) return;
                     const div = document.createElement('div'); div.className = 'turn-setup-item';
-                    div.innerHTML = `<span style="font-weight:bold;">${idx + 1}. ${ent.name}</span><div><button onclick="moveTempTurn(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button><button onclick="moveTempTurn(${idx}, 1)" ${idx === tempTurnOrder.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button><button onclick="removeTempTurn(${idx})" style="background:#fff5f5; color:#e53e3e; border:1px solid #fed7d7;">X</button></div>`;
+                    
+                    // 🌟 관전자에게는 조작 버튼(위/아래/삭제)을 숨김 처리
+                    let btnHtml = '';
+                    if (isUserAdmin) {
+                        btnHtml = `<div><button onclick="moveTempTurn(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button><button onclick="moveTempTurn(${idx}, 1)" ${idx === tempTurnOrder.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button><button onclick="removeTempTurn(${idx})" style="background:#fff5f5; color:#e53e3e; border:1px solid #fed7d7;">X</button></div>`;
+                    }
+                    
+                    div.innerHTML = `<span style="font-weight:bold;">${idx + 1}. ${ent.name}</span>${btnHtml}`;
                     currCol.appendChild(div);
                 });
             }
@@ -2585,10 +2603,11 @@
                 const existing = entities.find(e => e.id === editingId); 
                 if (existing) { 
                     currentHp = existing.stats.currentHp; 
-                    currentStatus = existing.statusEffects || []; 
+                    // 🌟 깊은 복사(Deep Copy)를 통해 캐릭터 간 데이터 참조 공유 완벽 차단
+                    currentStatus = JSON.parse(JSON.stringify(existing.statusEffects || [])); 
                     currentX = existing.x; 
                     currentY = existing.y; 
-                    currentEquipDurability = existing.equipDurability || {};
+                    currentEquipDurability = JSON.parse(JSON.stringify(existing.equipDurability || {}));
                 } 
             }
             
@@ -2866,11 +2885,17 @@
             container.innerHTML = '';
             const slotNames = { head: '머리', body: '몸', shoes: '신발', acc1: '장신구 1', acc2: '장신구 2', relic: '유물' };
             
+            // 🌟 관리자 권한 확인
+            const isUserAdmin = typeof isAdmin !== 'undefined' && isAdmin;
+            
             equipCatalog.forEach((eq, idx) => { 
                 let slotStr = slotNames[eq.slot] || eq.slot || '미지정';
                 if (eq.slot && eq.slot.startsWith('acc')) slotStr = '장신구';
                 let gradeStr = eq.grade || 'F';
-                let lClass = gradeStr === 'L' ? 'grade-L' : ''; // L등급 전용 스타일 적용
+                let lClass = gradeStr === 'L' ? 'grade-L' : ''; 
+                
+                // 🌟 관전자에게는 삭제 버튼을 렌더링하지 않음
+                let deleteBtnHtml = isUserAdmin ? `<button onclick="equipCatalog.splice(${idx}, 1); refreshEquipCatalogList(); populateEquipDropdowns();" style="padding:4px 8px; font-size:11px; background:#e53e3e; color:white; border:none; border-radius:4px; cursor:pointer; min-width:40px;">삭제</button>` : '';
                 
                 container.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; border-bottom:1px solid #e2e8f0; padding:8px 0;">
                     <div>
@@ -2881,7 +2906,7 @@
                         </div>
                         <div style="color:#718096; font-size:11px;">${eq.desc}</div>
                     </div>
-                    <button onclick="equipCatalog.splice(${idx}, 1); refreshEquipCatalogList(); populateEquipDropdowns();" style="padding:4px 8px; font-size:11px; background:#e53e3e; color:white; border:none; border-radius:4px; cursor:pointer; min-width:40px;">삭제</button>
+                    ${deleteBtnHtml}
                 </div>`; 
             });
         }
