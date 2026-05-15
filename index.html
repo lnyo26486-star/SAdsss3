@@ -2546,13 +2546,14 @@
                             while ((dmgMatch = dmgRegex.exec(eq.effect)) !== null) {
                                 equipDmgBonus += parseInt(dmgMatch[1]) || 0;
                             }
-                            // 💡 체력 증가는 getEffectiveMaxHp에서 따로 계산하므로 여기서 누적할 필요 없음
                         }
                     }
                 });
             }
 
             validTargets.forEach(target => {
+                let dodgedAttack = false;
+
                 if (isEtc) {
                     if (typeof addLog === 'function') addLog(`<b>${target.name}</b>에게 특수 효과가 적용되었습니다.`, "");
                 } else {
@@ -2580,6 +2581,7 @@
                         const isDodge = Math.random() * 100 < dodgeProb;
                         
                         if (isDodge) {
+                            dodgedAttack = true;
                             if (typeof addLog === 'function') addLog(`<b>${target.name}</b>이(가) 공격을 회피했습니다.`, "");
                         } else {
                             let baseDamage = attackerStat * gradeMultiplier * scale * rng;
@@ -2647,10 +2649,15 @@
                     }
                 }
 
-                if (target.stats.currentHp > 0 && activeSkill.rawEffect) {
+                if (target.stats.currentHp > 0 && activeSkill.rawEffect && !dodgedAttack) {
                     const regex = /\[부여\s*:\s*([^\]:]+)\s*:\s*(\d+)[^\]]*\]/g;
                     let match;
                     let appliedStatuses = [];
+                    
+                    const targetMen = getEffectiveStat(target, 'men');
+                    const resistProb = targetMen / 10;
+                    const isHostile = activeSkill.skillType === '공격';
+
                     while ((match = regex.exec(activeSkill.rawEffect)) !== null) {
                         const statusName = match[1].trim();
                         const duration = parseInt(match[2], 10);
@@ -2664,8 +2671,13 @@
                             if (target.statusEffects.some(s => s.type === 'immune')) {
                                 if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [면역] <b>${target.name}</b>은(는) [${statusName}] 부여를 무시했습니다!`, '', true);
                             } else {
-                                target.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: duration })));
-                                appliedStatuses.push(statusName);
+                                const isResisted = Math.random() * 100 < resistProb;
+                                if (isHostile && isResisted) {
+                                    if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [저항] <b>${target.name}</b>이(가) 높은 정신력으로 [${statusName}]을(를) 저항했습니다!`, '', true);
+                                } else {
+                                    target.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: duration })));
+                                    appliedStatuses.push(statusName);
+                                }
                             }
                         }
                     }
