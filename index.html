@@ -243,41 +243,7 @@
                 <button class="action-btn" style="background:#3182ce; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="nextTurn()">▶ 종료</button>
                 <button class="action-btn" style="background:#e53e3e; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="endBattle()">⏹️ 종료</button>
                 <button class="action-btn" style="background:#ecc94b; color:#744210; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="openTerrainModal()">🌲 지형지물</button>
-            </div>
-        </div>
-    
-        <div style="border: 1px solid #cbd5e0; padding: 10px; border-radius: 4px; margin-top: 10px; background-color: #f8fafc;">
-            <h4 style="margin: 0 0 10px 0; color: #2d3748;">수동 조작</h4>
-            
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 12px;">[성좌 공명도 조작]</label>
-                <div style="display: flex; gap: 5px; margin-top: 5px;">
-                    <select id="resonanceTargetSelect" style="flex: 1;" onfocus="populateResonanceSelect()">
-                        <option value="">캐릭터 선택</option>
-                    </select>
-                    <input type="number" id="resonanceValue" placeholder="수치" style="width: 60px;">
-                    <button onclick="applyResonanceChange()" style="padding: 4px 8px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">증감 적용</button>
-                </div>
-            </div>
-        
-            <div>
-                <label style="font-size: 12px;">[체력 회복]</label>
-                <div style="display: flex; gap: 5px; margin-top: 5px; align-items: center;">
-                    <select id="globalHpTarget" style="width: 80px;">
-                        <option value="all">전원</option>
-                        <option value="apostle">사도만</option>
-                        <option value="enemy">에너미만</option>
-                    </select>
-                    <select id="globalHpType" style="width: 80px;">
-                        <option value="flat">고정치</option>
-                        <option value="percent">% (최대체력)</option>
-                    </select>
-                    <input type="number" id="globalHpValue" placeholder="수치" style="width: 60px;">
-                </div>
-                <div style="display: flex; gap: 5px; margin-top: 5px;">
-                    <button onclick="applyGlobalHp('heal')" style="flex: 1; padding: 4px 8px; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 회복</button>
-                    <button onclick="applyGlobalHp('damage')" style="flex: 1; padding: 4px 8px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 피해</button>
-                </div>
+                <button id="manualControlBtn" onclick="openManualControlModal()" style="padding: 6px 12px; background: #4a5568; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">전체 조작</button>
             </div>
         </div>
 
@@ -570,6 +536,57 @@
         </div>
     </div>
 
+    <div id="manualControlModal" class="modal">
+        <div class="modal-content" style="width: 400px;">
+            <h3 style="margin-top: 0; color: #1a202c;">수동 조작</h3>
+            
+            <div class="form-group">
+                <label>조작 대상 선택</label>
+                <select id="manualControlType" onchange="toggleManualControlUI()" style="width: 100%;">
+                    <option value="resonance">공명도</option>
+                    <option value="hp">체력</option>
+                </select>
+            </div>
+    
+            <div id="manualResonanceSection">
+                <div class="form-section-title">성좌 공명도 증감</div>
+                <div class="form-group">
+                    <select id="resonanceTargetSelect" style="width: 100%;" onfocus="populateResonanceSelect()">
+                        <option value="">캐릭터 선택</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <input type="number" id="resonanceValue" placeholder="수치" style="flex: 1;">
+                    <button onclick="applyResonanceChange()" style="padding: 8px 16px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">증감 적용</button>
+                </div>
+            </div>
+    
+            <div id="manualHpSection" style="display: none;">
+                <div class="form-section-title">필드 체력 일괄 적용</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                    <select id="globalHpTarget" style="flex: 1;">
+                        <option value="all">전원</option>
+                        <option value="apostle">캐릭터만</option>
+                        <option value="enemy">에너미만</option>
+                    </select>
+                    <select id="globalHpType" style="flex: 1;">
+                        <option value="flat">고정치</option>
+                        <option value="percent">% (최대체력)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="globalHpValue" placeholder="수치" style="width: 100%;">
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="applyGlobalHp('heal')" style="flex: 1; padding: 8px; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 회복</button>
+                    <button onclick="applyGlobalHp('damage')" style="flex: 1; padding: 8px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 피해</button>
+                </div>
+            </div>
+    
+            <button onclick="closeManualControlModal()" style="width: 100%; margin-top: 20px;">닫기</button>
+        </div>
+    </div>
+
     <div id="terrainPanel" style="display: none; position: fixed; top: 20px; right: 20px; width: 200px; background: white; border: 1px solid #cbd5e0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; padding: 10px;">
         <div style="font-size: 13px; margin-bottom: 8px;">지형지물 설치</div>
         <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
@@ -644,6 +661,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('mode') === 'admin';
         const viewerJoinTime = Date.now(); 
+
+        if (!isAdmin) {
+            const manualBtn = document.getElementById('manualControlBtn');
+            if (manualBtn) manualBtn.style.display = 'none';
+        }
 
         function syncToFirebase() {
             if (!isAdmin) return;
@@ -3233,7 +3255,7 @@
                 return;
             }
 
-            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? '모든 탐사자' : '모든 에너미');
+            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? '모든 캐릭터' : '모든 에너미');
 
             targets.forEach(ent => {
                 const maxHp = typeof getEffectiveMaxHp === 'function' ? getEffectiveMaxHp(ent) : ent.stats.maxHp;
@@ -3279,6 +3301,33 @@
             if (typeof renderTokens === 'function') renderTokens();
             
             document.getElementById('globalHpValue').value = '';
+        }
+
+        function openManualControlModal() {
+            const modal = document.getElementById('manualControlModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                populateResonanceSelect();
+                toggleManualControlUI();
+            }
+        }
+
+        function closeManualControlModal() {
+            const modal = document.getElementById('manualControlModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function toggleManualControlUI() {
+            const type = document.getElementById('manualControlType').value;
+            if (type === 'resonance') {
+                document.getElementById('manualResonanceSection').style.display = 'block';
+                document.getElementById('manualHpSection').style.display = 'none';
+            } else {
+                document.getElementById('manualResonanceSection').style.display = 'none';
+                document.getElementById('manualHpSection').style.display = 'block';
+            }
         }
 
     </script>
