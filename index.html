@@ -246,6 +246,41 @@
             </div>
         </div>
     
+        <div style="border: 1px solid #cbd5e0; padding: 10px; border-radius: 4px; margin-top: 10px; background-color: #f8fafc;">
+            <h4 style="margin: 0 0 10px 0; color: #2d3748;">수동 조작</h4>
+            
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 12px;">[성좌 공명도 조작]</label>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <select id="resonanceTargetSelect" style="flex: 1;" onfocus="populateResonanceSelect()">
+                        <option value="">캐릭터 선택</option>
+                    </select>
+                    <input type="number" id="resonanceValue" placeholder="수치" style="width: 60px;">
+                    <button onclick="applyResonanceChange()" style="padding: 4px 8px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">증감 적용</button>
+                </div>
+            </div>
+        
+            <div>
+                <label style="font-size: 12px;">[체력 회복]</label>
+                <div style="display: flex; gap: 5px; margin-top: 5px; align-items: center;">
+                    <select id="globalHpTarget" style="width: 80px;">
+                        <option value="all">전원</option>
+                        <option value="apostle">사도만</option>
+                        <option value="enemy">에너미만</option>
+                    </select>
+                    <select id="globalHpType" style="width: 80px;">
+                        <option value="flat">고정치</option>
+                        <option value="percent">% (최대체력)</option>
+                    </select>
+                    <input type="number" id="globalHpValue" placeholder="수치" style="width: 60px;">
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button onclick="applyGlobalHp('heal')" style="flex: 1; padding: 4px 8px; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 회복</button>
+                    <button onclick="applyGlobalHp('damage')" style="flex: 1; padding: 4px 8px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 피해</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 오른쪽: 라운드 표시 (flex-shrink: 0을 주어 크기가 줄어들지 않게 합니다) -->
         <div style="flex-shrink: 0; background: #2d3748; color: white; padding: 8px 15px; border-radius: 6px; text-align: center; min-width: 80px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); margin-left: auto;">
             <div style="font-size: 10px; color: #a0aec0; margin-bottom: 2px; white-space:nowrap;">현재 라운드</div>
@@ -909,8 +944,13 @@
             const canvas = document.getElementById('rainCanvas');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'rgba(150, 180, 220, 0.4)';
-            ctx.lineWidth = 1.5;
+            
+            // 빗줄기의 색상을 더 밝게 하고, 불투명도를 0.4에서 0.8로 올려 훨씬 진하게 만듭니다.
+            ctx.strokeStyle = 'rgba(180, 210, 255, 0.8)';
+            
+            // 빗줄기의 두께를 1.5에서 3.0으로 두껍게 만듭니다.
+            ctx.lineWidth = 3.0;
+            
             ctx.lineCap = 'round';
             ctx.beginPath();
             for(let i=0; i<rainDrops.length; i++) {
@@ -1478,15 +1518,14 @@
                     } else if (weather === '비') {
                         addLog(`<b>[날씨: 비]</b> 쏟아지는 빗줄기가 시야를 방해합니다.`, 'log-action');
                         aliveEntities.forEach(e => {
-                            if (Math.random() < 0.2) { // 20% 확률
+                             if (Math.random() < 0.2) { // 20% 확률
                                 if (!e.statusEffects) e.statusEffects = [];
                                 e.statusEffects.push({ name: "실명", type: "stat", targetStat: "agi", value: -20, duration: 1, id: Date.now() + Math.random() });
                                 addLog(`&nbsp;&nbsp;💧 <b>${e.name}</b>이(가) 빗물에 시야가 가려졌습니다! (민첩 -20)`, 'log-action');
-                            }
+                             }
                         });
                     }
-                }
-                
+                 }
                 const nextEntity = entities.find(e => e.id === turnOrder[currentTurnIndex]);
 
                 if (nextEntity && nextEntity.stats.currentHp > 0) {
@@ -2528,7 +2567,7 @@
 
                             const targetStr = getEffectiveStat(target, 'str');
                             const targetMen = getEffectiveStat(target, 'men');
-                            const targetDefense = (targetStr + targetMen) * 0.4;
+                            const targetDefense = (targetStr + targetMen) * 0.2;
                             damage = Math.max(1, Math.floor(damage - targetDefense));
                             
                             let vulnerableEffect = target.statusEffects.find(s => s.type === 'vulnerable');
@@ -3116,6 +3155,130 @@
                 terrains.splice(tIndex, 1);
                 renderGrid();
             }
+        }
+
+        function populateResonanceSelect() {
+            const select = document.getElementById('resonanceTargetSelect');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">캐릭터 선택</option>';
+            
+            entities.forEach(ent => {
+                if (ent.stats && ent.stats.currentHp > 0) {
+                    const res = ent.resonance || 0;
+                    const opt = document.createElement('option');
+                    opt.value = ent.id;
+                    opt.innerText = `${ent.name} (현재: ${res})`;
+                    select.appendChild(opt);
+                }
+            });
+            
+            if (currentValue && entities.some(e => e.id === currentValue && e.stats.currentHp > 0)) {
+                select.value = currentValue;
+            }
+        }
+
+        function applyResonanceChange() {
+            const targetId = document.getElementById('resonanceTargetSelect').value;
+            const valStr = document.getElementById('resonanceValue').value;
+            
+            if (!targetId || valStr === '') {
+                alert('캐릭터와 수치를 입력하세요.');
+                return;
+            }
+            
+            const ent = entities.find(e => e.id === targetId);
+            if (ent) {
+                if (!ent.resonance) ent.resonance = 0;
+                const change = parseInt(valStr, 10);
+                ent.resonance += change;
+                
+                if (ent.resonance > 100) ent.resonance = 100;
+                if (ent.resonance < 0) ent.resonance = 0;
+                
+                if (typeof addLog === 'function') {
+                    const action = change >= 0 ? '증가' : '감소';
+                    addLog(`[시스템] ${ent.name}의 성좌 공명도가 ${Math.abs(change)} ${action}하여 ${ent.resonance}이(가) 되었습니다.`, 'log-action');
+                }
+                
+                populateResonanceSelect();
+                document.getElementById('resonanceValue').value = '';
+            }
+        }
+
+        function applyGlobalHp(actionType) {
+            const targetGroup = document.getElementById('globalHpTarget').value;
+            const calcType = document.getElementById('globalHpType').value;
+            const valStr = document.getElementById('globalHpValue').value;
+            
+            if (valStr === '') {
+                alert('수치를 입력하세요.');
+                return;
+            }
+            
+            const value = parseInt(valStr, 10);
+            if (value <= 0) {
+                alert('0보다 큰 숫자를 입력하세요.');
+                return;
+            }
+
+            const targets = entities.filter(e => {
+                if (e.x === undefined || e.x === null || e.stats.currentHp <= 0) return false;
+                if (targetGroup === 'apostle' && e.type === '에너미') return false;
+                if (targetGroup === 'enemy' && e.type !== '에너미') return false;
+                return true;
+            });
+
+            if (targets.length === 0) {
+                alert('필드에 조건을 만족하는 대상이 없습니다.');
+                return;
+            }
+
+            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? '모든 탐사자' : '모든 에너미');
+
+            targets.forEach(ent => {
+                const maxHp = typeof getEffectiveMaxHp === 'function' ? getEffectiveMaxHp(ent) : ent.stats.maxHp;
+                const amount = calcType === 'percent' ? Math.floor(maxHp * (value / 100)) : value;
+
+                if (actionType === 'heal') {
+                    if (typeof processHeal === 'function') {
+                        processHeal(ent, amount);
+                    } else {
+                        ent.stats.currentHp = Math.min(maxHp, ent.stats.currentHp + amount);
+                    }
+                    if (typeof spawnHealEffect === 'function') spawnHealEffect(ent.x, ent.y);
+                    
+                } else if (actionType === 'damage') {
+                    if (typeof processDamage === 'function') {
+                        processDamage(ent, amount);
+                    } else {
+                        ent.stats.currentHp -= amount;
+                        if (ent.stats.currentHp < 0) ent.stats.currentHp = 0;
+                    }
+                    
+                    const panelId = ent.type === '에너미' ? 'enemyPanel' : 'apostlePanel';
+                    const panel = document.getElementById(panelId);
+                    if (panel) {
+                        panel.classList.remove('shake-anim');
+                        void panel.offsetWidth;
+                        panel.classList.add('shake-anim');
+                    }
+                }
+            });
+
+            let logMsg = '';
+            if (actionType === 'heal') {
+                logMsg = `[시스템] ${groupName}에게 체력 ${value}${calcType === 'percent' ? '%' : ''} 회복 효과가 적용되었습니다.`;
+            } else {
+                logMsg = `[시스템] ${groupName}에게 체력 ${value}${calcType === 'percent' ? '%' : ''} 피해 효과가 적용되었습니다.`;
+            }
+
+            if (typeof addLog === 'function') addLog(logMsg, actionType === 'heal' ? 'log-heal' : 'log-hit');
+            
+            if (typeof updateBattleUI === 'function') updateBattleUI();
+            if (typeof renderGrid === 'function') renderGrid();
+            if (typeof renderTokens === 'function') renderTokens();
+            
+            document.getElementById('globalHpValue').value = '';
         }
 
     </script>
