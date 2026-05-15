@@ -1019,7 +1019,11 @@
                 addLog(`&nbsp;&nbsp;↳ <b>${target.name}</b>은(는) 치유 불가 상태라 체력을 회복할 수 없습니다!`, "", true);
                 return 0;
             }
-            let actualHeal = Math.min(target.stats.maxHp - target.stats.currentHp, amount);
+            
+            // 🌟 수정: 장비 반영 최대 체력 가져오기
+            const effectiveMaxHp = getEffectiveMaxHp(target);
+            
+            let actualHeal = Math.min(effectiveMaxHp - target.stats.currentHp, amount);
             target.stats.currentHp += actualHeal;
             return actualHeal;
         }
@@ -1218,6 +1222,28 @@
                 }
             }
             return Math.max(0, baseValue); 
+        }
+
+        function getEffectiveMaxHp(entity) {
+            let baseMaxHp = entity.stats.maxHp || 0;
+            
+            // 장비 효과 합산
+            if (entity.equippedSlots && typeof equipCatalog !== 'undefined') {
+                Object.values(entity.equippedSlots).forEach(equipName => {
+                    if (equipName && typeof equipName === 'string') {
+                        const matchedEquip = equipCatalog.find(eq => eq && eq.name === equipName);
+                        if (matchedEquip && matchedEquip.effect) {
+                            // [체력 증가 : 수치] 또는 [체력증가:수치] 모두 인식
+                            const hpRegex = /\[체력\s*증가\s*:\s*([+-]?\d+)\]/g;
+                            let match;
+                            while ((match = hpRegex.exec(matchedEquip.effect)) !== null) {
+                                baseMaxHp += parseInt(match[1], 10) || 0;
+                            }
+                        }
+                    }
+                });
+            }
+            return Math.max(1, baseMaxHp); // 최소 체력은 1
         }
 
         function selectSkill(skillId, range, ownerId, skillType = '공격') {
@@ -2454,25 +2480,16 @@
                     if (equipName) {
                         const eq = equipCatalog.find(e => e && e.name === equipName);
                         if (eq) {
-                            // 기존 피해 증가 정규식
                             const dmgRegex = /\[피해\s*증가\s*:\s*([+-]?\d+)\]/g;
                             let dmgMatch;
                             while ((dmgMatch = dmgRegex.exec(eq.effect)) !== null) {
                                 equipDmgBonus += parseInt(dmgMatch[1]) || 0;
                             }
-
-                            // 🌟 체력 증가 정규식 추가
-                            const hpRegex = /\[체력\s*증가\s*:\s*([+-]?\d+)\]/g;
-                            let hpMatch;
-                            while ((hpMatch = hpRegex.exec(eq.effect)) !== null) {
-                                equipHpBonus += parseInt(hpMatch[1]) || 0;
-                            }
+                            // 💡 체력 증가는 getEffectiveMaxHp에서 따로 계산하므로 여기서 누적할 필요 없음
                         }
                     }
                 });
             }
-
-
 
             validTargets.forEach(target => {
                 if (isEtc) {
