@@ -2170,7 +2170,45 @@
             }
         }
 
-        function toggleType() { const type = document.getElementById('inputType').value; const isEnemy = type === '에너미'; document.getElementById('hpGradeSection').style.display = !isEnemy ? 'flex' : 'none'; document.getElementById('tokenColorSection').style.display = !isEnemy ? 'flex' : 'none'; document.getElementById('hpManualSection').style.display = isEnemy ? 'flex' : 'none'; document.getElementById('constSkillSection').style.display = !isEnemy ? 'block' : 'none'; document.getElementById('charSkillSectionTitle').innerText = isEnemy ? '에너미 스킬' : '캐릭터 스킬'; document.getElementById('charSkillNameLabel').innerText = isEnemy ? '에너미 스킬 이름' : '스킬 이름'; document.getElementById('blessSectionTitle').innerText = !isEnemy ? '성좌의 가호' : '패시브'; document.getElementById('blessNameLabel').innerText = !isEnemy ? '가호 이름' : '패시브 이름'; document.getElementById('blessDescLabel').innerText = !isEnemy ? '가호 설명' : '패시브 설명'; document.querySelectorAll('.enemy-grade-l').forEach(opt => { opt.hidden = !isEnemy; opt.disabled = !isEnemy; }); if (!isEnemy) { document.querySelectorAll('.stat-grade').forEach(sel => { if (sel.value === 'L') { sel.value = 'SS'; } }); } }
+        function toggleType() {
+            const typeInput = document.getElementById('inputType');
+            if (!typeInput) return;
+            
+            const type = typeInput.value;
+            const isEnemy = type === '에너미';
+
+            const mappings = [
+                { id: 'hpGradeSection', prop: 'style', val: !isEnemy ? 'flex' : 'none' },
+                { id: 'tokenColorSection', prop: 'style', val: !isEnemy ? 'flex' : 'none' },
+                { id: 'hpManualSection', prop: 'style', val: isEnemy ? 'flex' : 'none' },
+                { id: 'constSkillSection', prop: 'style', val: !isEnemy ? 'block' : 'none' },
+                { id: 'charSkillSectionTitle', prop: 'innerText', val: isEnemy ? '에너미 스킬' : '캐릭터 스킬' },
+                { id: 'charSkillNameLabel', prop: 'innerText', val: isEnemy ? '에너미 스킬 이름' : '스킬 이름' },
+                { id: 'blessSectionTitle', prop: 'innerText', val: !isEnemy ? '성좌의 가호' : '패시브' },
+                { id: 'blessNameLabel', prop: 'innerText', val: !isEnemy ? '가호 이름' : '패시브 이름' },
+                { id: 'blessDescLabel', prop: 'innerText', val: !isEnemy ? '가호 설명' : '패시브 설명' }
+            ];
+
+            mappings.forEach(m => {
+                const el = document.getElementById(m.id);
+                if (el) {
+                    if (m.prop === 'style') el.style.display = m.val;
+                    else el.innerText = m.val;
+                }
+            });
+
+            document.querySelectorAll('.enemy-grade-l').forEach(opt => {
+                opt.hidden = !isEnemy;
+                opt.disabled = !isEnemy;
+            });
+
+            if (!isEnemy) {
+                document.querySelectorAll('.stat-grade').forEach(sel => {
+                    if (sel.value === 'L') { sel.value = 'SS'; }
+                });
+            }
+        }
+        
         function toggleDetails(btn) { const detailsDiv = btn.nextElementSibling; if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') { detailsDiv.style.display = 'block'; } else { detailsDiv.style.display = 'none'; } }
         function updateHp(id, newValue) { const entity = entities.find(e => e.id === id); if (entity) { entity.stats.currentHp = parseInt(newValue) || 0; renderGrid(); if(isBattleActive) updateBattleUI(); } }
         function deleteCharacter(id) { if (confirm("정말 이 개체를 삭제하시겠습니까?")) { entities = entities.filter(e => e.id !== id); renderGrid(); } }
