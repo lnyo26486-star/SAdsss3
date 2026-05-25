@@ -182,14 +182,6 @@
         .panel-silence {
             position: relative;
         }
-        .panel-silence::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: url('사슬이미지경로.png') center/cover;
-            opacity: 0.7;
-            pointer-events: none;
-        }
         .panel-freeze {
             box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.6);
             border: 2px solid #00c8ff !important;
@@ -219,14 +211,6 @@
         }
         .status-tooltip-container:hover .status-tooltip-text { visibility: visible; opacity: 1; }
 
-        body.weather-rain::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 30%;
-            background: linear-gradient(to bottom, rgba(50, 50, 60, 0.8), transparent);
-            pointer-events: none;
-            z-index: 1;
-        }
         body.weather-dust {
             filter: sepia(0.2) saturate(0.8);
         }
@@ -248,29 +232,6 @@
             height: 100%;
             pointer-events: none;
             z-index: 9999; /* 패널들보다 높은 위치로 강제 설정 */
-        }
-
-        /* 폭염: 화면 전체에 붉은 오버레이 */
-        .weather-heat::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 69, 0, 0.15);
-            pointer-events: none;
-            z-index: 9998;
-        }
-
-        /* 안개: 블러 처리 */
-        .weather-fog {
-            backdrop-filter: blur(5px);
-        }
-        .weather-fog::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(200, 200, 200, 0.3);
-            pointer-events: none;
-            z-index: 9998;
         }
     </style>
 </head>
@@ -426,7 +387,7 @@
                     </div>
                     <div class="form-group">
                         <label>스킬 설명 <input type="checkbox" id="inputCharSkillSecret" style="margin-left: 8px;"> 비공개</label>
-                        <textarea id="charSkillSectionTitle" rows="2"></textarea>
+                        <textarea id="inputCharSkillDesc" rows="2"></textarea>
                     </div>
                     <div class="form-group"><label>실제 효과 <br><span style="font-size:10px; font-weight:normal; color:#e53e3e;">태그: [부여:화상:2]<br>또는 [자가부여:버프:1]</span></label><textarea id="inputCharSkillEffect" rows="2"></textarea></div>
                 </div>
@@ -454,8 +415,8 @@
                         <select id="inputConstBlessTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>가호 설명 <input type="checkbox" id="blessSectionTitle" style="margin-left: 8px;"> 비공개</label>
-                        <textarea id="blessSectionTitle" rows="2"></textarea>
+                        <label>가호 설명 <input type="checkbox" id="inputConstBlessSecret" style="margin-left: 8px;"> 비공개</label>
+                        <textarea id="inputConstBlessDesc" rows="2"></textarea>
                     </div>
                     <div class="form-group"><label>실제 효과</label><textarea id="inputConstBlessEffect" rows="2"></textarea></div>
                 </div>
@@ -2256,18 +2217,18 @@
             document.getElementById('gradeStr').value = entity.stats.grades.str; document.getElementById('gradeAgi').value = entity.stats.grades.agi; document.getElementById('gradeInt').value = entity.stats.grades.int; document.getElementById('gradeMen').value = entity.stats.grades.men; document.getElementById('gradeLuk').value = entity.stats.grades.luk; document.getElementById('gradeSpecial').value = entity.stats.grades.special;
             document.getElementById('inputSpecialName').value = entity.stats.specialName === "특수" ? "" : entity.stats.specialName;
             document.getElementById('inputAbilityName').value = entity.skills.ability.name === "-" ? "" : entity.skills.ability.name; document.getElementById('inputAbilityDesc').value = entity.skills.ability.desc === "-" ? "" : entity.skills.ability.desc;
-            
+
             document.getElementById('inputCharSkillName').value = entity.skills.charSkill.name === "-" ? "" : entity.skills.charSkill.name; document.getElementById('inputCharSkillDesc').value = entity.skills.charSkill.desc === "-" ? "" : entity.skills.charSkill.desc; document.getElementById('inputCharSkillEffect').value = entity.skills.charSkill.effect === "-" ? "" : entity.skills.charSkill.effect; document.getElementById('inputCharSkillRange').value = entity.skills.charSkill.range || '단일'; document.getElementById('inputCharSkillTarget').value = entity.skills.charSkill.targetType || 'enemy';
-            
+
             document.getElementById('inputConstSkillName').value = entity.skills.constSkill.name === "-" ? "" : entity.skills.constSkill.name; document.getElementById('inputConstSkillDesc').value = entity.skills.constSkill.desc === "-" ? "" : entity.skills.constSkill.desc; document.getElementById('inputConstSkillEffect').value = entity.skills.constSkill.effect === "-" ? "" : entity.skills.constSkill.effect; document.getElementById('inputConstSkillRange').value = entity.skills.constSkill.range || '단일'; document.getElementById('inputConstSkillTarget').value = entity.skills.constSkill.targetType || 'enemy';
-            
+
             document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy';
-            
+
             document.getElementById('extraSkillsList').innerHTML = ''; const extraSkills = entity.skills.extraSkills || entity.skills.enemyBasics || []; extraSkills.forEach(bs => { addExtraSkill(bs.name, bs.type, bs.effect, bs.range, bs.targetType || 'enemy'); });
-            
+
             document.getElementById('inputItemQuantity').value = '1';
             tempInventory = JSON.parse(JSON.stringify(entity.inventory || [])); renderTempInventory(); updateItemDropdown();
-            
+
             populateEquipDropdowns();
             const slots = entity.equippedSlots || { head: '', body: '', shoes: '', acc1: '', acc2: '', relic: '' };
             if(document.getElementById('inputEquipHead')) document.getElementById('inputEquipHead').value = slots.head || '';
@@ -2276,7 +2237,7 @@
             if(document.getElementById('inputEquipAcc1')) document.getElementById('inputEquipAcc1').value = slots.acc1 || '';
             if(document.getElementById('inputEquipAcc2')) document.getElementById('inputEquipAcc2').value = slots.acc2 || '';
             if(document.getElementById('inputEquipRelic')) document.getElementById('inputEquipRelic').value = slots.relic || '';
-            
+
             document.getElementById('addModal').style.display = 'block';
         }
 
@@ -2598,6 +2559,7 @@
                     <div class="card-actions">
                         <button class="action-btn" onclick="togglePlacement('${entity.id}')" style="background:#ebf8ff; color:#2b6cb0; border-color:#90cdf4;">📍배치</button>
                         <button class="action-btn" onclick="removeToken('${entity.id}')" style="background:#fff5f5; color:#c53030; border-color:#fed7d7;">🔙회수</button>
+                        <button class="action-btn edit" onclick="editCharacter('${entity.id}')">수정</button>
                         <button class="action-btn edit" onclick="editCharacter('${entity.id}')">수정</button>
                         <button class="action-btn status" onclick="openStatusModal('${entity.id}')">+상태이상</button>
                         <button class="action-btn delete" onclick="deleteCharacter('${entity.id}')">삭제</button>
@@ -3229,75 +3191,63 @@
         let snowflakes = [];
     
         function changeWeather() {
-            const weather = document.getElementById('weatherSelect').value;
-            
-            const cRain = document.getElementById('rainCanvas');
-            const cSnow = document.getElementById('snowCanvas');
-            const cStorm = document.getElementById('stormCanvas');
-            const cDust = document.getElementById('dustCanvas');
-            
-            if (cRain) cRain.style.display = 'none';
-            if (cSnow) cSnow.style.display = 'none';
-            if (cStorm) cStorm.style.display = 'none';
-            if (cDust) cDust.style.display = 'none';
-            
-            if (typeof rainReq !== 'undefined') cancelAnimationFrame(rainReq);
-            if (typeof snowReq !== 'undefined') cancelAnimationFrame(snowReq);
+            // 1. 기존 애니메이션 정지
+            if (typeof rainReq !== 'undefined' && rainReq) cancelAnimationFrame(rainReq);
+            if (typeof snowAnimReq !== 'undefined') cancelAnimationFrame(snowAnimReq);
             if (typeof stormReq !== 'undefined') cancelAnimationFrame(stormReq);
             if (typeof dustReq !== 'undefined') cancelAnimationFrame(dustReq);
-            
-            document.body.classList.remove('weather-rain', 'weather-dust');
-            
-            const rainSound = document.getElementById('rainSound');
-            if (rainSound) {
-                rainSound.pause();
-                rainSound.currentTime = 0;
-            }
-            
-            const canvases = [cRain, cSnow, cStorm, cDust];
-            canvases.forEach(c => {
-                if (c) {
-                    c.style.display = 'none'; // 초기화
-                    c.width = window.innerWidth;
-                    c.height = window.innerHeight;
-                }
-            });
 
+            let weather = document.getElementById('weatherSelect').value;
+            const rainCanvas = document.getElementById('rainCanvas');
+            const snowCanvas = document.getElementById('snowCanvas');
+            const stormCanvas = document.getElementById('stormCanvas');
+            const dustCanvas = document.getElementById('dustCanvas');
+
+            // 2. 모든 날씨 캔버스 숨기기
+            if (rainCanvas) rainCanvas.style.display = 'none';
+            if (snowCanvas) snowCanvas.style.display = 'none';
+            if (stormCanvas) stormCanvas.style.display = 'none';
+            if (dustCanvas) dustCanvas.style.display = 'none';
+
+            // 3. 필터 및 효과 초기화
+            const container = document.querySelector('.main-battle-container');
+            if (container) container.style.filter = "none";
+            document.body.style.boxShadow = "none";
+
+            // 4. 날씨별 로직
             if (weather === '비') {
-                document.body.classList.add('weather-rain');
-                if (cRain) {
-                    cRain.style.display = 'block';
+                if (rainCanvas) {
+                    rainCanvas.style.display = 'block';
                     if (typeof initRain === 'function') initRain();
-                    if (typeof drawRain === 'function') drawRain();
-                }
-                if (rainSound) {
-                    rainSound.play().catch(e => console.log("오디오 재생 차단됨:", e));
+                    drawRain();
                 }
             } else if (weather === '혹한') {
-                if (cSnow) {
-                    cSnow.style.display = 'block';
-                    if (typeof initSnow === 'function') initSnow();
-                    if (typeof drawSnow === 'function') drawSnow();
+                if (snowCanvas) {
+                    snowCanvas.style.display = 'block';
+                    if(snowflakes.length === 0) {
+                        for(let i=0; i<250; i++) snowflakes.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 2 + 1, xs: -1 + Math.random() * 2, ys: Math.random() * 2 + 1 });
+                    }
+                    drawSnow();
                 }
+            } else if (weather === '폭염') {
+                document.body.style.boxShadow = "inset 0 0 150px rgba(229, 62, 62, 0.15)";
+            } else if (weather === '안개') {
+                if (container) container.style.filter = "blur(1px) contrast(0.9)";
             } else if (weather === '폭풍') {
-                if (cStorm) {
-                    cStorm.style.display = 'block';
-                    initStorm();
+                if (stormCanvas) {
+                    stormCanvas.style.display = 'block';
+                    if (typeof initStorm === 'function') initStorm();
                     drawStorm();
                 }
             } else if (weather === '황사') {
-                document.body.classList.add('weather-dust');
-                if (cDust) {
-                    cDust.style.display = 'block';
-                    initDust();
+                if (dustCanvas) {
+                    dustCanvas.style.display = 'block';
+                    if (typeof initDust === 'function') initDust();
                     drawDust();
                 }
-            } else if (weather === '폭염') {
-                document.body.classList.add('weather-heat');
-            } else if (weather === '안개') {
-                document.body.classList.add('weather-fog');
             }
-            
+
+            if (typeof showToast === 'function') showToast(`필드 환경이 [${weather}](으)로 변경되었습니다.`);
             if (typeof syncToFirebase === 'function') syncToFirebase();
         }
 
