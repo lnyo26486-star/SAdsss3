@@ -238,6 +238,40 @@
             pointer-events: none;
             z-index: 1;
         }
+
+        /* 날씨 캔버스가 패널이나 그리드 뒤에 숨지 않게 고정 */
+        #rainCanvas, #snowCanvas, #stormCanvas, #dustCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999; /* 패널들보다 높은 위치로 강제 설정 */
+        }
+
+        /* 폭염: 화면 전체에 붉은 오버레이 */
+        .weather-heat::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 69, 0, 0.15);
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* 안개: 블러 처리 */
+        .weather-fog {
+            backdrop-filter: blur(5px);
+        }
+        .weather-fog::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(200, 200, 200, 0.3);
+            pointer-events: none;
+            z-index: 9998;
+        }
     </style>
 </head>
 <body>
@@ -3223,6 +3257,7 @@
             const canvases = [cRain, cSnow, cStorm, cDust];
             canvases.forEach(c => {
                 if (c) {
+                    c.style.display = 'none'; // 초기화
                     c.width = window.innerWidth;
                     c.height = window.innerHeight;
                 }
@@ -3257,6 +3292,10 @@
                     initDust();
                     drawDust();
                 }
+            } else if (weather === '폭염') {
+                document.body.classList.add('weather-heat');
+            } else if (weather === '안개') {
+                document.body.classList.add('weather-fog');
             }
             
             if (typeof syncToFirebase === 'function') syncToFirebase();
@@ -3265,7 +3304,7 @@
         function drawSnow() {
             const canvas = document.getElementById('snowCanvas');
             if(!canvas || canvas.style.display === 'none') {
-                if(snowAnimReq) cancelAnimationFrame(snowAnimReq);
+                if(typeof snowAnimReq !== 'undefined') cancelAnimationFrame(snowAnimReq);
                 return;
             }
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
