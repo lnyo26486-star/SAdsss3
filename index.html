@@ -170,6 +170,35 @@
         .log-crit { font-weight: bold; color: #f6e05e; }
         .log-action { color: #90cdf4; font-weight: bold; }
 
+        body.weather-rain::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 30%;
+            background: linear-gradient(to bottom, rgba(50, 50, 60, 0.8), transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .panel-silence {
+            position: relative;
+        }
+        .panel-silence::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('사슬이미지경로.png') center/cover;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .panel-freeze {
+            box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.6);
+            border: 2px solid #00c8ff !important;
+        }
+        .panel-burn {
+            box-shadow: inset 0 0 20px rgba(255, 50, 0, 0.6);
+            border: 2px solid #ff3200 !important;
+        }
+
         @keyframes healCrossFloat {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
             20% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
@@ -189,12 +218,35 @@
             font-size: 11px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: pre-wrap;
         }
         .status-tooltip-container:hover .status-tooltip-text { visibility: visible; opacity: 1; }
+
+        body.weather-rain::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 30%;
+            background: linear-gradient(to bottom, rgba(50, 50, 60, 0.8), transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+        body.weather-dust {
+            filter: sepia(0.2) saturate(0.8);
+        }
+        body.weather-dust::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(210, 180, 140, 0.15);
+            pointer-events: none;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
 
     <canvas id="rainCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
     <canvas id="snowCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
+    <canvas id="stormCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
+    <canvas id="dustCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
+    <audio id="rainSound" src="https://www.dropbox.com/scl/fi/xd7milhnmx4jlxnzgyy47/10-ASMR.mp3?rlkey=fm9w841xsyx08jrsi9bxzg89f&st=itdvul22&dl=1" loop></audio>
 
     <div id="toastContainer" class="toast-container"></div>
 
@@ -221,6 +273,8 @@
                     <option value="혹한">혹한</option>
                     <option value="폭염">폭염</option>
                     <option value="안개">안개</option>
+                    <option value="폭풍">폭풍</option>
+                    <option value="황사">황사</option>
                 </select>
                 <div style="display:flex; align-items:center; gap:6px; border-left:1px solid #e2e8f0; padding-left:8px;">
                     <button onclick="document.getElementById('bgmInput').click()" style="padding:4px 8px; font-size:12px; font-weight:600; background:#e2e8f0; border:none; border-radius:4px; cursor:pointer; white-space:nowrap;">🎵 BGM</button>
@@ -336,7 +390,10 @@
                     <div class="form-group"><label>적용 대상</label>
                         <select id="inputCharSkillTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
-                    <div class="form-group"><label>스킬 설명</label><textarea id="inputCharSkillDesc" rows="2"></textarea></div>
+                    <div class="form-group">
+                        <label>스킬 설명 <input type="checkbox" id="inputCharSkillSecret" style="margin-left: 8px;"> 비공개</label>
+                        <textarea id="charSkillSectionTitle" rows="2"></textarea>
+                    </div>
                     <div class="form-group"><label>실제 효과 <br><span style="font-size:10px; font-weight:normal; color:#e53e3e;">태그: [부여:화상:2]<br>또는 [자가부여:버프:1]</span></label><textarea id="inputCharSkillEffect" rows="2"></textarea></div>
                 </div>
 
@@ -362,7 +419,10 @@
                     <div class="form-group"><label>적용 대상</label>
                         <select id="inputConstBlessTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
-                    <div class="form-group"><label id="blessDescLabel">가호 설명</label><textarea id="inputConstBlessDesc" rows="2"></textarea></div>
+                    <div class="form-group">
+                        <label>가호 설명 <input type="checkbox" id="blessSectionTitle" style="margin-left: 8px;"> 비공개</label>
+                        <textarea id="blessSectionTitle" rows="2"></textarea>
+                    </div>
                     <div class="form-group"><label>실제 효과</label><textarea id="inputConstBlessEffect" rows="2"></textarea></div>
                 </div>
 
@@ -642,6 +702,11 @@
 
         let terrains = [];
         let currentTerrainMode = null;
+
+        let stormParticles = [];
+        let stormReq;
+        let dustParticles = [];
+        let dustReq;
 
         const firebaseConfig = {
             apiKey: "AIzaSyB_UC8HGdBzdW_a21Sv4b7u5ewJT8Q6Rvo",
@@ -967,18 +1032,14 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 빗줄기의 색상을 더 밝게 하고, 불투명도를 0.4에서 0.8로 올려 훨씬 진하게 만듭니다.
-            ctx.strokeStyle = 'rgba(180, 210, 255, 0.8)';
-            
-            // 빗줄기의 두께를 1.5에서 3.0으로 두껍게 만듭니다.
-            ctx.lineWidth = 3.0;
-            
+            ctx.strokeStyle = 'rgba(200, 220, 255, 0.8)'; 
+            ctx.lineWidth = 2.5; 
             ctx.lineCap = 'round';
             ctx.beginPath();
             for(let i=0; i<rainDrops.length; i++) {
                 let p = rainDrops[i];
                 ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+                ctx.lineTo(p.x + p.l * p.xs * 1.5, p.y + p.l * p.ys * 1.5); 
                 p.x += p.xs; p.y += p.ys;
                 if(p.x > canvas.width || p.y > canvas.height) {
                     p.x = Math.random() * canvas.width; p.y = -20;
@@ -989,12 +1050,94 @@
         }
 
         window.onresize = () => {
-            if (isDarkMode) {
-                const canvas = document.getElementById('rainCanvas');
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
+            const cRain = document.getElementById('rainCanvas');
+            const cSnow = document.getElementById('snowCanvas');
+            const cStorm = document.getElementById('stormCanvas');
+            const cDust = document.getElementById('dustCanvas');
+            
+            if (cRain) { cRain.width = window.innerWidth; cRain.height = window.innerHeight; }
+            if (cSnow) { cSnow.width = window.innerWidth; cSnow.height = window.innerHeight; }
+            if (cStorm) { cStorm.width = window.innerWidth; cStorm.height = window.innerHeight; }
+            if (cDust) { cDust.width = window.innerWidth; cDust.height = window.innerHeight; }
         };
+
+        function initStorm() {
+            stormParticles = [];
+            const canvas = document.getElementById('stormCanvas');
+            for (let i = 0; i < 40; i++) {
+                stormParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    l: Math.random() * 60 + 40,
+                    xs: Math.random() * 20 + 20,
+                    ys: Math.random() * 4 - 2
+                });
+            }
+        }
+
+        function drawStorm() {
+            const canvas = document.getElementById('stormCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = 'rgba(220, 230, 255, 0.4)';
+            ctx.lineWidth = 2.0;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            
+            for (let i = 0; i < stormParticles.length; i++) {
+                let p = stormParticles[i];
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + p.l, p.y + p.ys);
+                p.x += p.xs;
+                p.y += p.ys;
+                
+                if (p.x > canvas.width) {
+                    p.x = -p.l;
+                    p.y = Math.random() * canvas.height;
+                }
+            }
+            ctx.stroke();
+            stormReq = requestAnimationFrame(drawStorm);
+        }
+
+        function initDust() {
+            dustParticles = [];
+            const canvas = document.getElementById('dustCanvas');
+            for (let i = 0; i < 60; i++) {
+                dustParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 4 + 2,
+                    xs: Math.random() * 3 + 2,
+                    ys: Math.random() * 1 - 0.5,
+                    alpha: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        function drawDust() {
+            const canvas = document.getElementById('dustCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < dustParticles.length; i++) {
+                let p = dustParticles[i];
+                ctx.fillStyle = `rgba(195, 165, 125, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                
+                p.x += p.xs;
+                p.y += p.ys;
+                
+                if (p.x > canvas.width) {
+                    p.x = -10;
+                    p.y = Math.random() * canvas.height;
+                }
+            }
+            dustReq = requestAnimationFrame(drawDust);
+        }
 
         function showToast(msg) {
             const container = document.getElementById('toastContainer');
@@ -1531,7 +1674,7 @@
                     } else if (weather === '혹한') {
                         addLog(`<b>[날씨: 혹한]</b> 매서운 추위로 인해 개체들이 얼어붙을 위험이 있습니다.`, 'log-action');
                         aliveEntities.forEach(e => {
-                            if (Math.random() < 0.2) { // 20% 확률
+                            if (Math.random() < 0.2) { 
                                 if (!e.statusEffects) e.statusEffects = [];
                                 e.statusEffects.push({ name: "동결", type: "stun", value: 0, duration: 1, id: Date.now() + Math.random() });
                                 addLog(`&nbsp;&nbsp;❄️ <b>${e.name}</b>이(가) 추위에 몸이 얼어붙었습니다! (1턴간 행동불능)`, 'log-action');
@@ -1540,20 +1683,52 @@
                     } else if (weather === '비') {
                         addLog(`<b>[날씨: 비]</b> 쏟아지는 빗줄기가 시야를 방해합니다.`, 'log-action');
                         aliveEntities.forEach(e => {
-                             if (Math.random() < 0.2) { // 20% 확률
+                            if (Math.random() < 0.2) { 
                                 if (!e.statusEffects) e.statusEffects = [];
                                 e.statusEffects.push({ name: "실명", type: "stat", targetStat: "agi", value: -20, duration: 1, id: Date.now() + Math.random() });
                                 addLog(`&nbsp;&nbsp;💧 <b>${e.name}</b>이(가) 빗물에 시야가 가려졌습니다! (민첩 -20)`, 'log-action');
-                             }
+                            }
+                        });
+                    } else if (weather === '폭풍') {
+                        addLog(`[날씨: 폭풍] 거센 바람이 불어와 개체들의 활력이 돋습니다.`, 'log-action');
+                        let stormAudio = document.getElementById('stormSound'); 
+                        if (stormAudio) { stormAudio.play(); }
+
+                        aliveEntities.forEach(e => {
+                            if (!e.statusEffects) e.statusEffects = [];
+                            let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === "활력") : null;
+                            if (!globalStatus) globalStatus = { id: 'auto_storm', icon: '💨', name: "활력", desc: "폭풍으로 인한 활력", type: "stat", targetStat: "agi", value: 10 };
+                            
+                            if (!e.statusEffects.some(s => s.name === "활력")) {
+                                e.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 1 })));
+                            }
+                        });
+                    } else if (weather === '황사') {
+                        addLog(`[날씨: 황사] 짙은 흙먼지가 시야를 가립니다.`, 'log-action');
+                        aliveEntities.forEach(e => {
+                            if (Math.random() < 0.3) { 
+                                if (!e.statusEffects) e.statusEffects = [];
+                                let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === "실명") : null;
+                                if (!globalStatus) globalStatus = { id: 'auto_dust', icon: '🌪️', name: "실명", desc: "황사로 인한 실명", type: "stat", targetStat: "agi", value: -20 };
+                                
+                                e.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 1 })));
+                                addLog(`&nbsp;&nbsp;🌪️ ${e.name}이(가) 모래먼지에 시야를 잃었습니다!`, 'log-action');
+                            }
                         });
                     }
-                 }
+                }
+                
                 const nextEntity = entities.find(e => e.id === turnOrder[currentTurnIndex]);
 
                 if (nextEntity && nextEntity.stats.currentHp > 0) {
-                    playTurnChangeSound();
+                    if (typeof playTurnChangeSound === 'function') playTurnChangeSound();
                     addLog(`<b>${nextEntity.name}</b>의 턴입니다.`, '');
                     
+                    if (!nextEntity.resonance) nextEntity.resonance = 0;
+                    let addedResonance = Math.floor(Math.random() * 6) + 25;
+                    nextEntity.resonance += addedResonance;
+                    if (nextEntity.resonance > 100) nextEntity.resonance = 100;
+
                     if (nextEntity.statusEffects && nextEntity.statusEffects.length > 0) {
                         let logMsgs = [];
                         nextEntity.statusEffects.forEach(eff => {
@@ -2166,7 +2341,14 @@
             entities.forEach(entity => {
                 try {
                     const isEnemy = entity.type === '에너미'; 
-                    const cardClass = isEnemy ? 'character-card enemy-card' : 'character-card'; 
+                    let cardClass = isEnemy ? 'character-card enemy-card' : 'character-card'; 
+                    
+                    if (entity.statusEffects) {
+                        if (entity.statusEffects.some(s => s.type === 'silence' || s.type === 'seal')) cardClass += ' panel-silence';
+                        if (entity.statusEffects.some(s => s.name === '동결' || s.type === 'freeze')) cardClass += ' panel-freeze';
+                        if (entity.statusEffects.some(s => s.name === '화상' || s.type === 'burn')) cardClass += ' panel-burn';
+                    }
+
                     const badgeClass = isEnemy ? 'type-badge enemy' : 'type-badge apostle'; 
                     const hpColorClass = isEnemy ? 'hp-color-enemy' : 'hp-color-apostle'; 
                     const isDead = entity.stats.currentHp <= 0;
@@ -2182,10 +2364,18 @@
                     const shieldPct = (totalShield / barMax) * 100;
                     const barColor = typeof getHpColor === 'function' ? getHpColor(entity.stats.currentHp, entity.stats.maxHp) : '#48bb78';
 
+                    const isObserver = typeof isAdmin !== 'undefined' && !isAdmin;
+
                     let constSkillHtml = '';
                     if (!isEnemy && entity.skills && entity.skills.constSkill) { 
                         const r = entity.skills.constSkill.range || '단일'; 
-                        constSkillHtml = `<div class="skill-box" onclick="selectSkill('constSkill', '${r}', '${entity.id}', '공격')"><span class="skill-title"><span>[성좌 스킬] ${entity.skills.constSkill.name}</span> <span class="range-badge">${r}</span></span><span class="skill-desc">${entity.skills.constSkill.desc}</span><span class="skill-effect">▶ 효과: ${entity.skills.constSkill.effect}</span></div>`; 
+                        let cDesc = entity.skills.constSkill.desc;
+                        let cEff = entity.skills.constSkill.effect;
+                        if (isObserver && entity.skills.constSkill.isSecret) {
+                            cDesc = "🔒 비공개된 스킬입니다.";
+                            cEff = "🔒 비공개된 효과입니다.";
+                        }
+                        constSkillHtml = `<div class="skill-box" onclick="selectSkill('constSkill', '${r}', '${entity.id}', '공격')"><span class="skill-title"><span>[성좌 스킬] ${entity.skills.constSkill.name}</span> <span class="range-badge">${r}</span></span><span class="skill-desc">${cDesc}</span><span class="skill-effect">▶ 효과: ${cEff}</span></div>`; 
                     }
 
                     let extraSkillsHtml = '';
@@ -2226,14 +2416,16 @@
                     const resonanceWidth = Math.min(100, Math.max(0, resonanceValue));
                     const resonanceHtml = `
                         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
-                            <div style="font-size: 11px; font-weight: bold; color: #805ad5; white-space: nowrap;">공명도 ${resonanceValue} / 100
+                            <div style="font-size: 11px; color: #805ad5; white-space: nowrap;">공명도 ${resonanceValue} / 100
+                                <button onclick="adjustResonance('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소">➖</button>
+                                <button onclick="adjustResonance('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가">➕</button>
                                 <button onclick="resetResonance('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="공명도 초기화">🔄</button>
                             </div>
                             <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
                                 <div style="width: ${resonanceWidth}%; height: 100%; background: linear-gradient(90deg, #b794f4, #805ad5); transition: width 0.3s ease;"></div>
                             </div>
                         </div>
-                        ${resonanceValue >= 100 ? `<div style="font-size:11px; color:#d53f8c; font-weight:bold; margin-top:4px; text-align:center;">✨ 성좌 스킬 활성화 가능!</div>` : ''}
+                        ${resonanceValue >= 100 ? '<div style="font-size:11px; color:#d53f8c; margin-top:4px; text-align:center;">✨ 성좌 스킬 활성화 가능!</div>' : ''}
                     `;
 
                     let itemButtons = (entity.inventory || []).map((item, idx) =>
@@ -2313,12 +2505,22 @@
 
                     const abilityName = (entity.skills && entity.skills.ability) ? entity.skills.ability.name : "-";
                     const abilityDesc = (entity.skills && entity.skills.ability) ? entity.skills.ability.desc : "-";
-                    const charSkillName = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.name : "-";
-                    const charSkillDesc = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.desc : "-";
-                    const charSkillEffect = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.effect : "-";
-                    const blessName = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.name : "-";
-                    const blessDesc = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.desc : "-";
-                    const blessEffect = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.effect : "-";
+
+                    let charSkillName = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.name : "-";
+                    let charSkillDesc = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.desc : "-";
+                    let charSkillEffect = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.effect : "-";
+                    if (isObserver && entity.skills && entity.skills.charSkill && entity.skills.charSkill.isSecret) {
+                        charSkillDesc = "🔒 비공개된 스킬입니다.";
+                        charSkillEffect = "🔒 비공개된 효과입니다.";
+                    }
+
+                    let blessName = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.name : "-";
+                    let blessDesc = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.desc : "-";
+                    let blessEffect = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.effect : "-";
+                    if (isObserver && entity.skills && entity.skills.constBless && entity.skills.constBless.isSecret) {
+                        blessDesc = "🔒 비공개된 가호입니다.";
+                        blessEffect = "🔒 비공개된 효과입니다.";
+                    }
 
                     card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">${entity.type}</span>${gradeBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
                     <div class="card-actions">
@@ -2392,6 +2594,21 @@
             try { if (typeof updateSkillDisplay === 'function') updateSkillDisplay(); } catch(e){}
             try { if (typeof renderTokens === 'function') renderTokens(); } catch(e){}
             try { if (typeof renderTerrains === 'function') renderTerrains(); } catch(e){}
+        }
+
+        function adjustResonance(entityId, amount) {
+            const entity = entities.find(e => e.id === entityId);
+            if (entity) {
+                if (!entity.resonance) entity.resonance = 0;
+                entity.resonance += amount;
+                
+                if (entity.resonance > 100) entity.resonance = 100;
+                if (entity.resonance < 0) entity.resonance = 0;
+                
+                if (typeof renderTokens === 'function') renderTokens();
+                if (typeof renderGrid === 'function') renderGrid();
+                if (typeof syncToFirebase === 'function') syncToFirebase();
+            }
         }
 
         function handleTileClick(cx, cy) {
@@ -2531,7 +2748,8 @@
             }
 
             if (!attacker.resonance) attacker.resonance = 0;
-            attacker.resonance += 10;
+            let addedResonance = Math.floor(Math.random() * 6) + 25; // 25~30 랜덤
+            attacker.resonance += addedResonance;
             if (attacker.resonance > 100) attacker.resonance = 100;
 
             let equipDmgBonus = 0;
@@ -2790,7 +3008,6 @@
                 const existing = entities.find(e => e.id === editingId); 
                 if (existing) { 
                     currentHp = existing.stats.currentHp; 
-                    // 🌟 깊은 복사(Deep Copy)를 통해 캐릭터 간 데이터 참조 공유 완벽 차단
                     currentStatus = JSON.parse(JSON.stringify(existing.statusEffects || [])); 
                     currentX = existing.x; 
                     currentY = existing.y; 
@@ -2851,21 +3068,24 @@
                         range: document.getElementById('inputCharSkillRange') ? document.getElementById('inputCharSkillRange').value : "단일", 
                         targetType: document.getElementById('inputCharSkillTarget') ? document.getElementById('inputCharSkillTarget').value : "enemy", 
                         desc: document.getElementById('inputCharSkillDesc') ? document.getElementById('inputCharSkillDesc').value || "-" : "-", 
-                        effect: document.getElementById('inputCharSkillEffect') ? document.getElementById('inputCharSkillEffect').value || "-" : "-" 
+                        effect: document.getElementById('inputCharSkillEffect') ? document.getElementById('inputCharSkillEffect').value || "-" : "-",
+                        isSecret: document.getElementById('inputCharSkillSecret') ? document.getElementById('inputCharSkillSecret').checked : false
                     }, 
                     constSkill: { 
                         name: document.getElementById('inputConstSkillName') ? document.getElementById('inputConstSkillName').value || "-" : "-", 
                         range: document.getElementById('inputConstSkillRange') ? document.getElementById('inputConstSkillRange').value : "단일", 
                         targetType: document.getElementById('inputConstSkillTarget') ? document.getElementById('inputConstSkillTarget').value : "enemy", 
                         desc: document.getElementById('inputConstSkillDesc') ? document.getElementById('inputConstSkillDesc').value || "-" : "-", 
-                        effect: document.getElementById('inputConstSkillEffect') ? document.getElementById('inputConstSkillEffect').value || "-" : "-" 
+                        effect: document.getElementById('inputConstSkillEffect') ? document.getElementById('inputConstSkillEffect').value || "-" : "-",
+                        isSecret: document.getElementById('inputConstSkillSecret') ? document.getElementById('inputConstSkillSecret').checked : false
                     }, 
                     constBless: { 
                         name: document.getElementById('inputConstBlessName') ? document.getElementById('inputConstBlessName').value || "-" : "-", 
                         range: document.getElementById('inputConstBlessRange') ? document.getElementById('inputConstBlessRange').value : "단일", 
                         targetType: document.getElementById('inputConstBlessTarget') ? document.getElementById('inputConstBlessTarget').value : "enemy", 
                         desc: document.getElementById('inputConstBlessDesc') ? document.getElementById('inputConstBlessDesc').value || "-" : "-", 
-                        effect: document.getElementById('inputConstBlessEffect') ? document.getElementById('inputConstBlessEffect').value || "-" : "-" 
+                        effect: document.getElementById('inputConstBlessEffect') ? document.getElementById('inputConstBlessEffect').value || "-" : "-",
+                        isSecret: document.getElementById('inputConstBlessSecret') ? document.getElementById('inputConstBlessSecret').checked : false
                     }, 
                     extraSkills: extraSkills 
                 },
@@ -2937,44 +3157,73 @@
         let snowflakes = [];
     
         function changeWeather() {
-            if (typeof rainReq !== 'undefined' && rainReq) cancelAnimationFrame(rainReq);
-            if (snowAnimReq) cancelAnimationFrame(snowAnimReq);
+            const weather = document.getElementById('weatherSelect').value;
             
-            let weather = document.getElementById('weatherSelect').value;
-            const rainCanvas = document.getElementById('rainCanvas');
-            const snowCanvas = document.getElementById('snowCanvas');
+            const cRain = document.getElementById('rainCanvas');
+            const cSnow = document.getElementById('snowCanvas');
+            const cStorm = document.getElementById('stormCanvas');
+            const cDust = document.getElementById('dustCanvas');
             
-            // 모든 날씨 캔버스 숨기기
-            if (rainCanvas) rainCanvas.style.display = 'none';
-            if (snowCanvas) snowCanvas.style.display = 'none';
+            if (cRain) cRain.style.display = 'none';
+            if (cSnow) cSnow.style.display = 'none';
+            if (cStorm) cStorm.style.display = 'none';
+            if (cDust) cDust.style.display = 'none';
             
-            document.querySelector('.main-battle-container').style.filter = "none";
-            document.body.style.boxShadow = "none";
-
-            if (weather === '비') {
-                if (rainCanvas) {
-                    rainCanvas.style.display = 'block';
-                    // 비 애니메이션 데이터 초기화 및 실행
-                    initRain(); 
-                    drawRain();
-                }
-            } else if (weather === '혹한') {
-                if (snowCanvas) {
-                    snowCanvas.style.display = 'block';
-                    if(snowflakes.length === 0) {
-                        for(let i=0; i<250; i++) snowflakes.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 2 + 1, xs: -1 + Math.random() * 2, ys: Math.random() * 2 + 1 });
-                    }
-                    drawSnow();
-                }
-            } else if (weather === '폭염') {
-                document.body.style.boxShadow = "inset 0 0 150px rgba(229, 62, 62, 0.15)";
-            } else if (weather === '안개') {
-                document.querySelector('.main-battle-container').style.filter = "blur(1px) contrast(0.9)";
+            if (typeof rainReq !== 'undefined') cancelAnimationFrame(rainReq);
+            if (typeof snowReq !== 'undefined') cancelAnimationFrame(snowReq);
+            if (typeof stormReq !== 'undefined') cancelAnimationFrame(stormReq);
+            if (typeof dustReq !== 'undefined') cancelAnimationFrame(dustReq);
+            
+            document.body.classList.remove('weather-rain', 'weather-dust');
+            
+            const rainSound = document.getElementById('rainSound');
+            if (rainSound) {
+                rainSound.pause();
+                rainSound.currentTime = 0;
             }
             
-            if (typeof showToast === 'function') showToast(`필드 환경이 [${weather}](으)로 변경되었습니다.`);
+            const canvases = [cRain, cSnow, cStorm, cDust];
+            canvases.forEach(c => {
+                if (c) {
+                    c.width = window.innerWidth;
+                    c.height = window.innerHeight;
+                }
+            });
+
+            if (weather === '비') {
+                document.body.classList.add('weather-rain');
+                if (cRain) {
+                    cRain.style.display = 'block';
+                    if (typeof initRain === 'function') initRain();
+                    if (typeof drawRain === 'function') drawRain();
+                }
+                if (rainSound) {
+                    rainSound.play().catch(e => console.log("오디오 재생 차단됨:", e));
+                }
+            } else if (weather === '혹한') {
+                if (cSnow) {
+                    cSnow.style.display = 'block';
+                    if (typeof initSnow === 'function') initSnow();
+                    if (typeof drawSnow === 'function') drawSnow();
+                }
+            } else if (weather === '폭풍') {
+                if (cStorm) {
+                    cStorm.style.display = 'block';
+                    initStorm();
+                    drawStorm();
+                }
+            } else if (weather === '황사') {
+                document.body.classList.add('weather-dust');
+                if (cDust) {
+                    cDust.style.display = 'block';
+                    initDust();
+                    drawDust();
+                }
+            }
+            
+            if (typeof syncToFirebase === 'function') syncToFirebase();
         }
-    
+
         function drawSnow() {
             const canvas = document.getElementById('snowCanvas');
             if(!canvas || canvas.style.display === 'none') {
@@ -3127,33 +3376,6 @@
                     speed: Math.random() * 10 + 15
                 });
             }
-        }
-
-        function drawRain() {
-            const canvas = document.getElementById('rainCanvas');
-            if (!canvas || canvas.style.display === 'none') return;
-            
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const ctx = canvas.getContext('2d');
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'rgba(174, 194, 224, 0.5)';
-            ctx.lineWidth = 1;
-            ctx.lineCap = 'round';
-            
-            ctx.beginPath();
-            raindrops.forEach(p => {
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x, p.y + p.len);
-                p.y += p.speed;
-                if (p.y > canvas.height) {
-                    p.y = -20;
-                    p.x = Math.random() * canvas.width;
-                }
-            });
-            ctx.stroke();
-            rainReq = requestAnimationFrame(drawRain);
         }
 
         function getEquipDamageBonus(entity) {
