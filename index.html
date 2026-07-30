@@ -312,6 +312,11 @@
             <div class="battle-tracker">
                 <div class="turn-order-container" id="turnOrderDisplay"></div>
             </div>
+
+            <div class="dice-container" style="margin: 0 auto 12px auto; justify-content: center;" title="스킬 발동 시 기본 영력(10) 외에 추가로 소모할 영력을 입력하세요. 소모한 영력 1당 데미지/치유량이 1%씩 증폭됩니다.">
+                <span>⚡ 추가 소모 영력</span>
+                <input type="number" id="spiritBoostInput" min="0" value="0" style="width: 55px;">
+            </div>
             
             <div class="grid-coordinate-wrapper">
                 <div class="grid-col-labels" id="gridColLabels"></div>
@@ -349,8 +354,8 @@
             <div id="formInner">
                 <div class="form-section-title">기본 정보</div>
                 <div class="form-group"><label>이름</label><input type="text" id="inputName"></div>
-                <div class="form-group"><label>분류</label><select id="inputType" onchange="toggleType()"><option value="사도">사도</option><option value="에너미">에너미</option></select></div>
-                <div class="form-group"><label>캐릭터 등급</label><select id="inputCharGrade"><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
+                <div class="form-group"><label>분류</label><select id="inputType" onchange="toggleType()"><option value="캐릭터">캐릭터</option><option value="에너미">에너미</option></select></div>
+                <div class="form-group"><label>캐릭터 등급</label><select id="inputCharGrade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7" selected>7</option></select></div>
                 <div id="tokenColorSection" class="form-group"><label>토큰 색상</label><input type="color" id="inputTokenColor" value="#3182ce" style="height: 35px; padding: 2px;"></div>
                 <div id="hpGradeSection" class="form-group"><label>체력 등급</label><select id="inputHpGrade"><option value="SS">SS (1800)</option><option value="S">S (1200)</option><option value="A">A (800)</option><option value="B">B (550)</option><option value="C">C (350)</option><option value="D">D (200)</option><option value="E">E (100)</option><option value="F" selected>F (50)</option></select></div>
                 <div id="hpManualSection" class="form-group" style="display:none;"><label>수동 체력 입력</label><input type="number" id="inputHpManual" value="3000"></div>
@@ -361,19 +366,20 @@
                 <div class="form-group"><label>지능</label><select class="stat-grade" id="gradeInt"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
                 <div class="form-group"><label>정신</label><select class="stat-grade" id="gradeMen"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
                 <div class="form-group"><label>행운</label><select class="stat-grade" id="gradeLuk"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
+                <div class="form-group"><label>영력 등급</label><select class="stat-grade" id="gradeSpirit"><option value="L" class="enemy-grade-l" hidden disabled>L (300)</option><option value="SS">SS (200)</option><option value="S">S (150)</option><option value="A">A (100)</option><option value="B">B (70)</option><option value="C">C (50)</option><option value="D">D (30)</option><option value="E">E (15)</option><option value="F" selected>F (5)</option></select></div>
 
-                <div class="form-section-title">특수 스탯 (다이스 판정)</div>
+                <div class="form-section-title">개인 스탯 (다이스 판정)</div>
                 <div class="form-group"><label>스탯 이름</label><input type="text" id="inputSpecialName" placeholder="예: 불굴"></div>
                 <div class="form-group"><label>스탯 등급</label><select class="stat-grade" id="gradeSpecial"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
 
-                <div class="form-section-title">이능력</div>
-                <div class="form-group"><label>이능력 이름</label><input type="text" id="inputAbilityName"></div>
-                <div class="form-group"><label>이능력 설명</label><textarea id="inputAbilityDesc" rows="2"></textarea></div>
+                <div class="form-section-title">영력</div>
+                <div class="form-group"><label>영력 형태</label><input type="text" id="inputAbilityName"></div>
+                <div class="form-group"><label>영력 설명</label><textarea id="inputAbilityDesc" rows="2"></textarea></div>
 
                 <div id="extraSkillSection">
-                    <div class="form-section-title">기본 스킬</div>
+                    <div class="form-section-title">일반 스킬</div>
                     <div id="extraSkillsList"></div>
-                    <button onclick="addExtraSkill()" class="toggle-btn" style="margin-top:0; margin-bottom:12px;">+ 기본 스킬 추가</button>
+                    <button onclick="addExtraSkill()" class="toggle-btn" style="margin-top:0; margin-bottom:12px;">+ 일반 스킬 추가</button>
                 </div>
 
                 <div id="charSkillSection">
@@ -393,7 +399,7 @@
                 </div>
 
                 <div id="constSkillSection">
-                    <div class="form-section-title">성좌 스킬</div>
+                    <div class="form-section-title">특별 스킬</div>
                     <div class="form-group"><label>스킬 이름</label><input type="text" id="inputConstSkillName"></div>
                     <div class="form-group"><label>공격 범위</label>
                         <select id="inputConstSkillRange"><option value="단일">단일</option><option value="주위 8칸">주위 8칸 (3x3)</option><option value="십자">십자</option><option value="전체">전체</option><option value="가로 1줄">가로 1줄</option><option value="세로 1줄">세로 1줄</option><option value="가로세로 1줄씩">가로세로 1줄씩</option><option value="대각선">대각선</option><option value="가로 3줄">가로 3줄</option><option value="세로 3줄">세로 3줄</option></select>
@@ -406,7 +412,7 @@
                 </div>
 
                 <div id="blessSection">
-                    <div class="form-section-title" id="blessSectionTitle">성좌의 가호</div>
+                    <div class="form-section-title" id="blessSectionTitle">패시브</div>
                     <div class="form-group"><label id="blessNameLabel">가호 이름</label><input type="text" id="inputConstBlessName"></div>
                     <div class="form-group"><label>공격 범위</label>
                         <select id="inputConstBlessRange"><option value="단일">단일</option><option value="주위 8칸">주위 8칸 (3x3)</option><option value="십자">십자</option><option value="전체">전체</option><option value="가로 1줄">가로 1줄</option><option value="세로 1줄">세로 1줄</option><option value="가로세로 1줄씩">가로세로 1줄씩</option><option value="대각선">대각선</option><option value="가로 3줄">가로 3줄</option><option value="세로 3줄">세로 3줄</option></select>
@@ -474,7 +480,7 @@
                         <option value="reduce_damage">피해 감소 (받는 피해 % 감소, 50 입력 시 반감)</option>
                         <option value="doom">즉사 (지속시간 종료 시 최대 체력 비례 % 피해)</option>
                         <option value="silence">침묵 (기본 스킬 장전 및 사용 불가)</option>
-                        <option value="seal">봉인 (특수/성좌 스킬 장전 및 사용 불가)</option>
+                        <option value="seal">봉인 (특수/특별 스킬 장전 및 사용 불가)</option>
                         <option value="unhealable">치유 불가 (모든 체력 회복 무시)</option>
                         <option value="immune">면역 (새로운 상태이상 부여 무시)</option>
                         <option value="immortal">불사 (체력이 0이 될 때 1로 생존)</option>
@@ -598,21 +604,21 @@
             <div class="form-group">
                 <label>조작 대상 선택</label>
                 <select id="manualControlType" onchange="toggleManualControlUI()" style="width: 100%;">
-                    <option value="resonance">공명도</option>
+                    <option value="spirit">영력</option>
                     <option value="hp">체력</option>
                 </select>
             </div>
     
             <div id="manualResonanceSection">
-                <div class="form-section-title">성좌 공명도 증감</div>
+                <div class="form-section-title">영력 증감</div>
                 <div class="form-group">
-                    <select id="resonanceTargetSelect" style="width: 100%;" onfocus="populateResonanceSelect()">
+                    <select id="resonanceTargetSelect" style="width: 100%;" onfocus="populateSpiritSelect()">
                         <option value="">캐릭터 선택</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 5px; margin-top: 5px;">
                     <input type="number" id="resonanceValue" placeholder="수치" style="flex: 1;">
-                    <button onclick="applyResonanceChange()" style="padding: 8px 16px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">증감 적용</button>
+                    <button onclick="applySpiritChange()" style="padding: 8px 16px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">증감 적용</button>
                 </div>
             </div>
     
@@ -671,6 +677,9 @@
     <script>
         const gradeMap = { "L": 250, "SS": 180, "S": 120, "A": 80, "B": 55, "C": 35, "D": 20, "E": 10, "F": 5 };
         const hpMap = { "SS": 1800, "S": 1200, "A": 800, "B": 550, "C": 350, "D": 200, "E": 100, "F": 50 };
+        const spiritMap = { "L": 300, "SS": 200, "S": 150, "A": 100, "B": 70, "C": 50, "D": 30, "E": 15, "F": 5 };
+        const SPIRIT_BASE_COST = 10; // 스킬 발동 시 기본 영력 소모량
+        const SPIRIT_BOOST_PERCENT_PER_POINT = 1; // 추가 소모 영력 1당 데미지/치유 증폭 %
         const specialGradeMap = { "L": 120, "SS": 100, "S": 85, "A": 70, "B": 55, "C": 40, "D": 25, "E": 10, "F": 5 };
         const rangeScales = { "단일": 1.5, "십자": 1.0, "주위 8칸": 0.8, "가로 1줄": 0.7, "세로 1줄": 0.7, "가로세로 1줄씩": 0.5, "대각선": 0.5, "가로 3줄": 0.4, "세로 3줄": 0.4, "전체": 0.15 };
         
@@ -735,7 +744,7 @@
             const weatherSelect = document.getElementById('weatherSelect');
 
             const rawData = {
-                entities: typeof entities !== 'undefined' ? entities.map(e => ({...e, resonance: e.resonance || 0})) : [],
+                entities: typeof entities !== 'undefined' ? entities : [],
                 globalStatusList: typeof globalStatusList !== 'undefined' ? globalStatusList : [],
                 itemCatalog: typeof itemCatalog !== 'undefined' ? itemCatalog : [],
                 equipCatalog: typeof equipCatalog !== 'undefined' ? equipCatalog : [],
@@ -1191,16 +1200,6 @@
             let actualHpLoss = Math.min(target.stats.currentHp, remainingDamage);
             target.stats.currentHp -= actualHpLoss;
 
-            // 🌟 공명도 상승 로직 추가 (최대 체력 대비 깎인 체력 비율에 비례)
-            // 예: 최대 체력의 10% 데미지를 입으면 공명도 +5 상승 (비율은 조절 가능)
-            if (!target.resonance) target.resonance = 0;
-            let resonanceGain = Math.floor((actualHpLoss / target.stats.maxHp) * 50); 
-            // 최소 1은 오르도록 설정
-            if (resonanceGain < 1) resonanceGain = 1;
-            
-            target.resonance += resonanceGain;
-            if (target.resonance > 100) target.resonance = 100; // 최대 100까지만
-
             // 3. 사망 및 불사 처리
             if (target.stats.currentHp <= 0) {
                 if (target.statusEffects && target.statusEffects.some(s => s.type === 'immortal')) {
@@ -1457,7 +1456,7 @@
                 return;
             }
             if (isSpecialSkill && owner.statusEffects && owner.statusEffects.some(s => s.type === 'seal')) {
-                alert("봉인 상태입니다. 특수/성좌 스킬을 장전할 수 없습니다.");
+                alert("봉인 상태입니다. 특수 스킬을 장전할 수 없습니다.");
                 return;
             }
 
@@ -1547,7 +1546,7 @@
             else {
                 aliveEntities.forEach(ent => {
                     const div = document.createElement('div'); div.className = 'turn-setup-item';
-                    div.innerHTML = `<span>${ent.type === '사도' ? '🟦' : '🟥'} ${ent.name}</span>`;
+                    div.innerHTML = `<span>${ent.type === '캐릭터' ? '🟦' : '🟥'} ${ent.name}</span>`;
                     
                     // 🌟 관전자에게는 클릭 이벤트와 '추가' 텍스트를 부여하지 않음
                     if (isUserAdmin) {
@@ -1596,6 +1595,15 @@
             const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
             if (aliveEntities.length === 0) return alert("전투에 참여할 생존 개체가 없습니다.");
             if (turnOrder.length === 0) { aliveEntities.sort((a, b) => { return getEffectiveStat(b, 'agi') - getEffectiveStat(a, 'agi'); }); turnOrder = aliveEntities.map(e => e.id); }
+
+            // 🌟 전투 시작 시 참여 개체 전원의 영력을 최대치로 충전 (이후엔 소모만 되고 자동 회복되지 않음)
+            turnOrder.forEach(id => {
+                const ent = entities.find(e => e.id === id);
+                if (ent && ent.stats) {
+                    ent.stats.currentSpirit = ent.stats.maxSpirit || 0;
+                }
+            });
+
             globalRound = 1; currentTurnIndex = 0; isBattleActive = true; updateBattleUI(); renderGrid();
             addLog(`<b>[시스템]</b> 전투가 시작되었습니다. (라운드: 1)`, 'log-action');
             playTurnChangeSound();
@@ -1718,11 +1726,6 @@
                 if (nextEntity && nextEntity.stats.currentHp > 0) {
                     if (typeof playTurnChangeSound === 'function') playTurnChangeSound();
                     addLog(`<b>${nextEntity.name}</b>의 턴입니다.`, '');
-                    
-                    if (!nextEntity.resonance) nextEntity.resonance = 0;
-                    let addedResonance = Math.floor(Math.random() * 6) + 25;
-                    nextEntity.resonance += addedResonance;
-                    if (nextEntity.resonance > 100) nextEntity.resonance = 100;
 
                     if (nextEntity.statusEffects && nextEntity.statusEffects.length > 0) {
                         let logMsgs = [];
@@ -2119,7 +2122,7 @@
 
         function clearForm() { 
             document.getElementById('inputName').value = ''; 
-            document.getElementById('inputType').value = '사도'; 
+            document.getElementById('inputType').value = '캐릭터'; 
             document.getElementById('inputTokenColor').value = '#3182ce'; 
             document.getElementById('inputHpGrade').value = 'F'; 
             document.getElementById('inputHpManual').value = '3000'; 
@@ -2200,9 +2203,9 @@
                 { id: 'constSkillSection', prop: 'style', val: !isEnemy ? 'block' : 'none' },
                 { id: 'charSkillSectionTitle', prop: 'innerText', val: isEnemy ? '에너미 스킬' : '캐릭터 스킬' },
                 { id: 'charSkillNameLabel', prop: 'innerText', val: isEnemy ? '에너미 스킬 이름' : '스킬 이름' },
-                { id: 'blessSectionTitle', prop: 'innerText', val: !isEnemy ? '성좌의 가호' : '패시브' },
-                { id: 'blessNameLabel', prop: 'innerText', val: !isEnemy ? '가호 이름' : '패시브 이름' },
-                { id: 'blessDescLabel', prop: 'innerText', val: !isEnemy ? '가호 설명' : '패시브 설명' }
+                { id: 'blessSectionTitle', prop: 'innerText', val: !isEnemy ? '패시브' : '패시브' },
+                { id: 'blessNameLabel', prop: 'innerText', val: !isEnemy ? '패시브 이름' : '패시브 이름' },
+                { id: 'blessDescLabel', prop: 'innerText', val: !isEnemy ? '패시브 설명' : '패시브 설명' }
             ];
 
             mappings.forEach(m => {
@@ -2234,8 +2237,9 @@
             editingId = id; document.getElementById('modalTitle').innerText = '정보 수정';
             document.getElementById('inputName').value = entity.name; document.getElementById('inputType').value = entity.type; toggleType(); 
             document.getElementById('inputTokenColor').value = entity.tokenColor || '#3182ce';
-            if (entity.type === '사도') { document.getElementById('inputHpGrade').value = entity.stats.hpGrade || 'F'; } else { document.getElementById('inputHpManual').value = entity.stats.maxHp; }
+            if (entity.type === '캐릭터') { document.getElementById('inputHpGrade').value = entity.stats.hpGrade || 'F'; } else { document.getElementById('inputHpManual').value = entity.stats.maxHp; }
             document.getElementById('gradeStr').value = entity.stats.grades.str; document.getElementById('gradeAgi').value = entity.stats.grades.agi; document.getElementById('gradeInt').value = entity.stats.grades.int; document.getElementById('gradeMen').value = entity.stats.grades.men; document.getElementById('gradeLuk').value = entity.stats.grades.luk; document.getElementById('gradeSpecial').value = entity.stats.grades.special;
+            if (document.getElementById('gradeSpirit')) document.getElementById('gradeSpirit').value = entity.stats.grades.spirit || 'F';
             document.getElementById('inputSpecialName').value = entity.stats.specialName === "특수" ? "" : entity.stats.specialName;
             document.getElementById('inputAbilityName').value = entity.skills.ability.name === "-" ? "" : entity.skills.ability.name; document.getElementById('inputAbilityDesc').value = entity.skills.ability.desc === "-" ? "" : entity.skills.ability.desc;
 
@@ -2364,7 +2368,7 @@
                 btn.style.textAlign = 'left';
                 btn.style.padding = '10px';
                 btn.style.marginBottom = '6px';
-                btn.innerText = `${ent.type === '사도' ? '🟦' : '🟥'} ${ent.name}`;
+                btn.innerText = `${ent.type === '캐릭터' ? '🟦' : '🟥'} ${ent.name}`;
                 btn.onclick = () => {
                     processItemEffects(ent, item.effect, owner.name);
                     owner.inventory[itemIndex].quantity -= 1;
@@ -2388,7 +2392,7 @@
             const enemyPanel = document.getElementById('enemyPanel'); 
             const apostlePanel = document.getElementById('apostlePanel');
             if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">에너미</h3><div class="side-skill-indicator enemy-indicator" id="enemySkillDisplay">장전된 스킬 없음</div>`;
-            if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">사도</h3><div class="side-skill-indicator apostle-indicator" id="apostleSkillDisplay">장전된 스킬 없음</div>`;
+            if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">캐릭터</h3><div class="side-skill-indicator apostle-indicator" id="apostleSkillDisplay">장전된 스킬 없음</div>`;
 
             if (typeof entities === 'undefined' || !Array.isArray(entities)) return;
 
@@ -2429,7 +2433,7 @@
                             cDesc = "🔒 비공개된 스킬입니다.";
                             cEff = "🔒 비공개된 효과입니다.";
                         }
-                        constSkillHtml = `<div class="skill-box" onclick="selectSkill('constSkill', '${r}', '${entity.id}', '공격')"><span class="skill-title"><span>[성좌 스킬] ${entity.skills.constSkill.name}</span> <span class="range-badge">${r}</span></span><span class="skill-desc">${cDesc}</span><span class="skill-effect">▶ 효과: ${cEff}</span></div>`; 
+                        constSkillHtml = `<div class="skill-box" onclick="selectSkill('constSkill', '${r}', '${entity.id}', '공격')"><span class="skill-title"><span>[특수 스킬] ${entity.skills.constSkill.name}</span> <span class="range-badge">${r}</span></span><span class="skill-desc">${cDesc}</span><span class="skill-effect">▶ 효과: ${cEff}</span></div>`; 
                     }
 
                     let extraSkillsHtml = '';
@@ -2444,7 +2448,7 @@
                     }
 
                     const charSkillTitle = isEnemy ? '[에너미 스킬]' : '[캐릭터 스킬]'; 
-                    const blessTitle = isEnemy ? '[패시브]' : '[성좌의 가호]';
+                    const blessTitle = isEnemy ? '[패시브]' : '[패시브]';
                     const charRange = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.range || '단일' : '단일'; 
                     const blessRange = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.range || '단일' : '단일';
 
@@ -2466,20 +2470,20 @@
                         hpDisplay += ` <span style="color:#3182ce; font-weight:bold; font-size:12px; margin-left:6px;">(+${totalShield})</span>`;
                     }
 
-                    const resonanceValue = entity.resonance || 0;
-                    const resonanceWidth = Math.min(100, Math.max(0, resonanceValue));
+                    const maxSpiritValue = (entity.stats && entity.stats.maxSpirit) || 0;
+                    const currentSpiritValue = (entity.stats && entity.stats.currentSpirit !== undefined && entity.stats.currentSpirit !== null) ? entity.stats.currentSpirit : maxSpiritValue;
+                    const spiritWidth = maxSpiritValue > 0 ? Math.min(100, Math.max(0, (currentSpiritValue / maxSpiritValue) * 100)) : 0;
                     const resonanceHtml = `
                         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
-                            <div style="font-size: 11px; color: #805ad5; white-space: nowrap;">공명도 ${resonanceValue} / 100
-                                <button onclick="adjustResonance('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소">➖</button>
-                                <button onclick="adjustResonance('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가">➕</button>
-                                <button onclick="resetResonance('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="공명도 초기화">🔄</button>
+                            <div style="font-size: 11px; color: #805ad5; white-space: nowrap;">영력 ${currentSpiritValue} / ${maxSpiritValue}
+                                <button onclick="adjustSpirit('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소">➖</button>
+                                <button onclick="adjustSpirit('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가">➕</button>
+                                <button onclick="resetSpirit('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="영력 최대치로 충전">🔄</button>
                             </div>
                             <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                                <div style="width: ${resonanceWidth}%; height: 100%; background: linear-gradient(90deg, #b794f4, #805ad5); transition: width 0.3s ease;"></div>
+                                <div style="width: ${spiritWidth}%; height: 100%; background: linear-gradient(90deg, #b794f4, #805ad5); transition: width 0.3s ease;"></div>
                             </div>
                         </div>
-                        ${resonanceValue >= 100 ? '<div style="font-size:11px; color:#d53f8c; margin-top:4px; text-align:center;">✨ 성좌 스킬 활성화 가능!</div>' : ''}
                     `;
 
                     let itemButtons = (entity.inventory || []).map((item, idx) =>
@@ -2651,14 +2655,15 @@
             try { if (typeof renderTerrains === 'function') renderTerrains(); } catch(e){}
         }
 
-        function adjustResonance(entityId, amount) {
+        function adjustSpirit(entityId, amount) {
             const entity = entities.find(e => e.id === entityId);
-            if (entity) {
-                if (!entity.resonance) entity.resonance = 0;
-                entity.resonance += amount;
+            if (entity && entity.stats) {
+                const maxSpirit = entity.stats.maxSpirit || 0;
+                if (entity.stats.currentSpirit === undefined || entity.stats.currentSpirit === null) entity.stats.currentSpirit = maxSpirit;
+                entity.stats.currentSpirit += amount;
                 
-                if (entity.resonance > 100) entity.resonance = 100;
-                if (entity.resonance < 0) entity.resonance = 0;
+                if (entity.stats.currentSpirit > maxSpirit) entity.stats.currentSpirit = maxSpirit;
+                if (entity.stats.currentSpirit < 0) entity.stats.currentSpirit = 0;
                 
                 if (typeof renderTokens === 'function') renderTokens();
                 if (typeof renderGrid === 'function') renderGrid();
@@ -2729,7 +2734,7 @@
                 return;
             }
             if (isSpecialSkill && attacker.statusEffects && attacker.statusEffects.some(s => s.type === 'seal')) {
-                alert("시전자가 봉인 상태라서 특수/성좌 스킬이 발동되지 않습니다.");
+                alert("시전자가 봉인 상태라서 특수 스킬이 발동되지 않습니다.");
                 return;
             }
 
@@ -2782,6 +2787,36 @@
                 return;
             }
 
+            // 🌟 영력 소모 및 증폭 처리
+            if (attacker.stats.maxSpirit === undefined) attacker.stats.maxSpirit = 0;
+            if (attacker.stats.currentSpirit === undefined || attacker.stats.currentSpirit === null) attacker.stats.currentSpirit = attacker.stats.maxSpirit;
+
+            if (attacker.stats.currentSpirit < SPIRIT_BASE_COST) {
+                alert(`영력이 부족하여 스킬을 발동할 수 없습니다. (필요: ${SPIRIT_BASE_COST}, 보유: ${attacker.stats.currentSpirit})`);
+                return;
+            }
+
+            const spiritBoostInput = document.getElementById('spiritBoostInput');
+            let extraSpirit = spiritBoostInput ? (parseInt(spiritBoostInput.value, 10) || 0) : 0;
+            if (extraSpirit < 0) extraSpirit = 0;
+
+            const availableExtraSpirit = attacker.stats.currentSpirit - SPIRIT_BASE_COST;
+            if (extraSpirit > availableExtraSpirit) {
+                extraSpirit = availableExtraSpirit;
+                if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [시스템] 보유 영력이 부족하여 추가 소모량이 <b>${extraSpirit}</b>(으)로 조정되었습니다.`, "", true);
+            }
+
+            const totalSpiritCost = SPIRIT_BASE_COST + extraSpirit;
+            attacker.stats.currentSpirit -= totalSpiritCost;
+
+            const boostMultiplier = 1 + (extraSpirit * SPIRIT_BOOST_PERCENT_PER_POINT / 100);
+
+            if (extraSpirit > 0 && typeof addLog === 'function') {
+                addLog(`&nbsp;&nbsp;✨ <b>${attacker.name}</b>이(가) 영력 <b>${totalSpiritCost}</b>을(를) 소모하여 위력을 <b>${Math.round((boostMultiplier - 1) * 100)}%</b> 증폭시켰습니다. (남은 영력: ${attacker.stats.currentSpirit})`, 'log-action', true);
+            }
+
+            if (spiritBoostInput) spiritBoostInput.value = 0;
+
             const isHeal = activeSkill.skillType === '치료';
             const isEtc = activeSkill.skillType === '그 외';
             
@@ -2801,11 +2836,6 @@
                 const subStat = Math.min(strStat, intStat);
                 attackerStat = mainStat + (subStat * 0.3);
             }
-
-            if (!attacker.resonance) attacker.resonance = 0;
-            let addedResonance = Math.floor(Math.random() * 6) + 25; // 25~30 랜덤
-            attacker.resonance += addedResonance;
-            if (attacker.resonance > 100) attacker.resonance = 100;
 
             let equipDmgBonus = 0;
             let equipHpBonus = 0;
@@ -2837,7 +2867,7 @@
                         let baseHeal = Math.floor(attackerStat * gradeMultiplier * 2.5 * scale * rng);
                         let hpPercentHeal = Math.floor(target.stats.maxHp * (10 * scale * rng) / 100);
                         if (isCrit) { baseHeal = Math.floor(baseHeal * 1.7); hpPercentHeal = Math.floor(hpPercentHeal * 1.7); }
-                        const totalHeal = baseHeal + hpPercentHeal;
+                        const totalHeal = Math.floor((baseHeal + hpPercentHeal) * boostMultiplier);
                         
                         let actualHealed = typeof processHeal === 'function' ? processHeal(target, totalHeal) : totalHeal;
                         
@@ -2861,6 +2891,7 @@
                             let damage = Math.floor(baseDamage) + equipDmgBonus;
                             
                             if (isCrit) damage = Math.floor(damage * 1.7);
+                            damage = Math.floor(damage * boostMultiplier);
 
                             const targetStr = getEffectiveStat(target, 'str');
                             const targetMen = getEffectiveStat(target, 'men');
@@ -3046,7 +3077,7 @@
             
             let maxHp = 0; 
             let hpGradeStr = "";
-            if (type === '사도') { 
+            if (type === '캐릭터') { 
                 hpGradeStr = document.getElementById('inputHpGrade').value; 
                 maxHp = (typeof hpMap !== 'undefined' && hpMap[hpGradeStr]) ? hpMap[hpGradeStr] : 1000; 
             } else { 
@@ -3058,6 +3089,10 @@
             let currentX = null; 
             let currentY = null;
             let currentEquipDurability = {};
+
+            const spiritGradeStr = document.getElementById('gradeSpirit') ? document.getElementById('gradeSpirit').value : 'F';
+            const maxSpirit = (typeof spiritMap !== 'undefined' && spiritMap[spiritGradeStr]) ? spiritMap[spiritGradeStr] : 0;
+            let currentSpirit = maxSpirit; // 신규 개체는 영력이 가득 찬 상태로 시작
             
             if (typeof editingId !== 'undefined' && editingId !== null) { 
                 const existing = entities.find(e => e.id === editingId); 
@@ -3067,6 +3102,7 @@
                     currentX = existing.x; 
                     currentY = existing.y; 
                     currentEquipDurability = JSON.parse(JSON.stringify(existing.equipDurability || {}));
+                    currentSpirit = (existing.stats.currentSpirit !== undefined && existing.stats.currentSpirit !== null) ? Math.min(existing.stats.currentSpirit, maxSpirit) : maxSpirit;
                 } 
             }
             
@@ -3109,9 +3145,12 @@
                         int: document.getElementById('gradeInt') ? document.getElementById('gradeInt').value : 'F', 
                         men: document.getElementById('gradeMen') ? document.getElementById('gradeMen').value : 'F', 
                         luk: document.getElementById('gradeLuk') ? document.getElementById('gradeLuk').value : 'F', 
-                        special: document.getElementById('gradeSpecial') ? document.getElementById('gradeSpecial').value : 'F' 
+                        special: document.getElementById('gradeSpecial') ? document.getElementById('gradeSpecial').value : 'F', 
+                        spirit: spiritGradeStr
                     }, 
-                    specialName: document.getElementById('inputSpecialName') ? document.getElementById('inputSpecialName').value || "특수" : "특수" 
+                    specialName: document.getElementById('inputSpecialName') ? document.getElementById('inputSpecialName').value || "특수" : "특수", 
+                    maxSpirit: maxSpirit,
+                    currentSpirit: currentSpirit
                 }, 
                 skills: { 
                     ability: { 
@@ -3196,11 +3235,11 @@
             }
         }
 
-        function resetResonance(entityId) {
+        function resetSpirit(entityId) {
             const entity = entities.find(e => e.id === entityId);
-            if (entity) {
-                entity.resonance = 0;
-                if (typeof addLog === 'function') addLog(`<span style="color:#805ad5;">[공명]</span> ${entity.name}의 공명도가 초기화되었습니다.`, "");
+            if (entity && entity.stats) {
+                entity.stats.currentSpirit = entity.stats.maxSpirit || 0;
+                if (typeof addLog === 'function') addLog(`<span style="color:#805ad5;">[영력]</span> ${entity.name}의 영력이 최대치로 충전되었습니다.`, "");
                 if (typeof renderGrid === 'function') renderGrid();
                 if (typeof syncToFirebase === 'function' && typeof isAdmin !== 'undefined' && isAdmin) syncToFirebase();
             }
@@ -3461,17 +3500,18 @@
             }
         }
 
-        function populateResonanceSelect() {
+        function populateSpiritSelect() {
             const select = document.getElementById('resonanceTargetSelect');
             const currentValue = select.value;
             select.innerHTML = '<option value="">캐릭터 선택</option>';
             
             entities.forEach(ent => {
                 if (ent.stats && ent.stats.currentHp > 0) {
-                    const res = ent.resonance || 0;
+                    const cur = ent.stats.currentSpirit || 0;
+                    const max = ent.stats.maxSpirit || 0;
                     const opt = document.createElement('option');
                     opt.value = ent.id;
-                    opt.innerText = `${ent.name} (현재: ${res})`;
+                    opt.innerText = `${ent.name} (현재: ${cur} / ${max})`;
                     select.appendChild(opt);
                 }
             });
@@ -3481,7 +3521,7 @@
             }
         }
 
-        function applyResonanceChange() {
+        function applySpiritChange() {
             const targetId = document.getElementById('resonanceTargetSelect').value;
             const valStr = document.getElementById('resonanceValue').value;
             
@@ -3491,20 +3531,21 @@
             }
             
             const ent = entities.find(e => e.id === targetId);
-            if (ent) {
-                if (!ent.resonance) ent.resonance = 0;
+            if (ent && ent.stats) {
+                const maxSpirit = ent.stats.maxSpirit || 0;
+                if (ent.stats.currentSpirit === undefined || ent.stats.currentSpirit === null) ent.stats.currentSpirit = maxSpirit;
                 const change = parseInt(valStr, 10);
-                ent.resonance += change;
+                ent.stats.currentSpirit += change;
                 
-                if (ent.resonance > 100) ent.resonance = 100;
-                if (ent.resonance < 0) ent.resonance = 0;
+                if (ent.stats.currentSpirit > maxSpirit) ent.stats.currentSpirit = maxSpirit;
+                if (ent.stats.currentSpirit < 0) ent.stats.currentSpirit = 0;
                 
                 if (typeof addLog === 'function') {
                     const action = change >= 0 ? '증가' : '감소';
-                    addLog(`[시스템] ${ent.name}의 성좌 공명도가 ${Math.abs(change)} ${action}하여 ${ent.resonance}이(가) 되었습니다.`, 'log-action');
+                    addLog(`[시스템] ${ent.name}의 영력이 ${Math.abs(change)} ${action}하여 ${ent.stats.currentSpirit}이(가) 되었습니다.`, 'log-action');
                 }
                 
-                populateResonanceSelect();
+                populateSpiritSelect();
                 document.getElementById('resonanceValue').value = '';
             }
         }
@@ -3589,7 +3630,7 @@
             const modal = document.getElementById('manualControlModal');
             if (modal) {
                 modal.style.display = 'flex';
-                populateResonanceSelect();
+                populateSpiritSelect();
                 toggleManualControlUI();
             }
         }
@@ -3603,7 +3644,7 @@
 
         function toggleManualControlUI() {
             const type = document.getElementById('manualControlType').value;
-            if (type === 'resonance') {
+            if (type === 'spirit') {
                 document.getElementById('manualResonanceSection').style.display = 'block';
                 document.getElementById('manualHpSection').style.display = 'none';
             } else {
