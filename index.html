@@ -3268,7 +3268,7 @@
             const critProb = getEffectiveStat(attacker, 'luk') / 10 + critUpBonus;
 
             const charGrade = (attacker.stats && attacker.stats.charGrade) ? attacker.stats.charGrade : 'F';
-            const gradeMultipliers = { 'S': 1.5, 'A': 1.35, 'B': 1.2, 'C': 1.1, 'D': 1.05, 'E': 1.0, 'F': 1.0 };
+            const gradeMultipliers = { '1': 1.5, '2': 1.35, '3': 1.2, '4': 1.1, '5': 1.05, '6': 1.0, '7': 1.0 };
             const gradeMultiplier = gradeMultipliers[charGrade] || 1.0;
 
             let attackerStat = 0;
