@@ -103,10 +103,6 @@
         .action-btn.edit { color: #3182ce; } .action-btn.status { color: #805ad5; } .action-btn.delete { color: #e53e3e; } 
         .action-btn:hover { background-color: #f7fafc; }
 
-        .item-use-tab { flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background: #f7fafc; color: #718096; cursor: pointer; }
-        .item-use-tab:hover { background: #edf2f7; }
-        .item-use-tab.active { background: #3182ce; color: #ffffff; border-color: #2b6cb0; }
-
         .type-badge { font-size: 11px; padding: 3px 6px; border-radius: 6px; font-weight: 700; }
         .type-badge.apostle { background-color: #ebf8ff; color: #2b6cb0; } 
         .type-badge.enemy { background-color: #fed7d7; color: #c53030; } 
@@ -244,6 +240,17 @@
     </style>
 </head>
 <body>
+    <div id="gmAuthPanel" style="position: fixed; top: 10px; right: 10px; z-index: 3000; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.12); font-size:12px; display:flex; gap:6px; align-items:center; font-family: inherit;">
+        <div id="gmAuthLoggedOut" style="display:flex; gap:4px; align-items:center;">
+            <input type="email" id="gmEmail" placeholder="GM 이메일" autocomplete="username" style="width:120px; padding:5px; font-size:11px; border:1px solid #cbd5e0; border-radius:4px;">
+            <input type="password" id="gmPassword" placeholder="비밀번호" autocomplete="current-password" style="width:90px; padding:5px; font-size:11px; border:1px solid #cbd5e0; border-radius:4px;" onkeydown="if(event.key==='Enter') gmLogin();">
+            <button id="gmLoginBtn" onclick="gmLogin()" style="padding:5px 10px; font-size:11px; background:#4a5568; color:#fff; border:none; border-radius:4px; cursor:pointer;">GM 로그인</button>
+        </div>
+        <div id="gmAuthLoggedIn" style="display:none; align-items:center; gap:8px;">
+            <span style="color:#38a169; font-weight:800;">● GM 모드</span>
+            <button onclick="gmLogout()" style="padding:5px 10px; font-size:11px; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px; cursor:pointer;">로그아웃</button>
+        </div>
+    </div>
 
     <canvas id="rainCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
     <canvas id="snowCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
@@ -338,17 +345,6 @@
         <div class="side-panel" id="apostlePanel"></div>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <div style="font-size:12px; color:#718096; display:flex; align-items:center; gap:6px;">
-            로그 최대 표시
-            <select id="battleLogMaxSelect" onchange="setBattleLogMax()" style="padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0; font-size:12px;">
-                <option value="100">100개</option>
-                <option value="200" selected>200개</option>
-                <option value="500">500개</option>
-            </select>
-        </div>
-        <button onclick="clearBattleLog()" style="padding:4px 10px; font-size:11px;">🗑️ 로그 전체 지우기</button>
-    </div>
     <div class="battle-log-container" id="battleLog"></div>
 
     <div id="turnOrderModal" class="modal">
@@ -578,9 +574,8 @@
                 </div>
                 <div class="form-group"><label>이미지 URL<br><span style="font-size:10px; font-weight:normal; color:#a0aec0;">(선택)</span></label><input type="text" id="inputItemImage" placeholder="https://..."></div>
                 <div class="form-group"><label>효과 키워드</label>
-                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]" oninput="previewItemEffectTags()"></textarea>
+                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]"></textarea>
                 </div>
-                <div id="itemEffectPreview" style="font-size:11px; line-height:1.6; margin:-8px 0 12px 2px;"></div>
                 <button class="success-btn" style="width:100%" onclick="addItemToCatalog()">도감에 아이템 추가</button>
             </div>
             <button onclick="closeItemCatalogModal()" style="width:100%;">닫기</button>
@@ -593,13 +588,6 @@
 
             <div id="itemUseListStep">
                 <p style="font-size:12px; color:#718096; margin-bottom:10px;">사용할 아이템을 선택하세요.</p>
-                <input type="text" id="itemUseSearchInput" placeholder="🔍 아이템 이름 검색" oninput="filterItemUseList()" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:8px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
-                <div id="itemUseCategoryTabs" style="display:flex; gap:6px; margin-bottom:10px;">
-                    <button type="button" class="item-use-tab active" data-cat="all" onclick="setItemUseCategory('all')">전체</button>
-                    <button type="button" class="item-use-tab" data-cat="음식" onclick="setItemUseCategory('음식')">🍖 음식</button>
-                    <button type="button" class="item-use-tab" data-cat="물약" onclick="setItemUseCategory('물약')">🧪 물약</button>
-                    <button type="button" class="item-use-tab" data-cat="일반" onclick="setItemUseCategory('일반')">📦 일반</button>
-                </div>
                 <div id="itemUseCatalogList" style="display:flex; flex-direction:column; gap:6px; max-height:340px; overflow-y:auto;"></div>
                 <button onclick="closeItemUseModal()" style="width:100%; margin-top:15px;">취소</button>
             </div>
@@ -678,7 +666,6 @@
                 <select id="manualControlType" onchange="toggleManualControlUI()" style="width: 100%;">
                     <option value="spirit">영력</option>
                     <option value="hp">체력</option>
-                    <option value="fullnesspotion">포만도 / 중독도</option>
                 </select>
             </div>
     
@@ -717,28 +704,6 @@
                 </div>
             </div>
     
-            <div id="manualFullnessSection" style="display: none;">
-                <div class="form-section-title">필드 포만도 / 중독도 일괄 적용</div>
-                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                    <select id="globalFullnessTarget" style="flex: 1;">
-                        <option value="all">전원</option>
-                        <option value="apostle">캐릭터만</option>
-                        <option value="enemy">에너미만</option>
-                    </select>
-                    <select id="globalFullnessKind" style="flex: 1;">
-                        <option value="fullness">🍖 포만도</option>
-                        <option value="potion">🧪 물약중독도</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <input type="number" id="globalFullnessValue" placeholder="수치" style="width: 100%;">
-                </div>
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="applyGlobalFullness('increase')" style="flex: 1; padding: 8px; background: #dd6b20; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 증가</button>
-                    <button onclick="applyGlobalFullness('decrease')" style="flex: 1; padding: 8px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 감소</button>
-                </div>
-            </div>
-
             <button onclick="closeManualControlModal()" style="width: 100%; margin-top: 20px;">닫기</button>
         </div>
     </div>
@@ -769,6 +734,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <script>
         const gradeMap = { "L": 250, "SS": 180, "S": 120, "A": 80, "B": 55, "C": 35, "D": 20, "E": 10, "F": 5 };
@@ -782,11 +748,6 @@
         const POTION_MAX = 100;
         const POTION_ADDICTION_PENALTY = -20; // 물약중독 시 전체 스탯 감소량
         const POTION_ADDICTION_STATUS_NAME = '물약 중독';
-        const FULLNESS_ROUND_DECAY = 5; // 라운드가 넘어갈 때마다 자동으로 줄어드는 포만도
-        const POTION_ROUND_DECAY = 5; // 라운드가 넘어갈 때마다 자동으로 줄어드는 물약중독도
-
-        // 📜 전투 로그 최대 유지 개수 (너무 많이 쌓이면 브라우저가 느려지는 것을 방지)
-        let battleLogMax = 200;
         const specialGradeMap = { "L": 120, "SS": 100, "S": 85, "A": 70, "B": 55, "C": 40, "D": 25, "E": 10, "F": 5 };
         const rangeScales = { "단일": 1.5, "십자": 1.0, "주위 8칸": 0.8, "가로 1줄": 0.7, "세로 1줄": 0.7, "가로세로 1줄씩": 0.5, "대각선": 0.5, "가로 3줄": 0.4, "세로 3줄": 0.4, "전체": 0.15 };
         
@@ -854,16 +815,110 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
         const battleDataRef = database.ref('battleData');
         const eventsRef = database.ref('battleEvents'); 
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('mode') === 'admin';
-        const viewerJoinTime = Date.now(); 
+        // 🌟 GM 전용 Firebase Auth 계정의 UID.
+        //    Firebase 콘솔 > Authentication > Sign-in method 에서 이메일/비밀번호 로그인을 켠 뒤
+        //    Users 탭에서 GM 계정을 하나 만들고, 그 계정의 UID를 복사해 아래에 붙여넣으세요.
+        const GM_UID = "lsEhfv6ScgcJfkFegvsJo478Xmf2";
 
-        if (!isAdmin) {
+        let isAdmin = false;          // 로그인 확인 전에는 항상 관전자로 취급합니다.
+        let appInitialized = false;
+        const viewerJoinTime = Date.now();
+
+        function onDomReady(fn) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fn, { once: true });
+            } else {
+                fn();
+            }
+        }
+
+        function gmLogin() {
+            const email = document.getElementById('gmEmail').value.trim();
+            const password = document.getElementById('gmPassword').value;
+            if (!email || !password) { alert('이메일과 비밀번호를 입력하세요.'); return; }
+
+            const btn = document.getElementById('gmLoginBtn');
+            if (btn) { btn.disabled = true; btn.textContent = '로그인 중...'; }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => location.reload())
+                .catch((err) => {
+                    alert('로그인 실패: ' + err.message);
+                    if (btn) { btn.disabled = false; btn.textContent = 'GM 로그인'; }
+                });
+        }
+
+        function gmLogout() {
+            auth.signOut().then(() => location.reload());
+        }
+
+        function updateAuthUI() {
+            const loggedOut = document.getElementById('gmAuthLoggedOut');
+            const loggedIn = document.getElementById('gmAuthLoggedIn');
+            if (!loggedOut || !loggedIn) return;
+            loggedOut.style.display = isAdmin ? 'none' : 'flex';
+            loggedIn.style.display = isAdmin ? 'flex' : 'none';
+        }
+
+        // 🌟 관전자 화면에서 허용할 기능 화이트리스트
+        //    (캐릭터 카드 펼치기/접기, 아이템/장비/상태이상 도감 열람만 허용)
+        //    이 목록에 없는 onclick 함수를 호출하는 버튼은 관전자에게 전부 숨김 처리됩니다.
+        const SPECTATOR_ALLOWED_ACTIONS = new Set([
+            'toggleDetails',
+            'openItemCatalogModal', 'closeItemCatalogModal',
+            'equipCatalogModal', 'closeEquipCatalogModal',
+            'openGlobalStatusModal', 'closeGlobalStatusModal'
+        ]);
+
+        function applySpectatorButtonWhitelist() {
+            document.querySelectorAll('button[onclick]').forEach((btn) => {
+                const raw = btn.getAttribute('onclick') || '';
+                const match = raw.trim().match(/^([A-Za-z0-9_]+)\s*\(/);
+                const fnName = match ? match[1] : null;
+                if (!fnName || !SPECTATOR_ALLOWED_ACTIONS.has(fnName)) {
+                    btn.style.setProperty('display', 'none', 'important');
+                }
+            });
+        }
+
+        function setupSpectatorMode() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .grid-container, #battleGrid, .battle-grid { pointer-events: none !important; }
+                .skill-box { pointer-events: none !important; cursor: default !important; }
+                .hp-input { pointer-events: none !important; border: none; background: transparent; }
+                #weatherSelect { pointer-events: none !important; appearance: none; }
+                .card-actions { display: none !important; }
+            `;
+            document.head.appendChild(style);
+
+            // 초기 렌더 버튼 정리 + 이후 동적으로 추가되는 카드/모달까지 계속 감시하여 정리
+            applySpectatorButtonWhitelist();
+            let debounceTimer = null;
+            const observer = new MutationObserver(() => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(applySpectatorButtonWhitelist, 50);
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+
             const manualBtn = document.getElementById('manualControlBtn');
             if (manualBtn) manualBtn.style.display = 'none';
+
+            document.body.addEventListener('click', function unlockAudio() {
+                const bgmAudio = document.getElementById('bgm');
+                if (bgmAudio && bgmAudio.paused) {
+                    bgmAudio.play().catch(e => console.log(e));
+                }
+                document.body.removeEventListener('click', unlockAudio);
+            }, { once: true });
+
+            window.handleTileClick = function(){ return false; };
+            window.selectSkill = function(){ return false; };
+            window.updateHp = function(){ return false; };
         }
 
         function syncToFirebase() {
@@ -955,7 +1010,7 @@
             };
         }
 
-        if (!isAdmin) {
+        function setupViewerSync() {
             battleDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
@@ -1027,60 +1082,35 @@
                     if (ev.func === 'playHitSound' && _origPlayHitSound) _origPlayHitSound.apply(null, ev.args);
                 }
             });
-
-            window.handleTileClick = function(){ return false; };
-            window.selectSkill = function(){ return false; };
-            window.updateHp = function(){ return false; };
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!isAdmin) {
-                const style = document.createElement('style');
-                style.innerHTML = `
-                    .grid-container, #battleGrid, .battle-grid { pointer-events: none !important; }
-                    .skill-box { pointer-events: none !important; cursor: default !important; }
-                    .hp-input { pointer-events: none !important; border: none; background: transparent; }
-                    #weatherSelect { pointer-events: none !important; appearance: none; }
-                    .card-actions { display: none !important; }
-                    
-                    button[onclick*="startBattle"], 
-                    button[onclick*="nextTurn"], 
-                    button[onclick*="endBattle"],
-                    button[onclick*="toggleRain"], 
-                    button[onclick*="toggleDarkMode"], 
-                    button[onclick*="playBgm"],
-                    button[onclick*="add"], 
-                    button[onclick*="Add"], 
-                    button[onclick*="save"], 
-                    button[onclick*="Save"], 
-                    button[onclick*="edit"], 
-                    button[onclick*="Edit"], 
-                    button[onclick*="delete"], 
-                    button[onclick*="Delete"], 
-                    button[onclick*="remove"], 
-                    button[onclick*="Remove"], 
-                    button[onclick*="clearTokens"],
-                    button[onclick*="exportData"],
-                    button[onclick*="importData"] { display: none !important; }
-                `;
-                document.head.appendChild(style);
+        function initApp() {
+            if (appInitialized) return;   // onAuthStateChanged가 중복 호출되는 경우 대비
+            appInitialized = true;
 
-                document.body.addEventListener('click', function unlockAudio() {
-                    const bgmAudio = document.getElementById('bgm');
-                    if (bgmAudio && bgmAudio.paused) {
-                        bgmAudio.play().catch(e => console.log(e));
+            onDomReady(() => {
+                updateAuthUI();
+
+                if (!isAdmin) {
+                    setupSpectatorMode();
+                    setupViewerSync();
+                } else {
+                    setInterval(syncToFirebase, 300);
+                    document.body.addEventListener('click', () => setTimeout(syncToFirebase, 50));
+
+                    const weatherSelect = document.getElementById('weatherSelect');
+                    if (weatherSelect) {
+                        weatherSelect.addEventListener('change', () => setTimeout(syncToFirebase, 50));
                     }
-                    document.body.removeEventListener('click', unlockAudio);
-                }, { once: true });
-            } else {
-                setInterval(syncToFirebase, 300);
-                document.body.addEventListener('click', () => setTimeout(syncToFirebase, 50));
-                
-                const weatherSelect = document.getElementById('weatherSelect');
-                if(weatherSelect) {
-                    weatherSelect.addEventListener('change', () => setTimeout(syncToFirebase, 50));
                 }
-            }
+            });
+        }
+
+        // 🌟 GM 여부는 URL이 아니라 Firebase 로그인 결과(UID 일치 여부)로만 결정합니다.
+        //    주소에 아무 파라미터를 붙여도 관전자는 조종 권한을 얻을 수 없습니다.
+        auth.onAuthStateChanged((user) => {
+            isAdmin = !!(user && user.uid === GM_UID);
+            initApp();
         });
 
         const _originalRenderGridForSync = typeof renderGrid === 'function' ? renderGrid : function(){};
@@ -1297,11 +1327,6 @@
             entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
             logBox.prepend(entry);
 
-            // 🌟 전투 로그가 무한정 쌓여 브라우저가 느려지는 것을 막기 위해 최근 N개만 유지합니다.
-            while (logBox.children.length > battleLogMax) {
-                logBox.removeChild(logBox.lastChild);
-            }
-
             if (!skipToast) {
                 const temp = document.createElement('div');
                 temp.innerHTML = msg;
@@ -1311,22 +1336,6 @@
                     showToast(plainText);
                 }
             }
-        }
-
-        function setBattleLogMax() {
-            const sel = document.getElementById('battleLogMaxSelect');
-            if (sel) battleLogMax = parseInt(sel.value, 10) || 200;
-            const logBox = document.getElementById('battleLog');
-            if (!logBox) return;
-            while (logBox.children.length > battleLogMax) {
-                logBox.removeChild(logBox.lastChild);
-            }
-        }
-
-        function clearBattleLog() {
-            if (!confirm('전투 로그를 전부 지우시겠습니까?')) return;
-            const logBox = document.getElementById('battleLog');
-            if (logBox) logBox.innerHTML = '';
         }
 
         function processDamage(target, rawDamage) {
@@ -1903,15 +1912,6 @@
                     
                     let weather = document.getElementById('weatherSelect').value;
                     const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
-
-                    // 🍖🧪 라운드가 넘어갈 때마다 포만도/물약중독도가 자연스럽게 조금씩 줄어듭니다.
-                    if (FULLNESS_ROUND_DECAY > 0 || POTION_ROUND_DECAY > 0) {
-                        aliveEntities.forEach(e => {
-                            if (FULLNESS_ROUND_DECAY > 0) adjustFullness(e.id, -FULLNESS_ROUND_DECAY);
-                            if (POTION_ROUND_DECAY > 0) adjustPotion(e.id, -POTION_ROUND_DECAY);
-                        });
-                        addLog(`<b>[시스템]</b> 라운드 경과로 필드의 포만도 -${FULLNESS_ROUND_DECAY} / 물약중독도 -${POTION_ROUND_DECAY}가 적용되었습니다.`, 'log-action', true);
-                    }
 
                     if (weather === '폭염') {
                         addLog(`<b>[날씨: 폭염]</b> 찜통더위로 인해 모든 개체가 최대 체력의 5% 화상 피해를 입습니다!`, 'log-hit');
@@ -2517,60 +2517,6 @@
             renderGrid();
         }
 
-        // 🌟 아이템 저장 전, 효과 키워드가 실제로 processItemEffects에서 인식되는지 미리 보여줍니다.
-        // processItemEffects와 동일한 정규식을 사용해야 실제 적용 결과와 미리보기가 어긋나지 않습니다.
-        function previewItemEffectTags() {
-            const el = document.getElementById('inputItemEffect');
-            const previewEl = document.getElementById('itemEffectPreview');
-            if (!el || !previewEl) return;
-            const str = el.value || '';
-
-            if (!str.trim()) {
-                previewEl.innerHTML = '';
-                return;
-            }
-
-            const healMatch = str.match(/\[회복\s*:\s*(\d+)\]/);
-            const clearMatch = str.match(/\[해제\s*:\s*([^\]]+)\]/);
-            const applyMatch = str.match(/\[부여\s*:\s*([^\]:]+)\s*:\s*(\d+)\]/);
-            const statMatch = str.match(/\[스탯\s*:\s*([^\]:]+)\s*:\s*(-?\d+)\]/);
-
-            const lines = [];
-            const recognizedRaw = [];
-
-            if (healMatch) {
-                recognizedRaw.push(healMatch[0]);
-                lines.push(`<div style="color:#38a169;">✅ 체력 ${healMatch[1]} 회복</div>`);
-            }
-            if (clearMatch) {
-                recognizedRaw.push(clearMatch[0]);
-                lines.push(`<div style="color:#38a169;">✅ [${clearMatch[1].trim()}] 상태 해제</div>`);
-            }
-            if (applyMatch) {
-                recognizedRaw.push(applyMatch[0]);
-                const name = applyMatch[1].trim();
-                const dur = applyMatch[2];
-                const known = typeof globalStatusList !== 'undefined' && globalStatusList.some(s => s.name === name);
-                if (known) {
-                    lines.push(`<div style="color:#38a169;">✅ [${name}] ${dur}턴 부여 (상태이상 도감에 등록됨)</div>`);
-                } else {
-                    lines.push(`<div style="color:#dd6b20;">⚠️ [${name}] ${dur}턴 부여 — 상태이상 도감에 없어 이름/아이콘만 붙고 실제 스탯 변화는 없습니다.</div>`);
-                }
-            }
-            if (statMatch) {
-                recognizedRaw.push(statMatch[0]);
-                lines.push(`<div style="color:#38a169;">✅ 스탯 [${statMatch[1].trim()}] ${statMatch[2]}</div>`);
-            }
-
-            // 인식된 태그 외에 남아있는 대괄호 조각은 오타이거나 형식이 어긋난 것으로 간주합니다.
-            const allTags = str.match(/\[[^\]]*\]/g) || [];
-            allTags.filter(t => !recognizedRaw.includes(t)).forEach(t => {
-                lines.push(`<div style="color:#e53e3e;">❌ ${t} — 인식되지 않는 태그입니다. 형식(예: [회복:500])을 확인하세요.</div>`);
-            });
-
-            previewEl.innerHTML = lines.length ? lines.join('') : '<div style="color:#a0aec0;">인식된 효과 태그가 없습니다.</div>';
-        }
-
         function openItemCatalogModal() {
             renderItemCatalog();
             document.getElementById('itemCatalogModal').style.display = 'block';
@@ -2611,7 +2557,6 @@
             document.getElementById('inputItemImage').value = '';
             document.getElementById('inputItemCategory').value = '일반';
             toggleItemFillAmountUI();
-            previewItemEffectTags();
         }
 
         function renderItemCatalog() {
@@ -2634,17 +2579,12 @@
         }
 
         let pendingItemUse = null; // { ownerId, catalogItemId }
-        let itemUseFilterState = { search: '', category: 'all' }; // 아이템 사용 목록 검색어/카테고리 필터 상태
 
         function openItemUseModal(ownerId) {
             const owner = entities.find(e => e.id === ownerId);
             if (!owner) return;
 
             pendingItemUse = { ownerId, catalogItemId: null };
-            itemUseFilterState = { search: '', category: 'all' };
-            const searchInput = document.getElementById('itemUseSearchInput');
-            if (searchInput) searchInput.value = '';
-            document.querySelectorAll('.item-use-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cat === 'all'));
 
             document.getElementById('itemUseTitle').innerText = `아이템 사용 - ${owner.name}`;
             renderItemUseCatalogList(ownerId);
@@ -2652,18 +2592,6 @@
             document.getElementById('itemUseListStep').style.display = 'block';
             document.getElementById('itemUseConfirmStep').style.display = 'none';
             document.getElementById('itemUseModal').style.display = 'block';
-        }
-
-        function setItemUseCategory(cat) {
-            itemUseFilterState.category = cat;
-            document.querySelectorAll('.item-use-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cat === cat));
-            if (pendingItemUse) renderItemUseCatalogList(pendingItemUse.ownerId);
-        }
-
-        function filterItemUseList() {
-            const searchInput = document.getElementById('itemUseSearchInput');
-            itemUseFilterState.search = searchInput ? searchInput.value : '';
-            if (pendingItemUse) renderItemUseCatalogList(pendingItemUse.ownerId);
         }
 
         function renderItemUseCatalogList(ownerId) {
@@ -2676,22 +2604,9 @@
                 return;
             }
 
-            const searchTerm = (itemUseFilterState.search || '').trim().toLowerCase();
-            const catFilter = itemUseFilterState.category || 'all';
-            const filteredItems = itemCatalog.filter(item => {
-                if (catFilter !== 'all' && (item.category || '일반') !== catFilter) return false;
-                if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) return false;
-                return true;
-            });
-
-            if (!filteredItems.length) {
-                list.innerHTML = '<div style="color:#a0aec0; font-size:13px; padding:10px 0;">조건에 맞는 아이템이 없습니다.</div>';
-                return;
-            }
-
             const catIcon = (cat) => cat === '음식' ? '🍖' : (cat === '물약' ? '🧪' : '📦');
             list.innerHTML = '';
-            filteredItems.forEach(item => {
+            itemCatalog.forEach(item => {
                 const category = item.category || '일반';
                 const blocked = category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX;
                 const thumb = item.image ? `<img src="${item.image}" style="width:34px; height:34px; object-fit:cover; border-radius:6px; margin-right:10px; flex-shrink:0;" onerror="this.style.display='none'">` : '';
@@ -4165,55 +4080,13 @@
 
         function toggleManualControlUI() {
             const type = document.getElementById('manualControlType').value;
-            document.getElementById('manualResonanceSection').style.display = type === 'spirit' ? 'block' : 'none';
-            document.getElementById('manualHpSection').style.display = type === 'hp' ? 'block' : 'none';
-            const fpSection = document.getElementById('manualFullnessSection');
-            if (fpSection) fpSection.style.display = type === 'fullnesspotion' ? 'block' : 'none';
-        }
-
-        function applyGlobalFullness(actionType) {
-            const targetGroup = document.getElementById('globalFullnessTarget').value;
-            const kind = document.getElementById('globalFullnessKind').value; // 'fullness' | 'potion'
-            const valStr = document.getElementById('globalFullnessValue').value;
-
-            if (valStr === '') {
-                alert('수치를 입력하세요.');
-                return;
+            if (type === 'spirit') {
+                document.getElementById('manualResonanceSection').style.display = 'block';
+                document.getElementById('manualHpSection').style.display = 'none';
+            } else {
+                document.getElementById('manualResonanceSection').style.display = 'none';
+                document.getElementById('manualHpSection').style.display = 'block';
             }
-
-            const value = parseInt(valStr, 10);
-            if (isNaN(value) || value <= 0) {
-                alert('0보다 큰 숫자를 입력하세요.');
-                return;
-            }
-
-            const targets = entities.filter(e => {
-                if (e.x === undefined || e.x === null || e.stats.currentHp <= 0) return false;
-                if (targetGroup === 'apostle' && e.type === '에너미') return false;
-                if (targetGroup === 'enemy' && e.type !== '에너미') return false;
-                return true;
-            });
-
-            if (targets.length === 0) {
-                alert('필드에 조건을 만족하는 대상이 없습니다.');
-                return;
-            }
-
-            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? '모든 캐릭터' : '모든 에너미');
-            const kindName = kind === 'fullness' ? '포만도' : '물약중독도';
-            const delta = actionType === 'increase' ? value : -value;
-
-            targets.forEach(ent => {
-                if (kind === 'fullness') {
-                    adjustFullness(ent.id, delta);
-                } else {
-                    adjustPotion(ent.id, delta);
-                }
-            });
-
-            addLog(`<b>[시스템]</b> ${groupName}의 ${kindName}이(가) ${value} ${actionType === 'increase' ? '증가' : '감소'}했습니다.`, 'log-action');
-
-            document.getElementById('globalFullnessValue').value = '';
         }
 
     </script>
