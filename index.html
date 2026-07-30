@@ -103,6 +103,10 @@
         .action-btn.edit { color: #3182ce; } .action-btn.status { color: #805ad5; } .action-btn.delete { color: #e53e3e; } 
         .action-btn:hover { background-color: #f7fafc; }
 
+        .item-use-tab { flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background: #f7fafc; color: #718096; cursor: pointer; }
+        .item-use-tab:hover { background: #edf2f7; }
+        .item-use-tab.active { background: #3182ce; color: #ffffff; border-color: #2b6cb0; }
+
         .type-badge { font-size: 11px; padding: 3px 6px; border-radius: 6px; font-weight: 700; }
         .type-badge.apostle { background-color: #ebf8ff; color: #2b6cb0; } 
         .type-badge.enemy { background-color: #fed7d7; color: #c53030; } 
@@ -189,6 +193,10 @@
         .panel-burn {
             box-shadow: inset 0 0 20px rgba(255, 50, 0, 0.6);
             border: 2px solid #ff3200 !important;
+        }
+        .panel-taunt {
+            box-shadow: inset 0 0 20px rgba(237, 137, 54, 0.6);
+            border: 2px dashed #ed8936 !important;
         }
 
         @keyframes healCrossFloat {
@@ -330,6 +338,17 @@
         <div class="side-panel" id="apostlePanel"></div>
     </div>
 
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div style="font-size:12px; color:#718096; display:flex; align-items:center; gap:6px;">
+            로그 최대 표시
+            <select id="battleLogMaxSelect" onchange="setBattleLogMax()" style="padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0; font-size:12px;">
+                <option value="100">100개</option>
+                <option value="200" selected>200개</option>
+                <option value="500">500개</option>
+            </select>
+        </div>
+        <button onclick="clearBattleLog()" style="padding:4px 10px; font-size:11px;">🗑️ 로그 전체 지우기</button>
+    </div>
     <div class="battle-log-container" id="battleLog"></div>
 
     <div id="turnOrderModal" class="modal">
@@ -359,6 +378,32 @@
                 <div id="tokenColorSection" class="form-group"><label>토큰 색상</label><input type="color" id="inputTokenColor" value="#3182ce" style="height: 35px; padding: 2px;"></div>
                 <div id="hpGradeSection" class="form-group"><label>체력 등급</label><select id="inputHpGrade"><option value="SS">SS (1800)</option><option value="S">S (1200)</option><option value="A">A (800)</option><option value="B">B (550)</option><option value="C">C (350)</option><option value="D">D (200)</option><option value="E">E (100)</option><option value="F" selected>F (50)</option></select></div>
                 <div id="hpManualSection" class="form-group" style="display:none;"><label>수동 체력 입력</label><input type="number" id="inputHpManual" value="3000"></div>
+
+                <div class="form-section-title">특성 (패시브)</div>
+                <div class="form-group">
+                    <label>특성 선택</label>
+                    <select id="inputTrait" onchange="updateTraitDescPreview()">
+                        <option value="">특성 없음</option>
+                        <option value="무도가">무도가</option>
+                        <option value="결투가">결투가</option>
+                        <option value="제작자">제작자</option>
+                        <option value="점성술사">점성술사</option>
+                        <option value="묘지기">묘지기</option>
+                        <option value="은둔자">은둔자</option>
+                        <option value="신자">신자</option>
+                        <option value="보살">보살</option>
+                        <option value="치료인">치료인</option>
+                        <option value="큐레이터">큐레이터</option>
+                        <option value="처형인">처형인</option>
+                        <option value="지휘관">지휘관</option>
+                        <option value="행운 토용">행운 토용</option>
+                        <option value="불운 토용">불운 토용</option>
+                        <option value="관세음보살">관세음보살</option>
+                        <option value="예술가">예술가</option>
+                        <option value="닥터">닥터</option>
+                    </select>
+                </div>
+                <div id="traitDescPreview" style="font-size:11px; color:#718096; margin: -8px 0 12px 0; white-space:pre-wrap; word-break:keep-all;"></div>
 
                 <div class="form-section-title">스탯 등급 설정</div>
                 <div class="form-group"><label>근력</label><select class="stat-grade" id="gradeStr"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
@@ -436,16 +481,6 @@
                     <div class="form-group"><label>장신구 2</label><select id="inputEquipAcc2"></select></div>
                     <div class="form-group"><label>유물</label><select id="inputEquipRelic"></select></div>
                 </div>
-
-                <div id="inventorySection">
-                    <div class="form-section-title">소지 아이템</div>
-                    <div class="form-group">
-                        <select id="selectCatalogItem" style="width: 55%;"></select>
-                        <input type="number" id="inputItemQuantity" value="1" min="1" style="width: 15%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; text-align: center;" title="수량">
-                        <button onclick="addTempItem()" type="button" style="padding:4px 8px; font-size:12px;">+ 추가</button>
-                    </div>
-                    <div id="tempInventoryList" style="display:flex; flex-direction:column; gap:4px; max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
-                </div>
             </div>
             <button class="primary-btn" onclick="saveCharacter()" style="width: 100%; margin-top: 25px;">저장하기</button>
             <button onclick="closeModal()" style="width: 100%; margin-top: 8px;">취소</button>
@@ -484,6 +519,8 @@
                         <option value="unhealable">치유 불가 (모든 체력 회복 무시)</option>
                         <option value="immune">면역 (새로운 상태이상 부여 무시)</option>
                         <option value="immortal">불사 (체력이 0이 될 때 1로 생존)</option>
+                        <option value="taunt">도발 (강제 지목 대상 표시 — 카드에 강조 테두리로 표시됨)</option>
+                        <option value="crit_up">치명타 확률 증가 (%)</option>
                     </select>
                 </div>
                 <div class="form-group" id="statusValueGroup" style="display:none;">
@@ -528,9 +565,22 @@
             <div id="itemCatalogAddSection" style="display: none; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
                 <div class="form-group"><label>이름</label><input type="text" id="inputItemName" placeholder="예: 고농축 포션"></div>
                 <div class="form-group"><label>설명</label><input type="text" id="inputItemDesc" placeholder="예: 체력을 500 회복합니다."></div>
-                <div class="form-group"><label>효과 키워드</label>
-                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]"></textarea>
+                <div class="form-group"><label>카테고리</label>
+                    <select id="inputItemCategory" onchange="toggleItemFillAmountUI()">
+                        <option value="일반">일반</option>
+                        <option value="음식">음식 (포만도)</option>
+                        <option value="물약">물약 (중독도)</option>
+                    </select>
                 </div>
+                <div class="form-group" id="itemFillAmountGroup" style="display:none;">
+                    <label id="itemFillAmountLabel">증가량</label>
+                    <input type="number" id="inputItemFillAmount" value="20" min="1" style="width:80px;">
+                </div>
+                <div class="form-group"><label>이미지 URL<br><span style="font-size:10px; font-weight:normal; color:#a0aec0;">(선택)</span></label><input type="text" id="inputItemImage" placeholder="https://..."></div>
+                <div class="form-group"><label>효과 키워드</label>
+                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]" oninput="previewItemEffectTags()"></textarea>
+                </div>
+                <div id="itemEffectPreview" style="font-size:11px; line-height:1.6; margin:-8px 0 12px 2px;"></div>
                 <button class="success-btn" style="width:100%" onclick="addItemToCatalog()">도감에 아이템 추가</button>
             </div>
             <button onclick="closeItemCatalogModal()" style="width:100%;">닫기</button>
@@ -538,12 +588,34 @@
     </div>
 
     <div id="itemUseModal" class="modal">
-        <div class="modal-content" style="width: 400px;">
+        <div class="modal-content" style="width: 420px;">
             <h3 id="itemUseTitle" style="margin-top: 0; color: #1a202c;">아이템 사용</h3>
-            <p id="itemUseDesc" style="font-size:12px; color:#718096; margin-bottom: 15px;"></p>
-            <div class="form-section-title">사용 대상 선택</div>
-            <div id="itemTargetList" style="display:flex; flex-direction:column; gap:4px; max-height: 300px; overflow-y: auto;"></div>
-            <button onclick="closeItemUseModal()" style="width:100%; margin-top:15px;">취소</button>
+
+            <div id="itemUseListStep">
+                <p style="font-size:12px; color:#718096; margin-bottom:10px;">사용할 아이템을 선택하세요.</p>
+                <input type="text" id="itemUseSearchInput" placeholder="🔍 아이템 이름 검색" oninput="filterItemUseList()" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:8px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+                <div id="itemUseCategoryTabs" style="display:flex; gap:6px; margin-bottom:10px;">
+                    <button type="button" class="item-use-tab active" data-cat="all" onclick="setItemUseCategory('all')">전체</button>
+                    <button type="button" class="item-use-tab" data-cat="음식" onclick="setItemUseCategory('음식')">🍖 음식</button>
+                    <button type="button" class="item-use-tab" data-cat="물약" onclick="setItemUseCategory('물약')">🧪 물약</button>
+                    <button type="button" class="item-use-tab" data-cat="일반" onclick="setItemUseCategory('일반')">📦 일반</button>
+                </div>
+                <div id="itemUseCatalogList" style="display:flex; flex-direction:column; gap:6px; max-height:340px; overflow-y:auto;"></div>
+                <button onclick="closeItemUseModal()" style="width:100%; margin-top:15px;">취소</button>
+            </div>
+
+            <div id="itemUseConfirmStep" style="display:none;">
+                <button onclick="backToItemUseList()" style="background:none; border:none; color:#3182ce; cursor:pointer; font-size:12px; padding:0; margin-bottom:10px;">◀ 목록으로</button>
+                <div id="itemUseImageWrap" style="text-align:center; margin-bottom:10px; display:none;"><img id="itemUseImage" style="max-width:120px; max-height:120px; border-radius:8px; border:1px solid #e2e8f0;"></div>
+                <p id="itemUseDesc" style="font-size:12px; color:#718096; margin-bottom: 10px;"></p>
+                <p id="itemUseCategoryInfo" style="font-size:11px; color:#c05621; margin-bottom: 15px;"></p>
+                <div class="form-group" style="justify-content:flex-start; gap:10px;">
+                    <label style="white-space:nowrap;">적용 횟수</label>
+                    <input type="number" id="itemUseQuantity" value="1" min="1" style="width:70px; padding:6px; border:1px solid #e2e8f0; border-radius:6px; text-align:center;">
+                </div>
+                <button class="success-btn" style="width:100%; margin-top:10px;" onclick="confirmUseItem()">사용</button>
+                <button onclick="closeItemUseModal()" style="width:100%; margin-top:8px;">취소</button>
+            </div>
         </div>
     </div>
 
@@ -606,6 +678,7 @@
                 <select id="manualControlType" onchange="toggleManualControlUI()" style="width: 100%;">
                     <option value="spirit">영력</option>
                     <option value="hp">체력</option>
+                    <option value="fullnesspotion">포만도 / 중독도</option>
                 </select>
             </div>
     
@@ -644,6 +717,28 @@
                 </div>
             </div>
     
+            <div id="manualFullnessSection" style="display: none;">
+                <div class="form-section-title">필드 포만도 / 중독도 일괄 적용</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                    <select id="globalFullnessTarget" style="flex: 1;">
+                        <option value="all">전원</option>
+                        <option value="apostle">캐릭터만</option>
+                        <option value="enemy">에너미만</option>
+                    </select>
+                    <select id="globalFullnessKind" style="flex: 1;">
+                        <option value="fullness">🍖 포만도</option>
+                        <option value="potion">🧪 물약중독도</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="globalFullnessValue" placeholder="수치" style="width: 100%;">
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="applyGlobalFullness('increase')" style="flex: 1; padding: 8px; background: #dd6b20; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 증가</button>
+                    <button onclick="applyGlobalFullness('decrease')" style="flex: 1; padding: 8px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 감소</button>
+                </div>
+            </div>
+
             <button onclick="closeManualControlModal()" style="width: 100%; margin-top: 20px;">닫기</button>
         </div>
     </div>
@@ -664,7 +759,8 @@
         </div>
         
         <div id="rewardConfig" style="display: none; font-size: 10px; margin-bottom: 8px; padding: 4px; background: #fffff0; border: 1px solid #fef08a;">
-            보상: <input type="text" id="rewardEffectsInput" value="회복, 신속" style="width: 100%; box-sizing: border-box; margin-top: 2px;">
+            보상 상태이상 (쉼표로 구분): <input type="text" id="rewardEffectsInput" value="회복, 신속" style="width: 100%; box-sizing: border-box; margin-top: 2px;">
+            지속 턴수: <input type="number" id="rewardDurationInput" value="3" min="1" style="width: 40px; margin-top: 4px;">
         </div>
         
         <div id="currentModeDisplay" style="font-size: 11px; color: #3182ce; margin-bottom: 8px;">모드: 없음</div>
@@ -680,6 +776,17 @@
         const spiritMap = { "L": 300, "SS": 200, "S": 150, "A": 100, "B": 70, "C": 50, "D": 30, "E": 15, "F": 5 };
         const SPIRIT_BASE_COST = 10; // 스킬 발동 시 기본 영력 소모량
         const SPIRIT_BOOST_PERCENT_PER_POINT = 1; // 추가 소모 영력 1당 데미지/치유 증폭 %
+
+        // 🍖🧪 포만도 / 물약중독 시스템 설정
+        const FULLNESS_MAX = 100;
+        const POTION_MAX = 100;
+        const POTION_ADDICTION_PENALTY = -20; // 물약중독 시 전체 스탯 감소량
+        const POTION_ADDICTION_STATUS_NAME = '물약 중독';
+        const FULLNESS_ROUND_DECAY = 5; // 라운드가 넘어갈 때마다 자동으로 줄어드는 포만도
+        const POTION_ROUND_DECAY = 5; // 라운드가 넘어갈 때마다 자동으로 줄어드는 물약중독도
+
+        // 📜 전투 로그 최대 유지 개수 (너무 많이 쌓이면 브라우저가 느려지는 것을 방지)
+        let battleLogMax = 200;
         const specialGradeMap = { "L": 120, "SS": 100, "S": 85, "A": 70, "B": 55, "C": 40, "D": 25, "E": 10, "F": 5 };
         const rangeScales = { "단일": 1.5, "십자": 1.0, "주위 8칸": 0.8, "가로 1줄": 0.7, "세로 1줄": 0.7, "가로세로 1줄씩": 0.5, "대각선": 0.5, "가로 3줄": 0.4, "세로 3줄": 0.4, "전체": 0.15 };
         
@@ -687,9 +794,32 @@
 
         let entities = [];
         let globalStatusList = []; 
+
+        // 🌟 특성(패시브) 데이터베이스 — 캐릭터 정보란의 "특성" 선택지 및 설명 표시에 사용
+        // auto: true  → 전투 시작/공격/회복 로직에 실제 수치로 자동 반영됨
+        // auto: false → 상시 적용되는 효과이나 판정이 주관적이거나(예: 신자) 아직 없는 기능(예: 아이템 제작)에
+        //               의존하고 있어, 우선은 카드에 설명만 표시되고 GM이 직접 판정/적용해야 함
+        const TRAIT_DB = {
+            '무도가':   { desc: '전투 시작 시 2턴간 도발 효과를 부여하고 민첩 스탯을 20 증가시킵니다.', auto: true },
+            '결투가':   { desc: '전투 시작 시 본인에게 500의 보호막을 부여합니다.', auto: true },
+            '제작자':   { desc: '아이템을 제작할 때 20%의 확률로 결과물이 2개씩 생성됩니다. (제작 기능 미구현: GM 판정 필요)', auto: false },
+            '점성술사': { desc: '아군 혹은 적군 한 개체를 선택하여 랜덤 버프 혹은 디버프를 부여합니다. (대상 선택 필요: GM이 직접 상태이상 부여)', auto: false },
+            '묘지기':   { desc: '공격 데미지의 20%를 흡혈하여 체력을 회복합니다.', auto: true },
+            '은둔자':   { desc: '전투 시작 시 3턴간 공격력이 300 증가하지만, 주위 24칸 내에 생명이 있을 때마다 공격력 수치가 줄어듭니다.', auto: true },
+            '신자':     { desc: '전투 시작 전 얼마나 간절하게 신에게 비는지에 따라 버프가 부여됩니다. (주관적 판정: GM이 직접 상태이상 부여)', auto: false },
+            '보살':     { desc: '디버프 저항력을 조금 지닙니다. ▶ 정신력 스탯 증가', auto: true },
+            '치료인':   { desc: '타인을 치료할 때 더 좋은 효과를 냅니다. ▶ 지능 스탯 증가', auto: true },
+            '큐레이터': { desc: '물건을 제작할 때 50%의 확률로 결과물이 2개씩 생성됩니다. (제작 기능 미구현: GM 판정 필요)', auto: false },
+            '처형인':   { desc: '공격 데미지의 40%를 흡혈하여 체력을 회복합니다.', auto: true },
+            '지휘관':   { desc: '영력을 소모하여 적군의 턴을 늦추거나 아군의 턴을 조정할 수 있습니다. (턴 순서 수동 조작 모달 이용)', auto: false },
+            '행운 토용': { desc: '순간 모든 영력을 소모하여 3턴간 아군 전체에게 공격력 200증가, 600의 보호막을 부여합니다. (전체 대상: GM이 직접 발동)', auto: false },
+            '불운 토용': { desc: '순간 모든 영력을 소모하여 적군에게 강화 표식을 남기고, 3턴간 공격력 300감소 디버프를 부여합니다. (강화 표식 ▶ 받는 데미지 15% 증가) (전체 대상: GM이 직접 발동)', auto: false },
+            '관세음보살': { desc: '디버프 저항력이 상승하고 20% 확률로 추가피해를 입힙니다.', auto: true },
+            '예술가':   { desc: '정신력이 30 미만으로 내려갔을 때 더 좋은 품질의 생산품을 100% 확률로 제작합니다. (제작 기능 미구현: GM 판정 필요)', auto: false },
+            '닥터':     { desc: '자신을 치료하지 못하게 되는 대신 타인을 치료할 때 더욱 좋은 효과를 냅니다.', auto: true }
+        };
         let itemCatalog = [];
         let equipCatalog = [];
-        let tempInventory = [];
         let editingId = null;
         let activeStatusEntityId = null;
         let editingGlobalStatusId = null;
@@ -845,9 +975,9 @@
                 if (typeof renderGrid === 'function') renderGrid();
                 if (typeof updateBattleUI === 'function') updateBattleUI();
                 if (typeof updateSkillDisplay === 'function') updateSkillDisplay();
-                if (typeof renderStatusCatalog === 'function') renderStatusCatalog();
+                if (typeof renderGlobalStatusList === 'function') renderGlobalStatusList();
                 if (typeof renderItemCatalog === 'function') renderItemCatalog();
-                if (typeof renderEquipCatalog === 'function') renderEquipCatalog();
+                if (typeof refreshEquipCatalogList === 'function') refreshEquipCatalogList();
 
                 const weatherSelect = document.getElementById('weatherSelect');
                 if (weatherSelect && data.currentWeather !== undefined && weatherSelect.value !== data.currentWeather) {
@@ -1000,6 +1130,7 @@
                 } else if (currentTerrainMode === 'reward') {
                     const effStr = document.getElementById('rewardEffectsInput').value;
                     newTerrain.effects = effStr.split(',').map(s => s.trim()).filter(s => s);
+                    newTerrain.duration = parseInt(document.getElementById('rewardDurationInput').value, 10) || 3;
 
                     const occupiedEnt = entities.find(e => e.x === x && e.y === y && e.stats.currentHp > 0);
                     if (occupiedEnt && newTerrain.effects.length > 0) {
@@ -1010,9 +1141,9 @@
                             globalStatus = { id: 'auto_' + Date.now(), icon: '✨', name: randomEffectName, desc: '보상 발판 획득 효과', type: 'none', value: 0 };
                         }
                         
-                        occupiedEnt.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 3 })));
+                        occupiedEnt.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: newTerrain.duration })));
                         if (typeof addLog === 'function') {
-                            addLog(`&nbsp;&nbsp;🎁 <b>[보상 획득]</b> <b>${occupiedEnt.name}</b>이(가) 발밑에 생성된 보상 발판에서 [${randomEffectName}] 효과를 얻었습니다!`, 'log-heal');
+                            addLog(`&nbsp;&nbsp;🎁 <b>[보상 획득]</b> <b>${occupiedEnt.name}</b>이(가) 발밑에 생성된 보상 발판에서 [${randomEffectName}] 효과를 얻었습니다! (${newTerrain.duration}턴)`, 'log-heal');
                         }
                         isConsumed = true;
                     }
@@ -1053,7 +1184,7 @@
             rainReq = requestAnimationFrame(drawRain);
         }
 
-        window.onresize = () => {
+        function resizeWeatherCanvases() {
             const cRain = document.getElementById('rainCanvas');
             const cSnow = document.getElementById('snowCanvas');
             const cStorm = document.getElementById('stormCanvas');
@@ -1063,7 +1194,11 @@
             if (cSnow) { cSnow.width = window.innerWidth; cSnow.height = window.innerHeight; }
             if (cStorm) { cStorm.width = window.innerWidth; cStorm.height = window.innerHeight; }
             if (cDust) { cDust.width = window.innerWidth; cDust.height = window.innerHeight; }
-        };
+        }
+        window.onresize = resizeWeatherCanvases;
+        // 🌟 버그 수정: 창을 한 번도 리사이즈하지 않으면 캔버스가 브라우저 기본 크기(300x150)로
+        // 남아 폭풍/황사 등 날씨 효과가 화면 좌상단에만 작게 그려지는 문제가 있어, 로드 시 1회 즉시 호출.
+        resizeWeatherCanvases();
 
         function initStorm() {
             stormParticles = [];
@@ -1162,6 +1297,11 @@
             entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
             logBox.prepend(entry);
 
+            // 🌟 전투 로그가 무한정 쌓여 브라우저가 느려지는 것을 막기 위해 최근 N개만 유지합니다.
+            while (logBox.children.length > battleLogMax) {
+                logBox.removeChild(logBox.lastChild);
+            }
+
             if (!skipToast) {
                 const temp = document.createElement('div');
                 temp.innerHTML = msg;
@@ -1171,6 +1311,22 @@
                     showToast(plainText);
                 }
             }
+        }
+
+        function setBattleLogMax() {
+            const sel = document.getElementById('battleLogMaxSelect');
+            if (sel) battleLogMax = parseInt(sel.value, 10) || 200;
+            const logBox = document.getElementById('battleLog');
+            if (!logBox) return;
+            while (logBox.children.length > battleLogMax) {
+                logBox.removeChild(logBox.lastChild);
+            }
+        }
+
+        function clearBattleLog() {
+            if (!confirm('전투 로그를 전부 지우시겠습니까?')) return;
+            const logBox = document.getElementById('battleLog');
+            if (logBox) logBox.innerHTML = '';
         }
 
         function processDamage(target, rawDamage) {
@@ -1194,7 +1350,12 @@
             }
             target.statusEffects = target.statusEffects.filter(s => !(s.type === 'shield' && s.value <= 0));
 
-            if (remainingDamage <= 0) return rawDamage;
+            // 🌟 버그 수정: 보호막이 피해를 전부 흡수한 경우 실제로 깎인 체력은 0인데
+            // 이전 코드는 여기서도 rawDamage(원본 피해량)를 그대로 반환하고 있었습니다.
+            // 이 반환값을 그대로 "실제 피해량(actualDamageDealt)"으로 사용해 흡혈/반사/장비
+            // 내구도 소모를 판정하던 다른 코드들이, 보호막으로 완전히 막힌 공격에도
+            // 흡혈·내구도 소모가 발동하는 오류가 있었습니다.
+            if (remainingDamage <= 0) return 0;
 
             // 2. 실제 데미지 적용
             let actualHpLoss = Math.min(target.stats.currentHp, remainingDamage);
@@ -1210,7 +1371,8 @@
                 }
             }
 
-            return rawDamage; 
+            // 🌟 버그 수정: 최대 체력 이상으로 오버킬 되어도 실제로 깎인 체력(actualHpLoss)만 반환
+            return actualHpLoss; 
         }
 
         function processHeal(target, amount) {
@@ -1386,7 +1548,7 @@
             
             if (entity.statusEffects && entity.statusEffects.length > 0) {
                 entity.statusEffects.forEach(eff => {
-                    if (eff.type === 'stat' && eff.targetStat === statName) {
+                    if (eff.type === 'stat' && (eff.targetStat === statName || eff.targetStat === 'all')) {
                         baseValue += parseInt(eff.value, 10) || 0;
                     }
                 });
@@ -1604,9 +1766,83 @@
                 }
             });
 
+            // 🌟 전투 시작 시 특성(패시브) 자동 적용
+            turnOrder.forEach(id => {
+                const ent = entities.find(e => e.id === id);
+                if (ent) applyTraitBattleStartEffects(ent);
+            });
+
             globalRound = 1; currentTurnIndex = 0; isBattleActive = true; updateBattleUI(); renderGrid();
             addLog(`<b>[시스템]</b> 전투가 시작되었습니다. (라운드: 1)`, 'log-action');
             playTurnChangeSound();
+        }
+
+        // 🌟 특성(패시브) 전투 시작 효과 — 기존 상태이상 시스템(stat/shield/vampire)에
+        // 그대로 얹어서 적용하므로, 지속시간이 다하면 자동으로 사라지고
+        // 상태이상 목록/툴팁에도 동일하게 표시됩니다.
+        function applyTraitBattleStartEffects(ent) {
+            if (!ent || !ent.trait || !ent.stats || ent.stats.currentHp <= 0) return;
+            if (!ent.statusEffects) ent.statusEffects = [];
+
+            const mk = (name, type, value, duration, icon, desc, targetStat) => {
+                const obj = { id: 'trait_' + Date.now() + '_' + Math.floor(Math.random() * 10000), icon: icon || '🏅', name: name, desc: desc || '', type: type, value: value, duration: duration };
+                if (targetStat) obj.targetStat = targetStat;
+                return obj;
+            };
+
+            switch (ent.trait) {
+                case '무도가':
+                    ent.statusEffects.push(mk('도발(무도가)', 'taunt', 0, 2, '😤', '무도가 특성으로 전투 시작 시 부여된 도발 효과'));
+                    ent.statusEffects.push(mk('민첩 증가(무도가)', 'stat', 20, 999, '⚡', '무도가 특성으로 인한 민첩 증가', 'agi'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:무도가] <b>${ent.name}</b>에게 도발(2턴)과 민첩 +20 효과가 부여되었습니다.`, 'log-action', true);
+                    break;
+                case '결투가':
+                    ent.statusEffects.push(mk('보호막(결투가)', 'shield', 500, 999, '🛡️', '결투가 특성으로 얻은 보호막'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:결투가] <b>${ent.name}</b>에게 500의 보호막이 부여되었습니다.`, 'log-action', true);
+                    break;
+                case '보살':
+                    ent.statusEffects.push(mk('정신력 증가(보살)', 'stat', 15, 999, '🙏', '보살 특성으로 인한 정신력 증가', 'men'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:보살] <b>${ent.name}</b>의 정신력이 15 증가했습니다.`, 'log-action', true);
+                    break;
+                case '치료인':
+                    ent.statusEffects.push(mk('지능 증가(치료인)', 'stat', 15, 999, '💉', '치료인 특성으로 인한 지능 증가', 'int'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:치료인] <b>${ent.name}</b>의 지능이 15 증가했습니다.`, 'log-action', true);
+                    break;
+                case '관세음보살':
+                    ent.statusEffects.push(mk('정신력 증가(관세음보살)', 'stat', 25, 999, '🙏', '관세음보살 특성으로 인한 정신력 증가 (디버프 저항 상승)', 'men'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:관세음보살] <b>${ent.name}</b>의 정신력이 25 증가했습니다. (공격 시 20% 확률로 추가피해 발동)`, 'log-action', true);
+                    break;
+                case '묘지기':
+                    ent.statusEffects.push(mk('흡혈(묘지기)', 'vampire', 20, 999, '🩸', '묘지기 특성으로 인한 흡혈'));
+                    break;
+                case '처형인':
+                    ent.statusEffects.push(mk('흡혈(처형인)', 'vampire', 40, 999, '🩸', '처형인 특성으로 인한 흡혈'));
+                    break;
+                case '은둔자': {
+                    // 주위 24칸(체비셰프 거리 2, 5x5 범위) 내 생존 개체 수만큼 공격력 증가폭 감소
+                    // ⚠️ 개체 1명당 감소량(-50)은 원문에 수치가 명시되어 있지 않아 임의로 정한 기본값입니다.
+                    //    코드 내 NEARBY_PENALTY_PER_ENTITY 값만 바꾸면 쉽게 조정할 수 있습니다.
+                    const NEARBY_PENALTY_PER_ENTITY = 50;
+                    const nearbyCount = entities.filter(e =>
+                        e.id !== ent.id && e.stats && e.stats.currentHp > 0 &&
+                        e.x !== null && e.x !== undefined && e.y !== null && e.y !== undefined &&
+                        ent.x !== null && ent.x !== undefined &&
+                        Math.max(Math.abs(e.x - ent.x), Math.abs(e.y - ent.y)) <= 2
+                    ).length;
+                    const bonus = Math.max(0, 300 - nearbyCount * NEARBY_PENALTY_PER_ENTITY);
+                    ent.statusEffects.push(mk('공격력 증가(은둔자)', 'stat', bonus, 3, '🌲', `은둔자 특성 (주위 24칸 내 생존 개체 ${nearbyCount}명 감지로 감소)`, 'str'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:은둔자] <b>${ent.name}</b>: 주위 24칸 내 ${nearbyCount}명 감지, 근력 +${bonus} (3턴)`, 'log-action', true);
+                    break;
+                }
+                case '닥터':
+                    addLog(`&nbsp;&nbsp;🏅 [특성:닥터] <b>${ent.name}</b>은(는) 자신을 치료할 수 없는 대신, 타인 치료 효과가 강화됩니다.`, 'log-action', true);
+                    break;
+                default:
+                    // 제작자/점성술사/신자/큐레이터/지휘관/행운 토용/불운 토용/예술가는
+                    // 제작·턴 조작·대상 선택 등 아직 없는 기능에 의존하므로 자동 적용하지 않고
+                    // 카드의 특성 배지 설명으로만 안내합니다.
+                    break;
+            }
         }
 
         function nextTurn() {
@@ -1667,6 +1903,15 @@
                     
                     let weather = document.getElementById('weatherSelect').value;
                     const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
+
+                    // 🍖🧪 라운드가 넘어갈 때마다 포만도/물약중독도가 자연스럽게 조금씩 줄어듭니다.
+                    if (FULLNESS_ROUND_DECAY > 0 || POTION_ROUND_DECAY > 0) {
+                        aliveEntities.forEach(e => {
+                            if (FULLNESS_ROUND_DECAY > 0) adjustFullness(e.id, -FULLNESS_ROUND_DECAY);
+                            if (POTION_ROUND_DECAY > 0) adjustPotion(e.id, -POTION_ROUND_DECAY);
+                        });
+                        addLog(`<b>[시스템]</b> 라운드 경과로 필드의 포만도 -${FULLNESS_ROUND_DECAY} / 물약중독도 -${POTION_ROUND_DECAY}가 적용되었습니다.`, 'log-action', true);
+                    }
 
                     if (weather === '폭염') {
                         addLog(`<b>[날씨: 폭염]</b> 찜통더위로 인해 모든 개체가 최대 체력의 5% 화상 피해를 입습니다!`, 'log-hit');
@@ -1797,19 +2042,6 @@
 
         function checkAliveInTurnOrder() { return turnOrder.some(id => { const e = entities.find(ent => ent.id === id); return e && e.stats.currentHp > 0; }); }
 
-        function nextRound() {
-            if (!isBattleActive) return alert("전투가 시작되지 않았습니다.");
-            globalRound++; currentTurnIndex = 0;
-            while (entities.find(e => e.id === turnOrder[currentTurnIndex])?.stats.currentHp <= 0 && checkAliveInTurnOrder()) { currentTurnIndex++; if (currentTurnIndex >= turnOrder.length) currentTurnIndex = 0; }
-            addLog(`<b>[시스템]</b> 강제로 다음 라운드로 넘어갔습니다. (라운드: ${globalRound})`, 'log-action');
-            const nextEntity = entities.find(e => e.id === turnOrder[currentTurnIndex]); 
-            if(nextEntity) {
-                playTurnChangeSound();
-                addLog(`<b>${nextEntity.name}</b>의 턴입니다.`, '');
-            }
-            updateBattleUI(); renderGrid();
-        }
-        
         function endBattle() {
             if (!isBattleActive) return alert("현재 진행 중인 전투가 없습니다.");
             if (!confirm("전투를 종료하시겠습니까? (상태이상이 초기화됩니다.)")) return;
@@ -1954,7 +2186,7 @@
             if (globalStatusList.length === 0) { container.innerHTML = '<div style="color: #a0aec0; font-size: 13px; padding: 10px 0;">도감에 등록된 상태이상이 없습니다.</div>'; return; } 
             globalStatusList.forEach((status) => { 
                 const tLabel = typeof typeLabels !== 'undefined' && typeLabels[status.type] ? typeLabels[status.type] : status.type;
-                const valStr = (status.type === 'stat') ? `(${status.targetStat} ${status.value})` : ['dot', 'hot', 'vampire', 'reflect', 'vulnerable', 'doom', 'reduce_damage'].includes(status.type) ? `(${status.value}%)` : (status.type === 'shield') ? `(방어량: ${status.value})` : '';
+                const valStr = (status.type === 'stat') ? `(${status.targetStat} ${status.value})` : ['dot', 'hot', 'vampire', 'reflect', 'vulnerable', 'doom', 'reduce_damage', 'crit_up'].includes(status.type) ? `(${status.value}%)` : (status.type === 'shield') ? `(방어량: ${status.value})` : '';
                 const item = document.createElement('div'); item.className = 'status-list-item'; 
                 item.innerHTML = `<div style="flex: 1;"><span style="font-size:16px;">${status.icon}</span> <span style="font-weight:bold;">${status.name}</span> <span class="status-type-badge">${tLabel}${valStr}</span> <div style="font-size:11px; color:#718096; margin-top:3px;">${status.desc}</div></div>
                 <div style="display:flex; gap:4px; align-items:center;">
@@ -2080,46 +2312,6 @@
             list.appendChild(div);
         }
 
-        function updateItemDropdown() {
-            const sel = document.getElementById('selectCatalogItem');
-            sel.innerHTML = '<option value="" disabled selected>도감에서 아이템 선택</option>';
-            itemCatalog.forEach(item => {
-                sel.innerHTML += `<option value="${item.id}">${item.name}</option>`;
-            });
-        }
-
-        function addTempItem() {
-            const sel = document.getElementById('selectCatalogItem');
-            const qtyInput = document.getElementById('inputItemQuantity');
-            const itemId = parseInt(sel.value);
-            const qty = parseInt(qtyInput.value) || 1;
-            if(!itemId) return;
-            
-            const existingItem = tempInventory.find(i => i.id === itemId);
-            if (existingItem) {
-                existingItem.quantity += qty;
-            } else {
-                const item = itemCatalog.find(i => i.id === itemId);
-                if(item) {
-                    let newItem = JSON.parse(JSON.stringify(item));
-                    newItem.quantity = qty;
-                    tempInventory.push(newItem);
-                }
-            }
-            renderTempInventory();
-        }
-
-        function renderTempInventory() {
-            const list = document.getElementById('tempInventoryList');
-            list.innerHTML = '';
-            tempInventory.forEach((item, idx) => {
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#f7fafc; padding:6px 10px; border:1px solid #e2e8f0; border-radius:4px;">
-                    <span style="font-size:12px; font-weight:600;">${item.name} <span style="color:#3182ce;">(x${item.quantity})</span></span>
-                    <button type="button" onclick="tempInventory.splice(${idx}, 1); renderTempInventory();" style="padding:4px 8px; font-size:11px; background:#e53e3e; color:white; border:none; border-radius:4px; cursor:pointer;">삭제</button>
-                </div>`;
-            });
-        }
-
         function clearForm() { 
             document.getElementById('inputName').value = ''; 
             document.getElementById('inputType').value = '캐릭터'; 
@@ -2150,16 +2342,14 @@
             const charGradeEl = document.getElementById('inputCharGrade');
             if (charGradeEl) charGradeEl.value = 'F';
             document.querySelectorAll('.stat-grade').forEach(sel => { sel.value = 'F'; });
+
+            const traitEl = document.getElementById('inputTrait');
+            if (traitEl) traitEl.value = '';
+            try { if (typeof updateTraitDescPreview === 'function') updateTraitDescPreview(); } catch(e){}
             
             const extraSkillsList = document.getElementById('extraSkillsList');
             if(extraSkillsList) extraSkillsList.innerHTML = ''; 
             
-            const itemQty = document.getElementById('inputItemQuantity');
-            if(itemQty) itemQty.value = '1';
-            
-            if (typeof tempInventory !== 'undefined') tempInventory = []; 
-            try { if (typeof renderTempInventory === 'function') renderTempInventory(); } catch(e){}
-            try { if (typeof updateItemDropdown === 'function') updateItemDropdown(); } catch(e){}
             try { if (typeof toggleType === 'function') toggleType(); } catch(e){}
             
             ['inputEquipHead', 'inputEquipBody', 'inputEquipShoes', 'inputEquipAcc1', 'inputEquipAcc2', 'inputEquipRelic'].forEach(id => {
@@ -2228,6 +2418,14 @@
             }
         }
         
+        function updateTraitDescPreview() {
+            const select = document.getElementById('inputTrait');
+            const preview = document.getElementById('traitDescPreview');
+            if (!select || !preview) return;
+            const trait = TRAIT_DB[select.value];
+            preview.innerText = trait ? `▶ ${trait.desc}` : '';
+        }
+
         function toggleDetails(btn) { const detailsDiv = btn.nextElementSibling; if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') { detailsDiv.style.display = 'block'; } else { detailsDiv.style.display = 'none'; } }
         function updateHp(id, newValue) { const entity = entities.find(e => e.id === id); if (entity) { entity.stats.currentHp = parseInt(newValue) || 0; renderGrid(); if(isBattleActive) updateBattleUI(); } }
         function deleteCharacter(id) { if (confirm("정말 이 개체를 삭제하시겠습니까?")) { entities = entities.filter(e => e.id !== id); renderGrid(); } }
@@ -2237,6 +2435,10 @@
             editingId = id; document.getElementById('modalTitle').innerText = '정보 수정';
             document.getElementById('inputName').value = entity.name; document.getElementById('inputType').value = entity.type; toggleType(); 
             document.getElementById('inputTokenColor').value = entity.tokenColor || '#3182ce';
+            if (document.getElementById('inputTrait')) {
+                document.getElementById('inputTrait').value = entity.trait || '';
+                if (typeof updateTraitDescPreview === 'function') updateTraitDescPreview();
+            }
             if (entity.type === '캐릭터') { document.getElementById('inputHpGrade').value = entity.stats.hpGrade || 'F'; } else { document.getElementById('inputHpManual').value = entity.stats.maxHp; }
             document.getElementById('gradeStr').value = entity.stats.grades.str; document.getElementById('gradeAgi').value = entity.stats.grades.agi; document.getElementById('gradeInt').value = entity.stats.grades.int; document.getElementById('gradeMen').value = entity.stats.grades.men; document.getElementById('gradeLuk').value = entity.stats.grades.luk; document.getElementById('gradeSpecial').value = entity.stats.grades.special;
             if (document.getElementById('gradeSpirit')) document.getElementById('gradeSpirit').value = entity.stats.grades.spirit || 'F';
@@ -2250,9 +2452,6 @@
             document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy';
 
             document.getElementById('extraSkillsList').innerHTML = ''; const extraSkills = entity.skills.extraSkills || entity.skills.enemyBasics || []; extraSkills.forEach(bs => { addExtraSkill(bs.name, bs.type, bs.effect, bs.range, bs.targetType || 'enemy'); });
-
-            document.getElementById('inputItemQuantity').value = '1';
-            tempInventory = JSON.parse(JSON.stringify(entity.inventory || [])); renderTempInventory(); updateItemDropdown();
 
             populateEquipDropdowns();
             const slots = entity.equippedSlots || { head: '', body: '', shoes: '', acc1: '', acc2: '', relic: '' };
@@ -2318,6 +2517,60 @@
             renderGrid();
         }
 
+        // 🌟 아이템 저장 전, 효과 키워드가 실제로 processItemEffects에서 인식되는지 미리 보여줍니다.
+        // processItemEffects와 동일한 정규식을 사용해야 실제 적용 결과와 미리보기가 어긋나지 않습니다.
+        function previewItemEffectTags() {
+            const el = document.getElementById('inputItemEffect');
+            const previewEl = document.getElementById('itemEffectPreview');
+            if (!el || !previewEl) return;
+            const str = el.value || '';
+
+            if (!str.trim()) {
+                previewEl.innerHTML = '';
+                return;
+            }
+
+            const healMatch = str.match(/\[회복\s*:\s*(\d+)\]/);
+            const clearMatch = str.match(/\[해제\s*:\s*([^\]]+)\]/);
+            const applyMatch = str.match(/\[부여\s*:\s*([^\]:]+)\s*:\s*(\d+)\]/);
+            const statMatch = str.match(/\[스탯\s*:\s*([^\]:]+)\s*:\s*(-?\d+)\]/);
+
+            const lines = [];
+            const recognizedRaw = [];
+
+            if (healMatch) {
+                recognizedRaw.push(healMatch[0]);
+                lines.push(`<div style="color:#38a169;">✅ 체력 ${healMatch[1]} 회복</div>`);
+            }
+            if (clearMatch) {
+                recognizedRaw.push(clearMatch[0]);
+                lines.push(`<div style="color:#38a169;">✅ [${clearMatch[1].trim()}] 상태 해제</div>`);
+            }
+            if (applyMatch) {
+                recognizedRaw.push(applyMatch[0]);
+                const name = applyMatch[1].trim();
+                const dur = applyMatch[2];
+                const known = typeof globalStatusList !== 'undefined' && globalStatusList.some(s => s.name === name);
+                if (known) {
+                    lines.push(`<div style="color:#38a169;">✅ [${name}] ${dur}턴 부여 (상태이상 도감에 등록됨)</div>`);
+                } else {
+                    lines.push(`<div style="color:#dd6b20;">⚠️ [${name}] ${dur}턴 부여 — 상태이상 도감에 없어 이름/아이콘만 붙고 실제 스탯 변화는 없습니다.</div>`);
+                }
+            }
+            if (statMatch) {
+                recognizedRaw.push(statMatch[0]);
+                lines.push(`<div style="color:#38a169;">✅ 스탯 [${statMatch[1].trim()}] ${statMatch[2]}</div>`);
+            }
+
+            // 인식된 태그 외에 남아있는 대괄호 조각은 오타이거나 형식이 어긋난 것으로 간주합니다.
+            const allTags = str.match(/\[[^\]]*\]/g) || [];
+            allTags.filter(t => !recognizedRaw.includes(t)).forEach(t => {
+                lines.push(`<div style="color:#e53e3e;">❌ ${t} — 인식되지 않는 태그입니다. 형식(예: [회복:500])을 확인하세요.</div>`);
+            });
+
+            previewEl.innerHTML = lines.length ? lines.join('') : '<div style="color:#a0aec0;">인식된 효과 태그가 없습니다.</div>';
+        }
+
         function openItemCatalogModal() {
             renderItemCatalog();
             document.getElementById('itemCatalogModal').style.display = 'block';
@@ -2327,65 +2580,284 @@
             document.getElementById('itemCatalogModal').style.display = 'none';
         }
 
+        function toggleItemFillAmountUI() {
+            const cat = document.getElementById('inputItemCategory').value;
+            const group = document.getElementById('itemFillAmountGroup');
+            const label = document.getElementById('itemFillAmountLabel');
+            if (cat === '음식') {
+                group.style.display = 'flex';
+                label.innerText = '포만도 증가량';
+            } else if (cat === '물약') {
+                group.style.display = 'flex';
+                label.innerText = '중독도 증가량';
+            } else {
+                group.style.display = 'none';
+            }
+        }
+
         function addItemToCatalog() {
             const name = document.getElementById('inputItemName').value;
             const desc = document.getElementById('inputItemDesc').value;
             const effect = document.getElementById('inputItemEffect').value;
+            const category = document.getElementById('inputItemCategory') ? document.getElementById('inputItemCategory').value : '일반';
+            const fillAmount = document.getElementById('inputItemFillAmount') ? (parseInt(document.getElementById('inputItemFillAmount').value, 10) || 20) : 20;
+            const image = document.getElementById('inputItemImage') ? document.getElementById('inputItemImage').value.trim() : '';
             if (!name) return alert("아이템 이름을 입력하세요.");
-            itemCatalog.push({ id: Date.now(), name, desc, effect });
+            itemCatalog.push({ id: Date.now(), name, desc, effect, category, fillAmount, image });
             renderItemCatalog();
             document.getElementById('inputItemName').value = '';
             document.getElementById('inputItemDesc').value = '';
             document.getElementById('inputItemEffect').value = '';
+            document.getElementById('inputItemImage').value = '';
+            document.getElementById('inputItemCategory').value = '일반';
+            toggleItemFillAmountUI();
+            previewItemEffectTags();
         }
 
         function renderItemCatalog() {
             const list = document.getElementById('itemCatalogList');
             list.innerHTML = itemCatalog.length ? '' : '<div style="color:#a0aec0; font-size:13px; padding: 10px 0;">등록된 아이템이 없습니다.</div>';
+            const catBadge = (cat) => {
+                if (cat === '음식') return '<span style="background:#fefcbf; color:#744210; font-size:10px; padding:2px 5px; border-radius:4px; margin-left:4px;">🍖 음식</span>';
+                if (cat === '물약') return '<span style="background:#e9d8fd; color:#553c9a; font-size:10px; padding:2px 5px; border-radius:4px; margin-left:4px;">🧪 물약</span>';
+                return '<span style="background:#edf2f7; color:#4a5568; font-size:10px; padding:2px 5px; border-radius:4px; margin-left:4px;">📦 일반</span>';
+            };
             itemCatalog.forEach((item, idx) => {
                 const div = document.createElement('div');
                 div.className = 'item-list-item';
-                div.innerHTML = `<div><b>${item.name}</b><br><span style="font-size:11px; color:#718096;">${item.desc}</span><br><span style="font-size:10px; color:#c05621;">${item.effect}</span></div>
+                const thumb = item.image ? `<img src="${item.image}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; margin-right:8px; vertical-align:middle;" onerror="this.style.display='none'">` : '';
+                const fillInfo = (item.category === '음식' || item.category === '물약') ? `<br><span style="font-size:10px; color:#805ad5;">증가량: ${item.fillAmount || 0}</span>` : '';
+                div.innerHTML = `<div style="display:flex; align-items:center;">${thumb}<div><b>${item.name}</b>${catBadge(item.category)}<br><span style="font-size:11px; color:#718096;">${item.desc}</span><br><span style="font-size:10px; color:#c05621;">${item.effect}</span>${fillInfo}</div></div>
                 <button onclick="itemCatalog.splice(${idx}, 1); renderItemCatalog();" class="danger-btn" style="padding:4px 8px; font-size:11px;">삭제</button>`;
                 list.appendChild(div);
             });
         }
 
-        function promptUseItem(ownerId, itemIndex) {
+        let pendingItemUse = null; // { ownerId, catalogItemId }
+        let itemUseFilterState = { search: '', category: 'all' }; // 아이템 사용 목록 검색어/카테고리 필터 상태
+
+        function openItemUseModal(ownerId) {
             const owner = entities.find(e => e.id === ownerId);
-            const item = owner.inventory[itemIndex];
-            if (!item) return;
-            
-            const targetList = document.getElementById('itemTargetList');
-            targetList.innerHTML = '';
-            document.getElementById('itemUseTitle').innerText = `[${item.name}] 사용`;
-            document.getElementById('itemUseDesc').innerText = item.desc;
+            if (!owner) return;
 
-            entities.filter(e => e.stats.currentHp > 0).forEach(ent => {
-                const btn = document.createElement('button');
-                btn.className = 'action-btn';
-                btn.style.width = '100%';
-                btn.style.textAlign = 'left';
-                btn.style.padding = '10px';
-                btn.style.marginBottom = '6px';
-                btn.innerText = `${ent.type === '캐릭터' ? '🟦' : '🟥'} ${ent.name}`;
-                btn.onclick = () => {
-                    processItemEffects(ent, item.effect, owner.name);
-                    owner.inventory[itemIndex].quantity -= 1;
-                    if (owner.inventory[itemIndex].quantity <= 0) {
-                        owner.inventory.splice(itemIndex, 1);
-                    }
-                    document.getElementById('itemUseModal').style.display = 'none';
-                    renderGrid();
-                };
-                targetList.appendChild(btn);
-            });
+            pendingItemUse = { ownerId, catalogItemId: null };
+            itemUseFilterState = { search: '', category: 'all' };
+            const searchInput = document.getElementById('itemUseSearchInput');
+            if (searchInput) searchInput.value = '';
+            document.querySelectorAll('.item-use-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cat === 'all'));
 
+            document.getElementById('itemUseTitle').innerText = `아이템 사용 - ${owner.name}`;
+            renderItemUseCatalogList(ownerId);
+
+            document.getElementById('itemUseListStep').style.display = 'block';
+            document.getElementById('itemUseConfirmStep').style.display = 'none';
             document.getElementById('itemUseModal').style.display = 'block';
         }
 
+        function setItemUseCategory(cat) {
+            itemUseFilterState.category = cat;
+            document.querySelectorAll('.item-use-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cat === cat));
+            if (pendingItemUse) renderItemUseCatalogList(pendingItemUse.ownerId);
+        }
+
+        function filterItemUseList() {
+            const searchInput = document.getElementById('itemUseSearchInput');
+            itemUseFilterState.search = searchInput ? searchInput.value : '';
+            if (pendingItemUse) renderItemUseCatalogList(pendingItemUse.ownerId);
+        }
+
+        function renderItemUseCatalogList(ownerId) {
+            const owner = entities.find(e => e.id === ownerId);
+            const list = document.getElementById('itemUseCatalogList');
+            if (!list) return;
+
+            if (!itemCatalog.length) {
+                list.innerHTML = '<div style="color:#a0aec0; font-size:13px; padding:10px 0;">등록된 아이템이 없습니다. 먼저 [아이템 도감]에서 아이템을 추가하세요.</div>';
+                return;
+            }
+
+            const searchTerm = (itemUseFilterState.search || '').trim().toLowerCase();
+            const catFilter = itemUseFilterState.category || 'all';
+            const filteredItems = itemCatalog.filter(item => {
+                if (catFilter !== 'all' && (item.category || '일반') !== catFilter) return false;
+                if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) return false;
+                return true;
+            });
+
+            if (!filteredItems.length) {
+                list.innerHTML = '<div style="color:#a0aec0; font-size:13px; padding:10px 0;">조건에 맞는 아이템이 없습니다.</div>';
+                return;
+            }
+
+            const catIcon = (cat) => cat === '음식' ? '🍖' : (cat === '물약' ? '🧪' : '📦');
+            list.innerHTML = '';
+            filteredItems.forEach(item => {
+                const category = item.category || '일반';
+                const blocked = category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX;
+                const thumb = item.image ? `<img src="${item.image}" style="width:34px; height:34px; object-fit:cover; border-radius:6px; margin-right:10px; flex-shrink:0;" onerror="this.style.display='none'">` : '';
+
+                const div = document.createElement('div');
+                div.style.cssText = `display:flex; align-items:center; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; ${blocked ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;'}`;
+                div.title = blocked ? '포만 상태라 사용할 수 없습니다.' : (item.desc || '');
+                div.innerHTML = `${thumb}<div style="flex:1; min-width:0;"><b style="font-size:13px;">${catIcon(category)} ${item.name}</b><br><span style="font-size:11px; color:#718096;">${item.desc || ''}</span></div>`;
+                if (!blocked) {
+                    div.onclick = () => selectItemForUse(ownerId, item.id);
+                    div.onmouseenter = () => div.style.background = '#f7fafc';
+                    div.onmouseleave = () => div.style.background = '#fff';
+                }
+                list.appendChild(div);
+            });
+        }
+
+        function selectItemForUse(ownerId, catalogItemId) {
+            const owner = entities.find(e => e.id === ownerId);
+            const item = itemCatalog.find(i => i.id === catalogItemId);
+            if (!owner || !item) return;
+
+            const category = item.category || '일반';
+
+            if (category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
+                alert(`${owner.name}은(는) 포만 상태라 더 이상 음식 아이템을 사용할 수 없습니다.`);
+                return;
+            }
+
+            pendingItemUse = { ownerId, catalogItemId };
+
+            document.getElementById('itemUseTitle').innerText = `[${item.name}] 사용 - ${owner.name}`;
+            document.getElementById('itemUseDesc').innerText = item.desc || '';
+
+            const imgWrap = document.getElementById('itemUseImageWrap');
+            const imgEl = document.getElementById('itemUseImage');
+            if (item.image) {
+                imgEl.src = item.image;
+                imgWrap.style.display = 'block';
+            } else {
+                imgWrap.style.display = 'none';
+            }
+
+            const infoEl = document.getElementById('itemUseCategoryInfo');
+            if (category === '음식') {
+                infoEl.innerText = `🍖 포만도 +${item.fillAmount || 0} (현재 ${owner.stats.currentFullness || 0}/${FULLNESS_MAX})`;
+            } else if (category === '물약') {
+                infoEl.innerText = `🧪 물약중독도 +${item.fillAmount || 0} (현재 ${owner.stats.currentPotion || 0}/${POTION_MAX})`;
+            } else {
+                infoEl.innerText = '';
+            }
+
+            document.getElementById('itemUseQuantity').value = 1;
+
+            document.getElementById('itemUseListStep').style.display = 'none';
+            document.getElementById('itemUseConfirmStep').style.display = 'block';
+        }
+
+        function backToItemUseList() {
+            if (!pendingItemUse) return;
+            renderItemUseCatalogList(pendingItemUse.ownerId);
+            document.getElementById('itemUseListStep').style.display = 'block';
+            document.getElementById('itemUseConfirmStep').style.display = 'none';
+        }
+
+        function confirmUseItem() {
+            if (!pendingItemUse || !pendingItemUse.catalogItemId) return;
+            const owner = entities.find(e => e.id === pendingItemUse.ownerId);
+            const item = itemCatalog.find(i => i.id === pendingItemUse.catalogItemId);
+            if (!owner || !item) { closeItemUseModal(); return; }
+
+            let qty = parseInt(document.getElementById('itemUseQuantity').value, 10) || 1;
+            if (qty < 1) qty = 1;
+
+            const category = item.category || '일반';
+
+            if (category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
+                alert(`${owner.name}은(는) 포만 상태라 더 이상 음식 아이템을 사용할 수 없습니다.`);
+                closeItemUseModal();
+                return;
+            }
+
+            let usedCount = 0;
+            for (let i = 0; i < qty; i++) {
+                if (category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) break;
+                processItemEffects(owner, item.effect, owner.name);
+                if (category === '음식') {
+                    adjustFullness(owner.id, item.fillAmount || 0);
+                } else if (category === '물약') {
+                    adjustPotion(owner.id, item.fillAmount || 0);
+                }
+                usedCount++;
+            }
+
+            addLog(`<b>${owner.name}</b>이(가) [${item.name}]을(를) ${usedCount}회 사용했습니다.`, 'log-action');
+
+            closeItemUseModal();
+            renderGrid();
+            if (typeof syncToFirebase === 'function') syncToFirebase();
+        }
+
         function closeItemUseModal() {
+            pendingItemUse = null;
             document.getElementById('itemUseModal').style.display = 'none';
+        }
+
+        function adjustFullness(entityId, amount) {
+            const entity = entities.find(e => e.id === entityId);
+            if (!entity || !entity.stats) return;
+            if (entity.stats.currentFullness === undefined || entity.stats.currentFullness === null) entity.stats.currentFullness = 0;
+            entity.stats.currentFullness += amount;
+            if (entity.stats.currentFullness > FULLNESS_MAX) entity.stats.currentFullness = FULLNESS_MAX;
+            if (entity.stats.currentFullness < 0) entity.stats.currentFullness = 0;
+            if (typeof renderGrid === 'function') renderGrid();
+            if (typeof syncToFirebase === 'function') syncToFirebase();
+        }
+
+        function resetFullness(entityId) {
+            const entity = entities.find(e => e.id === entityId);
+            if (!entity || !entity.stats) return;
+            entity.stats.currentFullness = 0;
+            if (typeof renderGrid === 'function') renderGrid();
+            if (typeof syncToFirebase === 'function') syncToFirebase();
+        }
+
+        function adjustPotion(entityId, amount) {
+            const entity = entities.find(e => e.id === entityId);
+            if (!entity || !entity.stats) return;
+            if (entity.stats.currentPotion === undefined || entity.stats.currentPotion === null) entity.stats.currentPotion = 0;
+            entity.stats.currentPotion += amount;
+            if (entity.stats.currentPotion > POTION_MAX) entity.stats.currentPotion = POTION_MAX;
+            if (entity.stats.currentPotion < 0) entity.stats.currentPotion = 0;
+
+            if (!entity.statusEffects) entity.statusEffects = [];
+            const hasAddiction = entity.statusEffects.some(s => s.name === POTION_ADDICTION_STATUS_NAME);
+
+            if (entity.stats.currentPotion >= POTION_MAX && !hasAddiction) {
+                entity.statusEffects.push({
+                    id: 'addiction_' + Date.now(),
+                    icon: '🧪',
+                    name: POTION_ADDICTION_STATUS_NAME,
+                    desc: '물약을 과다 섭취하여 전체 스탯이 감소했습니다.',
+                    type: 'stat',
+                    targetStat: 'all',
+                    value: POTION_ADDICTION_PENALTY,
+                    duration: 999
+                });
+                addLog(`<b>${entity.name}</b>이(가) 물약을 과다 섭취하여 <b>물약 중독</b> 상태가 되었습니다! (전체 스탯 ${POTION_ADDICTION_PENALTY})`, 'log-hit');
+            } else if (entity.stats.currentPotion < POTION_MAX && hasAddiction) {
+                entity.statusEffects = entity.statusEffects.filter(s => s.name !== POTION_ADDICTION_STATUS_NAME);
+                addLog(`<b>${entity.name}</b>의 물약 중독 상태가 해제되었습니다.`, 'log-heal');
+            }
+
+            if (typeof renderGrid === 'function') renderGrid();
+            if (typeof syncToFirebase === 'function') syncToFirebase();
+        }
+
+        function resetPotion(entityId) {
+            const entity = entities.find(e => e.id === entityId);
+            if (!entity || !entity.stats) return;
+            entity.stats.currentPotion = 0;
+            if (entity.statusEffects) {
+                entity.statusEffects = entity.statusEffects.filter(s => s.name !== POTION_ADDICTION_STATUS_NAME);
+            }
+            if (typeof renderGrid === 'function') renderGrid();
+            if (typeof syncToFirebase === 'function') syncToFirebase();
         }
 
         function renderGrid() {
@@ -2405,6 +2877,7 @@
                         if (entity.statusEffects.some(s => s.type === 'silence' || s.type === 'seal')) cardClass += ' panel-silence';
                         if (entity.statusEffects.some(s => s.name === '동결' || s.type === 'freeze')) cardClass += ' panel-freeze';
                         if (entity.statusEffects.some(s => s.name === '화상' || s.type === 'burn')) cardClass += ' panel-burn';
+                        if (entity.statusEffects.some(s => s.type === 'taunt')) cardClass += ' panel-taunt';
                     }
 
                     const badgeClass = isEnemy ? 'type-badge enemy' : 'type-badge apostle'; 
@@ -2415,6 +2888,13 @@
                     
                     const charGradeStr = (entity.stats && entity.stats.charGrade) ? entity.stats.charGrade : 'F';
                     const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}급</span>` : '';
+
+                    // 🌟 특성(패시브) 배지 — 상시 적용되는 특성을 카드 상단에 표시하고, 마우스를 올리면 설명이 보임
+                    let traitBadge = '';
+                    if (entity.trait && typeof TRAIT_DB !== 'undefined' && TRAIT_DB[entity.trait]) {
+                        const traitDesc = TRAIT_DB[entity.trait].desc.replace(/"/g, '&quot;');
+                        traitBadge = `<span class="type-badge" title="${traitDesc}" style="background:#fefcbf; color:#744210; margin-left:4px; cursor:help;">✨ ${entity.trait}</span>`;
+                    }
 
                     let totalShield = (entity.statusEffects || []).filter(s => s.type === 'shield').reduce((sum, s) => sum + s.value, 0);
                     let barMax = Math.max(entity.stats.maxHp, entity.stats.currentHp + totalShield);
@@ -2486,13 +2966,41 @@
                         </div>
                     `;
 
-                    let itemButtons = (entity.inventory || []).map((item, idx) =>
-                        `<button class="action-btn" style="font-size:10px; margin-right:2px; margin-bottom:2px;" title="${item.desc}&#10;효과: ${item.effect}" onclick="promptUseItem('${entity.id}', ${idx})">💊 ${item.name} (x${item.quantity})</button>`
-                    ).join('');
-                    
+                    const curFullness = (entity.stats && entity.stats.currentFullness) || 0;
+                    const curPotion = (entity.stats && entity.stats.currentPotion) || 0;
+                    const isFull = curFullness >= FULLNESS_MAX;
+                    const isAddicted = curPotion >= POTION_MAX;
+                    const fullnessWidth = Math.min(100, Math.max(0, (curFullness / FULLNESS_MAX) * 100));
+                    const potionWidth = Math.min(100, Math.max(0, (curPotion / POTION_MAX) * 100));
+
+                    const fullnessHtml = `
+                        <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                            <div style="font-size: 11px; color: #c05621; white-space: nowrap;">🍖 ${curFullness} / ${FULLNESS_MAX}
+                                <button onclick="adjustFullness('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소">➖</button>
+                                <button onclick="adjustFullness('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가">➕</button>
+                                <button onclick="resetFullness('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="포만도 초기화">🔄</button>
+                            </div>
+                            <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${fullnessWidth}%; height: 100%; background: linear-gradient(90deg, #f6ad55, #dd6b20); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    const potionHtml = `
+                        <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                            <div style="font-size: 11px; color: ${isAddicted ? '#c53030' : '#805ad5'}; white-space: nowrap;">🧪 ${curPotion} / ${POTION_MAX}${isAddicted ? ' (중독)' : ''}
+                                <button onclick="adjustPotion('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소">➖</button>
+                                <button onclick="adjustPotion('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가">➕</button>
+                                <button onclick="resetPotion('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="중독도 초기화">🔄</button>
+                            </div>
+                            <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${potionWidth}%; height: 100%; background: linear-gradient(90deg, ${isAddicted ? '#fc8181' : '#b794f4'}, ${isAddicted ? '#c53030' : '#805ad5'}); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    `;
+
                     let itemContainerHtml = `<div style="margin-top:10px; border-top:1px solid #edf2f7; padding-top:10px; margin-bottom:10px;">
-                        <div style="font-size:11px; font-weight:bold; margin-bottom:5px; color:#4a5568;">소지 아이템</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:4px;">${itemButtons || '<span style="font-size:10px; color:#a0aec0;">소지한 아이템이 없습니다.</span>'}</div>
+                        <button class="action-btn" style="width:100%; padding:8px; font-size:12px; background:#f7fafc;" onclick="openItemUseModal('${entity.id}')">🎒 아이템 사용</button>
                     </div>`;
 
                     const card = document.createElement('div'); 
@@ -2580,7 +3088,7 @@
                         blessEffect = "🔒 비공개된 효과입니다.";
                     }
 
-                    card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">${entity.type}</span>${gradeBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
+                    card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">${entity.type}</span>${gradeBadge}${traitBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
                     <div class="card-actions">
                         <button class="action-btn" onclick="togglePlacement('${entity.id}')" style="background:#ebf8ff; color:#2b6cb0; border-color:#90cdf4;">📍배치</button>
                         <button class="action-btn" onclick="removeToken('${entity.id}')" style="background:#fff5f5; color:#c53030; border-color:#fed7d7;">🔙회수</button>
@@ -2594,6 +3102,8 @@
                         <div class="shield-bar-fill" style="width: ${shieldPct}%;"></div>
                     </div>
                     ${resonanceHtml}
+                    ${fullnessHtml}
+                    ${potionHtml}
                     ${itemContainerHtml}
                     <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div><div class="skill-box" style="cursor:default;"><span class="skill-title">[이능력] ${abilityName}</span><span class="skill-desc">${abilityDesc}</span></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '공격')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" onclick="selectSkill('constBless', '${blessRange}', '${entity.id}', '그 외')"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge">${blessRange}</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
                     
@@ -2693,14 +3203,15 @@
                     const rewardTerrain = terrains[rewardIndex];
                     if (rewardTerrain.effects && rewardTerrain.effects.length > 0) {
                         const randomEffectName = rewardTerrain.effects[Math.floor(Math.random() * rewardTerrain.effects.length)];
+                        const rewardDuration = rewardTerrain.duration || 3;
                         
                         let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === randomEffectName) : null;
                         if (!globalStatus) {
                             globalStatus = { id: 'auto_' + Date.now(), icon: '✨', name: randomEffectName, desc: '보상 발판 획득 효과', type: 'none', value: 0 };
                         }
                         
-                        ent.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 3 }))); // 기본 지속시간 3턴
-                        if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;🎁 <b>[보상 획득]</b> <b>${ent.name}</b>이(가) 보상 발판을 밟아 [${randomEffectName}] 효과를 얻었습니다!`, 'log-heal');
+                        ent.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: rewardDuration })));
+                        if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;🎁 <b>[보상 획득]</b> <b>${ent.name}</b>이(가) 보상 발판을 밟아 [${randomEffectName}] 효과를 얻었습니다! (${rewardDuration}턴)`, 'log-heal');
                         
                         // 밟은 보상 발판 삭제
                         terrains.splice(rewardIndex, 1);
@@ -2822,7 +3333,12 @@
             
             const strStat = getEffectiveStat(attacker, 'str');
             const intStat = getEffectiveStat(attacker, 'int');
-            const critProb = getEffectiveStat(attacker, 'luk') / 10;
+            // 🌟 신규 상태이상 타입: crit_up (치명타 확률 증가) 반영
+            let critUpBonus = 0;
+            if (attacker.statusEffects) {
+                attacker.statusEffects.forEach(s => { if (s.type === 'crit_up') critUpBonus += (parseInt(s.value, 10) || 0); });
+            }
+            const critProb = getEffectiveStat(attacker, 'luk') / 10 + critUpBonus;
 
             const charGrade = (attacker.stats && attacker.stats.charGrade) ? attacker.stats.charGrade : 'F';
             const gradeMultipliers = { 'S': 1.5, 'A': 1.35, 'B': 1.2, 'C': 1.1, 'D': 1.05, 'E': 1.0, 'F': 1.0 };
@@ -2864,19 +3380,31 @@
                     const rng = 0.85 + Math.random() * 0.3;
 
                     if (isHeal) {
-                        let baseHeal = Math.floor(attackerStat * gradeMultiplier * 2.5 * scale * rng);
-                        let hpPercentHeal = Math.floor(target.stats.maxHp * (10 * scale * rng) / 100);
-                        if (isCrit) { baseHeal = Math.floor(baseHeal * 1.7); hpPercentHeal = Math.floor(hpPercentHeal * 1.7); }
-                        const totalHeal = Math.floor((baseHeal + hpPercentHeal) * boostMultiplier);
-                        
-                        let actualHealed = typeof processHeal === 'function' ? processHeal(target, totalHeal) : totalHeal;
-                        
-                        if (actualHealed > 0) {
-                            if (typeof spawnHealEffect === 'function') spawnHealEffect(target.x, target.y);
-                            if (isCrit) {
-                                if (typeof addLog === 'function') addLog(`크리티컬! <b>${attacker.name}</b>이(가) <b>${target.name}</b>의 체력을 <b>${actualHealed}</b> 회복시킵니다.`, 'log-heal log-crit');
-                            } else {
-                                if (typeof addLog === 'function') addLog(`<b>${attacker.name}</b>이(가) <b>${target.name}</b>의 체력을 <b>${actualHealed}</b> 회복시킵니다.`, 'log-heal');
+                        const isSelfHeal = target.id === attacker.id;
+
+                        // 🌟 특성: 닥터 - 자신은 치료할 수 없음
+                        if (attacker.trait === '닥터' && isSelfHeal) {
+                            if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [특성:닥터] <b>${attacker.name}</b>은(는) 자신을 치료할 수 없습니다.`, '', true);
+                        } else {
+                            let baseHeal = Math.floor(attackerStat * gradeMultiplier * 2.5 * scale * rng);
+                            let hpPercentHeal = Math.floor(target.stats.maxHp * (10 * scale * rng) / 100);
+                            if (isCrit) { baseHeal = Math.floor(baseHeal * 1.7); hpPercentHeal = Math.floor(hpPercentHeal * 1.7); }
+                            let totalHeal = Math.floor((baseHeal + hpPercentHeal) * boostMultiplier);
+
+                            // 🌟 특성: 치료인/닥터 - 타인을 치료할 때 효과 +30%
+                            if ((attacker.trait === '치료인' || attacker.trait === '닥터') && !isSelfHeal) {
+                                totalHeal = Math.floor(totalHeal * 1.3);
+                            }
+                            
+                            let actualHealed = typeof processHeal === 'function' ? processHeal(target, totalHeal) : totalHeal;
+                            
+                            if (actualHealed > 0) {
+                                if (typeof spawnHealEffect === 'function') spawnHealEffect(target.x, target.y);
+                                if (isCrit) {
+                                    if (typeof addLog === 'function') addLog(`크리티컬! <b>${attacker.name}</b>이(가) <b>${target.name}</b>의 체력을 <b>${actualHealed}</b> 회복시킵니다.`, 'log-heal log-crit');
+                                } else {
+                                    if (typeof addLog === 'function') addLog(`<b>${attacker.name}</b>이(가) <b>${target.name}</b>의 체력을 <b>${actualHealed}</b> 회복시킵니다.`, 'log-heal');
+                                }
                             }
                         }
                     } else {
@@ -2892,6 +3420,12 @@
                             
                             if (isCrit) damage = Math.floor(damage * 1.7);
                             damage = Math.floor(damage * boostMultiplier);
+
+                            // 🌟 특성: 관세음보살 - 20% 확률로 추가피해(+30%)
+                            if (attacker.trait === '관세음보살' && Math.random() < 0.2) {
+                                damage = Math.floor(damage * 1.3);
+                                if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [특성:관세음보살] <b>${attacker.name}</b>의 공격에 추가피해가 발동했습니다!`, 'log-action', true);
+                            }
 
                             const targetStr = getEffectiveStat(target, 'str');
                             const targetMen = getEffectiveStat(target, 'men');
@@ -2917,6 +3451,12 @@
                                     panel.classList.remove('shake-anim');
                                     void panel.offsetWidth;
                                     panel.classList.add('shake-anim');
+                                }
+
+                                // 🌟 명중 시 공격자(무기)와 피격자(방어구) 양쪽 장비 내구도 소모
+                                if (typeof reduceEquipDurability === 'function') {
+                                    reduceEquipDurability(attacker);
+                                    reduceEquipDurability(target);
                                 }
                             }
 
@@ -3046,11 +3586,9 @@
                     
                     entities.forEach(ent => { 
                         if (!ent.statusEffects) ent.statusEffects = []; 
-                        if (!ent.inventory) ent.inventory = []; 
                         if (!ent.equippedSlots) ent.equippedSlots = {};
                         if (!ent.equipDurability) ent.equipDurability = {};
                         if (!ent.skills) ent.skills = {};
-                        ent.inventory.forEach(i => { if(!i.quantity) i.quantity = 1; }); 
                         
                         if(ent.skills.charSkill && !ent.skills.charSkill.range) ent.skills.charSkill.range = '단일'; 
                         if(ent.skills.constSkill && !ent.skills.constSkill.range) ent.skills.constSkill.range = '단일'; 
@@ -3089,6 +3627,8 @@
             let currentX = null; 
             let currentY = null;
             let currentEquipDurability = {};
+            let currentFullness = 0;
+            let currentPotion = 0;
 
             const spiritGradeStr = document.getElementById('gradeSpirit') ? document.getElementById('gradeSpirit').value : 'F';
             const maxSpirit = (typeof spiritMap !== 'undefined' && spiritMap[spiritGradeStr]) ? spiritMap[spiritGradeStr] : 0;
@@ -3103,6 +3643,8 @@
                     currentY = existing.y; 
                     currentEquipDurability = JSON.parse(JSON.stringify(existing.equipDurability || {}));
                     currentSpirit = (existing.stats.currentSpirit !== undefined && existing.stats.currentSpirit !== null) ? Math.min(existing.stats.currentSpirit, maxSpirit) : maxSpirit;
+                    currentFullness = existing.stats.currentFullness || 0;
+                    currentPotion = existing.stats.currentPotion || 0;
                 } 
             }
             
@@ -3130,6 +3672,7 @@
                 id: (typeof editingId !== 'undefined' && editingId !== null) ? editingId : "entity_" + Date.now(), 
                 name: name, 
                 type: type, 
+                trait: document.getElementById('inputTrait') ? document.getElementById('inputTrait').value : "",
                 statusEffects: currentStatus, 
                 tokenColor: document.getElementById('inputTokenColor') ? document.getElementById('inputTokenColor').value : '#3182ce', 
                 x: currentX, 
@@ -3150,7 +3693,9 @@
                     }, 
                     specialName: document.getElementById('inputSpecialName') ? document.getElementById('inputSpecialName').value || "특수" : "특수", 
                     maxSpirit: maxSpirit,
-                    currentSpirit: currentSpirit
+                    currentSpirit: currentSpirit,
+                    currentFullness: currentFullness,
+                    currentPotion: currentPotion
                 }, 
                 skills: { 
                     ability: { 
@@ -3183,7 +3728,6 @@
                     }, 
                     extraSkills: extraSkills 
                 },
-                inventory: typeof tempInventory !== 'undefined' ? JSON.parse(JSON.stringify(tempInventory)) : [],
                 equippedSlots: equippedSlots,
                 equipDurability: currentEquipDurability
             };
@@ -3390,6 +3934,11 @@
             const chance = ignoreChances[eq.grade] || 0;
             if (Math.random() < chance) return; 
 
+            if (!entity.equipDurability) entity.equipDurability = {};
+            if (entity.equipDurability[randomSlot] === undefined || entity.equipDurability[randomSlot] === null) {
+                entity.equipDurability[randomSlot] = eq.maxDur || 10;
+            }
+
             if (entity.equipDurability[randomSlot] > 0) {
                 entity.equipDurability[randomSlot] -= 1;
                 
@@ -3452,51 +4001,23 @@
         }
 
         function initRain() {
-            raindrops = [];
+            // 🌟 버그 수정: drawRain()이 참조하는 전역 변수는 rainDrops(대문자 D)인데
+            // 기존 코드는 raindrops(암묵적 전역 변수)에 채워 넣고 있어 실제로는
+            // rainDrops가 항상 빈 배열로 남아 비가 전혀 그려지지 않았습니다.
+            // 또한 drawRain()이 기대하는 속성명(l, xs, ys)과도 달라(len, speed) 있었습니다.
+            rainDrops = [];
             const canvas = document.getElementById('rainCanvas');
             if (!canvas) return;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             for (let i = 0; i < 150; i++) {
-                raindrops.push({
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                    len: Math.random() * 20 + 10,
-                    speed: Math.random() * 10 + 15
+                rainDrops.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    l: Math.random() * 12 + 8,
+                    xs: -6 + Math.random() * 2,
+                    ys: Math.random() * 10 + 18
                 });
-            }
-        }
-
-        function getEquipDamageBonus(entity) {
-            let bonus = 0;
-            if (entity.equippedSlots && typeof equipCatalog !== 'undefined') {
-                Object.values(entity.equippedSlots).forEach(equipName => {
-                    if (equipName && typeof equipName === 'string') {
-                        const matchedEquip = equipCatalog.find(eq => eq.name === equipName);
-                        const effectStr = matchedEquip ? matchedEquip.effect : "";
-                        const regex = /\[피해증가\s*:\s*([+-]?\d+)\]/g;
-                        let match;
-                        while ((match = regex.exec(effectStr)) !== null) {
-                            bonus += parseInt(match[1]) || 0;
-                        }
-                    }
-                });
-            }
-            return bonus;
-        }
-
-        function checkTerrainInteraction(entity) {
-            if (!entity) return;
-            const tIndex = terrains.findIndex(t => t.x === entity.x && t.y === entity.y && t.type === 'reward');
-            if (tIndex !== -1) {
-                const t = terrains[tIndex];
-                const effectName = t.effects[Math.floor(Math.random() * t.effects.length)] || "버프";
-                
-                if (!entity.statusEffects) entity.statusEffects = [];
-                entity.statusEffects.push({ name: effectName, type: "buff", value: 0, duration: 3, id: Date.now() });
-                
-                addLog(`[시스템] ${entity.name}이(가) 랜덤 보상을 획득했습니다! [${effectName}] 부여됨.`, 'log-action');
-                
-                terrains.splice(tIndex, 1);
-                renderGrid();
             }
         }
 
@@ -3644,13 +4165,55 @@
 
         function toggleManualControlUI() {
             const type = document.getElementById('manualControlType').value;
-            if (type === 'spirit') {
-                document.getElementById('manualResonanceSection').style.display = 'block';
-                document.getElementById('manualHpSection').style.display = 'none';
-            } else {
-                document.getElementById('manualResonanceSection').style.display = 'none';
-                document.getElementById('manualHpSection').style.display = 'block';
+            document.getElementById('manualResonanceSection').style.display = type === 'spirit' ? 'block' : 'none';
+            document.getElementById('manualHpSection').style.display = type === 'hp' ? 'block' : 'none';
+            const fpSection = document.getElementById('manualFullnessSection');
+            if (fpSection) fpSection.style.display = type === 'fullnesspotion' ? 'block' : 'none';
+        }
+
+        function applyGlobalFullness(actionType) {
+            const targetGroup = document.getElementById('globalFullnessTarget').value;
+            const kind = document.getElementById('globalFullnessKind').value; // 'fullness' | 'potion'
+            const valStr = document.getElementById('globalFullnessValue').value;
+
+            if (valStr === '') {
+                alert('수치를 입력하세요.');
+                return;
             }
+
+            const value = parseInt(valStr, 10);
+            if (isNaN(value) || value <= 0) {
+                alert('0보다 큰 숫자를 입력하세요.');
+                return;
+            }
+
+            const targets = entities.filter(e => {
+                if (e.x === undefined || e.x === null || e.stats.currentHp <= 0) return false;
+                if (targetGroup === 'apostle' && e.type === '에너미') return false;
+                if (targetGroup === 'enemy' && e.type !== '에너미') return false;
+                return true;
+            });
+
+            if (targets.length === 0) {
+                alert('필드에 조건을 만족하는 대상이 없습니다.');
+                return;
+            }
+
+            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? '모든 캐릭터' : '모든 에너미');
+            const kindName = kind === 'fullness' ? '포만도' : '물약중독도';
+            const delta = actionType === 'increase' ? value : -value;
+
+            targets.forEach(ent => {
+                if (kind === 'fullness') {
+                    adjustFullness(ent.id, delta);
+                } else {
+                    adjustPotion(ent.id, delta);
+                }
+            });
+
+            addLog(`<b>[시스템]</b> ${groupName}의 ${kindName}이(가) ${value} ${actionType === 'increase' ? '증가' : '감소'}했습니다.`, 'log-action');
+
+            document.getElementById('globalFullnessValue').value = '';
         }
 
     </script>
