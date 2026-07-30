@@ -370,7 +370,7 @@
                 <div class="form-section-title">기본 정보</div>
                 <div class="form-group"><label>이름</label><input type="text" id="inputName"></div>
                 <div class="form-group"><label>분류</label><select id="inputType" onchange="toggleType()"><option value="캐릭터">캐릭터</option><option value="에너미">에너미</option></select></div>
-                <div class="form-group"><label>캐릭터 등급</label><select id="inputCharGrade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7" selected>7</option></select></div>
+                <div class="form-group"><label>캐릭터 성급</label><select id="inputCharGrade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7" selected>7</option></select></div>
                 <div id="tokenColorSection" class="form-group"><label>토큰 색상</label><input type="color" id="inputTokenColor" value="#3182ce" style="height: 35px; padding: 2px;"></div>
                 <div id="hpGradeSection" class="form-group"><label>체력 등급</label><select id="inputHpGrade"><option value="SS">SS (1800)</option><option value="S">S (1200)</option><option value="A">A (800)</option><option value="B">B (550)</option><option value="C">C (350)</option><option value="D">D (200)</option><option value="E">E (100)</option><option value="F" selected>F (50)</option></select></div>
                 <div id="hpManualSection" class="form-group" style="display:none;"><label>수동 체력 입력</label><input type="number" id="inputHpManual" value="3000"></div>
@@ -2814,7 +2814,7 @@
                     const activeClass = isActiveTurn ? ' active-turn' : '';
                     
                     const charGradeStr = (entity.stats && entity.stats.charGrade) ? entity.stats.charGrade : 'F';
-                    const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}급</span>` : '';
+                    const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}성</span>` : '';
 
                     // 🌟 특성(패시브) 배지 — 상시 적용되는 특성을 카드 상단에 표시하고, 마우스를 올리면 설명이 보임
                     let traitBadge = '';
