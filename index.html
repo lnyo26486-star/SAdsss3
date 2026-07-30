@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>종합 커뮤니티 관리 앱 - 전술 전투 필드</title>
+    <title>전투 웹앱</title>
     <style>
         body { background-color: #f4f5f7; color: #2d3748; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; padding: 30px; }
         
@@ -1810,16 +1810,16 @@
                     addLog(`&nbsp;&nbsp;🏅 [특성:결투가] <b>${ent.name}</b>에게 500의 보호막이 부여되었습니다.`, 'log-action', true);
                     break;
                 case '보살':
-                    ent.statusEffects.push(mk('정신력 증가(보살)', 'stat', 15, 999, '🙏', '보살 특성으로 인한 정신력 증가', 'men'));
-                    addLog(`&nbsp;&nbsp;🏅 [특성:보살] <b>${ent.name}</b>의 정신력이 15 증가했습니다.`, 'log-action', true);
+                    ent.statusEffects.push(mk('정신력 증가(보살)', 'stat', 25, 999, '🙏', '보살 특성으로 인한 정신력 증가', 'men'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:보살] <b>${ent.name}</b>의 정신력이 25 증가했습니다.`, 'log-action', true);
                     break;
                 case '치료인':
-                    ent.statusEffects.push(mk('지능 증가(치료인)', 'stat', 15, 999, '💉', '치료인 특성으로 인한 지능 증가', 'int'));
-                    addLog(`&nbsp;&nbsp;🏅 [특성:치료인] <b>${ent.name}</b>의 지능이 15 증가했습니다.`, 'log-action', true);
+                    ent.statusEffects.push(mk('지능 증가(치료인)', 'stat', 25, 999, '💉', '치료인 특성으로 인한 지능 증가', 'int'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:치료인] <b>${ent.name}</b>의 지능이 25 증가했습니다.`, 'log-action', true);
                     break;
                 case '관세음보살':
-                    ent.statusEffects.push(mk('정신력 증가(관세음보살)', 'stat', 25, 999, '🙏', '관세음보살 특성으로 인한 정신력 증가 (디버프 저항 상승)', 'men'));
-                    addLog(`&nbsp;&nbsp;🏅 [특성:관세음보살] <b>${ent.name}</b>의 정신력이 25 증가했습니다. (공격 시 20% 확률로 추가피해 발동)`, 'log-action', true);
+                    ent.statusEffects.push(mk('정신력 증가(관세음보살)', 'stat', 100, 999, '🙏', '관세음보살 특성으로 인한 정신력 증가 (디버프 저항 상승)', 'men'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:관세음보살] <b>${ent.name}</b>의 정신력이 100 증가했습니다. (공격 시 20% 확률로 추가피해 발동)`, 'log-action', true);
                     break;
                 case '묘지기':
                     ent.statusEffects.push(mk('흡혈(묘지기)', 'vampire', 20, 999, '🩸', '묘지기 특성으로 인한 흡혈'));
@@ -1844,7 +1844,8 @@
                     break;
                 }
                 case '닥터':
-                    addLog(`&nbsp;&nbsp;🏅 [특성:닥터] <b>${ent.name}</b>은(는) 자신을 치료할 수 없는 대신, 타인 치료 효과가 강화됩니다.`, 'log-action', true);
+                    ent.statusEffects.push(mk('지능 증가(닥터)', 'stat', 100, 999, '💉', '닥터 특성으로 인한 지능 증가', 'int'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:닥터] <b>${ent.name}</b>의 지능이 100 증가했습니다.`, 'log-action', true);
                     break;
                 default:
                     // 제작자/점성술사/신자/큐레이터/지휘관/행운 토용/불운 토용/예술가는
