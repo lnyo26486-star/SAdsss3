@@ -370,7 +370,7 @@
                 <div class="form-section-title">기본 정보</div>
                 <div class="form-group"><label>이름</label><input type="text" id="inputName"></div>
                 <div class="form-group"><label>분류</label><select id="inputType" onchange="toggleType()"><option value="캐릭터">캐릭터</option><option value="에너미">에너미</option></select></div>
-                <div class="form-group"><label>캐릭터 성급</label><select id="inputCharGrade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7" selected>7</option></select></div>
+                <div class="form-group"><label>캐릭터 등급</label><select id="inputCharGrade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7" selected>7</option></select></div>
                 <div id="tokenColorSection" class="form-group"><label>토큰 색상</label><input type="color" id="inputTokenColor" value="#3182ce" style="height: 35px; padding: 2px;"></div>
                 <div id="hpGradeSection" class="form-group"><label>체력 등급</label><select id="inputHpGrade"><option value="SS">SS (1800)</option><option value="S">S (1200)</option><option value="A">A (800)</option><option value="B">B (550)</option><option value="C">C (350)</option><option value="D">D (200)</option><option value="E">E (100)</option><option value="F" selected>F (50)</option></select></div>
                 <div id="hpManualSection" class="form-group" style="display:none;"><label>수동 체력 입력</label><input type="number" id="inputHpManual" value="3000"></div>
@@ -2814,7 +2814,7 @@
                     const activeClass = isActiveTurn ? ' active-turn' : '';
                     
                     const charGradeStr = (entity.stats && entity.stats.charGrade) ? entity.stats.charGrade : 'F';
-                    const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}성</span>` : '';
+                    const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}급</span>` : '';
 
                     // 🌟 특성(패시브) 배지 — 상시 적용되는 특성을 카드 상단에 표시하고, 마우스를 올리면 설명이 보임
                     let traitBadge = '';
@@ -3225,26 +3225,26 @@
                 return;
             }
 
-            // 🌟 영력 소모 및 증폭 처리
+            // 🌟 영력 소모 및 증폭 처리 (영력이 0이어도 공격 자체는 항상 가능하도록, 소모량을 보유량 한도로 자동 조정)
             if (attacker.stats.maxSpirit === undefined) attacker.stats.maxSpirit = 0;
             if (attacker.stats.currentSpirit === undefined || attacker.stats.currentSpirit === null) attacker.stats.currentSpirit = attacker.stats.maxSpirit;
 
-            if (attacker.stats.currentSpirit < SPIRIT_BASE_COST) {
-                alert(`영력이 부족하여 스킬을 발동할 수 없습니다. (필요: ${SPIRIT_BASE_COST}, 보유: ${attacker.stats.currentSpirit})`);
-                return;
+            const actualBaseCost = Math.min(SPIRIT_BASE_COST, attacker.stats.currentSpirit);
+            if (actualBaseCost < SPIRIT_BASE_COST && typeof addLog === 'function') {
+                addLog(`&nbsp;&nbsp;↳ [시스템] 보유 영력이 부족하여 기본 소모량이 <b>${actualBaseCost}</b>(으)로 조정되었습니다. (보유: ${attacker.stats.currentSpirit})`, "", true);
             }
 
             const spiritBoostInput = document.getElementById('spiritBoostInput');
             let extraSpirit = spiritBoostInput ? (parseInt(spiritBoostInput.value, 10) || 0) : 0;
             if (extraSpirit < 0) extraSpirit = 0;
 
-            const availableExtraSpirit = attacker.stats.currentSpirit - SPIRIT_BASE_COST;
+            const availableExtraSpirit = attacker.stats.currentSpirit - actualBaseCost;
             if (extraSpirit > availableExtraSpirit) {
                 extraSpirit = availableExtraSpirit;
                 if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [시스템] 보유 영력이 부족하여 추가 소모량이 <b>${extraSpirit}</b>(으)로 조정되었습니다.`, "", true);
             }
 
-            const totalSpiritCost = SPIRIT_BASE_COST + extraSpirit;
+            const totalSpiritCost = actualBaseCost + extraSpirit;
             attacker.stats.currentSpirit -= totalSpiritCost;
 
             const boostMultiplier = 1 + (extraSpirit * SPIRIT_BOOST_PERCENT_PER_POINT / 100);
