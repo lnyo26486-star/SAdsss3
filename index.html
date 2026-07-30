@@ -569,12 +569,12 @@
                     </select>
                 </div>
                 <div class="form-group" id="itemFillAmountGroup" style="display:none;">
-                    <label id="itemFillAmountLabel">증가량</label>
-                    <input type="number" id="inputItemFillAmount" value="20" min="1" style="width:80px;">
+                    <label id="itemFillAmountLabel">증감량</label>
+                    <input type="number" id="inputItemFillAmount" value="20" style="width:80px;">
                 </div>
                 <div class="form-group"><label>이미지 URL<br><span style="font-size:10px; font-weight:normal; color:#a0aec0;">(선택)</span></label><input type="text" id="inputItemImage" placeholder="https://..."></div>
                 <div class="form-group"><label>효과 키워드</label>
-                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3]"></textarea>
+                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3] [영력:30]"></textarea>
                 </div>
                 <button class="success-btn" style="width:100%" onclick="addItemToCatalog()">도감에 아이템 추가</button>
             </div>
@@ -822,7 +822,7 @@
         // 🌟 GM 전용 Firebase Auth 계정의 UID.
         //    Firebase 콘솔 > Authentication > Sign-in method 에서 이메일/비밀번호 로그인을 켠 뒤
         //    Users 탭에서 GM 계정을 하나 만들고, 그 계정의 UID를 복사해 아래에 붙여넣으세요.
-        const GM_UID = "lsEhfv6ScgcJfkFegvsJo478Xmf2";
+        const GM_UID = "여기에_GM_계정의_UID를_입력하세요";
 
         let isAdmin = false;          // 로그인 확인 전에는 항상 관전자로 취급합니다.
         let appInitialized = false;
@@ -2470,6 +2470,7 @@
             const clearMatch = effectStr.match(/\[해제\s*:\s*([^\]]+)\]/);
             const applyMatch = effectStr.match(/\[부여\s*:\s*([^\]:]+)\s*:\s*(\d+)\]/);
             const statMatch = effectStr.match(/\[스탯\s*:\s*([^\]:]+)\s*:\s*(-?\d+)\]/);
+            const spiritMatch = effectStr.match(/\[영력\s*:\s*(-?\d+)\]/);
 
             if (healMatch) {
                 let amount = parseInt(healMatch[1]);
@@ -2478,6 +2479,16 @@
                     spawnHealEffect(target.x, target.y);
                     playHealSound();
                     addLog(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 체력을 <b>${actual}</b> 회복했습니다.`, 'log-heal');
+                }
+            }
+
+            if (spiritMatch) {
+                let amount = parseInt(spiritMatch[1]);
+                if (typeof adjustSpirit === 'function') adjustSpirit(target.id, amount);
+                if (amount > 0) {
+                    addLog(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 영력을 <b>${amount}</b> 회복했습니다.`, 'log-heal');
+                } else if (amount < 0) {
+                    addLog(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 영력이 <b>${Math.abs(amount)}</b> 감소했습니다.`, 'log-hit');
                 }
             }
 
@@ -2532,10 +2543,10 @@
             const label = document.getElementById('itemFillAmountLabel');
             if (cat === '음식') {
                 group.style.display = 'flex';
-                label.innerText = '포만도 증가량';
+                label.innerText = '포만도 증감량 (음수 입력 시 감소)';
             } else if (cat === '물약') {
                 group.style.display = 'flex';
-                label.innerText = '중독도 증가량';
+                label.innerText = '중독도 증감량 (음수 입력 시 감소)';
             } else {
                 group.style.display = 'none';
             }
@@ -2608,7 +2619,7 @@
             list.innerHTML = '';
             itemCatalog.forEach(item => {
                 const category = item.category || '일반';
-                const blocked = category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX;
+                const blocked = category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX;
                 const thumb = item.image ? `<img src="${item.image}" style="width:34px; height:34px; object-fit:cover; border-radius:6px; margin-right:10px; flex-shrink:0;" onerror="this.style.display='none'">` : '';
 
                 const div = document.createElement('div');
@@ -2631,7 +2642,7 @@
 
             const category = item.category || '일반';
 
-            if (category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
+            if (category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
                 alert(`${owner.name}은(는) 포만 상태라 더 이상 음식 아이템을 사용할 수 없습니다.`);
                 return;
             }
@@ -2651,10 +2662,11 @@
             }
 
             const infoEl = document.getElementById('itemUseCategoryInfo');
+            const fillSign = (item.fillAmount || 0) >= 0 ? '+' : '';
             if (category === '음식') {
-                infoEl.innerText = `🍖 포만도 +${item.fillAmount || 0} (현재 ${owner.stats.currentFullness || 0}/${FULLNESS_MAX})`;
+                infoEl.innerText = `🍖 포만도 ${fillSign}${item.fillAmount || 0} (현재 ${owner.stats.currentFullness || 0}/${FULLNESS_MAX})`;
             } else if (category === '물약') {
-                infoEl.innerText = `🧪 물약중독도 +${item.fillAmount || 0} (현재 ${owner.stats.currentPotion || 0}/${POTION_MAX})`;
+                infoEl.innerText = `🧪 물약중독도 ${fillSign}${item.fillAmount || 0} (현재 ${owner.stats.currentPotion || 0}/${POTION_MAX})`;
             } else {
                 infoEl.innerText = '';
             }
@@ -2683,7 +2695,7 @@
 
             const category = item.category || '일반';
 
-            if (category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
+            if (category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
                 alert(`${owner.name}은(는) 포만 상태라 더 이상 음식 아이템을 사용할 수 없습니다.`);
                 closeItemUseModal();
                 return;
@@ -2691,7 +2703,7 @@
 
             let usedCount = 0;
             for (let i = 0; i < qty; i++) {
-                if (category === '음식' && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) break;
+                if (category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) break;
                 processItemEffects(owner, item.effect, owner.name);
                 if (category === '음식') {
                     adjustFullness(owner.id, item.fillAmount || 0);
