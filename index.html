@@ -418,14 +418,17 @@
                 <div class="form-group"><label>영력 설명</label><textarea id="inputAbilityDesc" rows="2"></textarea></div>
 
                 <div id="extraSkillSection">
-                    <div class="form-section-title">일반 스킬</div>
+                    <div class="form-section-title">일반 술식</div>
                     <div id="extraSkillsList"></div>
                     <button onclick="addExtraSkill()" class="toggle-btn" style="margin-top:0; margin-bottom:12px;">+ 일반 스킬 추가</button>
                 </div>
 
                 <div id="charSkillSection">
-                    <div class="form-section-title" id="charSkillSectionTitle">캐릭터 스킬</div>
-                    <div class="form-group"><label id="charSkillNameLabel">스킬 이름</label><input type="text" id="inputCharSkillName"></div>
+                    <div class="form-section-title" id="charSkillSectionTitle">유일 술식</div>
+                    <div class="form-group"><label id="charSkillNameLabel">술실 이름</label><input type="text" id="inputCharSkillName"></div>
+                    <div class="form-group"><label>효과 유형</label>
+                        <select id="inputCharSkillType"><option value="공격">공격</option><option value="치료">치료</option><option value="그 외">그 외 (상태이상 부여용)</option></select>
+                    </div>
                     <div class="form-group"><label>공격 범위</label>
                         <select id="inputCharSkillRange"><option value="단일">단일</option><option value="주위 8칸">주위 8칸 (3x3)</option><option value="십자">십자</option><option value="전체">전체</option><option value="가로 1줄">가로 1줄</option><option value="세로 1줄">세로 1줄</option><option value="가로세로 1줄씩">가로세로 1줄씩</option><option value="대각선">대각선</option><option value="가로 3줄">가로 3줄</option><option value="세로 3줄">세로 3줄</option></select>
                     </div>
@@ -433,28 +436,34 @@
                         <select id="inputCharSkillTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>스킬 설명 <input type="checkbox" id="inputCharSkillSecret" style="margin-left: 8px;"> 비공개</label>
+                        <label>술식 설명 <input type="checkbox" id="inputCharSkillSecret" style="margin-left: 8px;"> 비공개</label>
                         <textarea id="inputCharSkillDesc" rows="2"></textarea>
                     </div>
                     <div class="form-group"><label>실제 효과 <br><span style="font-size:10px; font-weight:normal; color:#e53e3e;">태그: [부여:화상:2]<br>또는 [자가부여:버프:1]</span></label><textarea id="inputCharSkillEffect" rows="2"></textarea></div>
                 </div>
 
                 <div id="constSkillSection">
-                    <div class="form-section-title">특별 스킬</div>
-                    <div class="form-group"><label>스킬 이름</label><input type="text" id="inputConstSkillName"></div>
+                    <div class="form-section-title">특별 술식</div>
+                    <div class="form-group"><label>술식 이름</label><input type="text" id="inputConstSkillName"></div>
+                    <div class="form-group"><label>효과 유형</label>
+                        <select id="inputConstSkillType"><option value="공격">공격</option><option value="치료">치료</option><option value="그 외">그 외 (상태이상 부여용)</option></select>
+                    </div>
                     <div class="form-group"><label>공격 범위</label>
                         <select id="inputConstSkillRange"><option value="단일">단일</option><option value="주위 8칸">주위 8칸 (3x3)</option><option value="십자">십자</option><option value="전체">전체</option><option value="가로 1줄">가로 1줄</option><option value="세로 1줄">세로 1줄</option><option value="가로세로 1줄씩">가로세로 1줄씩</option><option value="대각선">대각선</option><option value="가로 3줄">가로 3줄</option><option value="세로 3줄">세로 3줄</option></select>
                     </div>
                     <div class="form-group"><label>적용 대상</label>
                         <select id="inputConstSkillTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
-                    <div class="form-group"><label>스킬 설명</label><textarea id="inputConstSkillDesc" rows="2"></textarea></div>
+                    <div class="form-group"><label>술식 설명</label><textarea id="inputConstSkillDesc" rows="2"></textarea></div>
                     <div class="form-group"><label>실제 효과</label><textarea id="inputConstSkillEffect" rows="2"></textarea></div>
                 </div>
 
                 <div id="blessSection">
-                    <div class="form-section-title" id="blessSectionTitle">패시브</div>
-                    <div class="form-group"><label id="blessNameLabel">가호 이름</label><input type="text" id="inputConstBlessName"></div>
+                    <div class="form-section-title" id="blessSectionTitle">고유 술식</div>
+                    <div class="form-group"><label id="blessNameLabel">술식 이름</label><input type="text" id="inputConstBlessName"></div>
+                    <div class="form-group"><label>효과 유형</label>
+                        <select id="inputConstBlessType"><option value="공격">공격</option><option value="치료">치료</option><option value="그 외" selected>그 외 (상태이상 부여용)</option></select>
+                    </div>
                     <div class="form-group"><label>공격 범위</label>
                         <select id="inputConstBlessRange"><option value="단일">단일</option><option value="주위 8칸">주위 8칸 (3x3)</option><option value="십자">십자</option><option value="전체">전체</option><option value="가로 1줄">가로 1줄</option><option value="세로 1줄">세로 1줄</option><option value="가로세로 1줄씩">가로세로 1줄씩</option><option value="대각선">대각선</option><option value="가로 3줄">가로 3줄</option><option value="세로 3줄">세로 3줄</option></select>
                     </div>
@@ -462,7 +471,7 @@
                         <select id="inputConstBlessTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>가호 설명 <input type="checkbox" id="inputConstBlessSecret" style="margin-left: 8px;"> 비공개</label>
+                        <label>술식 설명 <input type="checkbox" id="inputConstBlessSecret" style="margin-left: 8px;"> 비공개</label>
                         <textarea id="inputConstBlessDesc" rows="2"></textarea>
                     </div>
                     <div class="form-group"><label>실제 효과</label><textarea id="inputConstBlessEffect" rows="2"></textarea></div>
@@ -510,8 +519,8 @@
                         <option value="vulnerable">취약 (받는 피해 % 증가)</option>
                         <option value="reduce_damage">피해 감소 (받는 피해 % 감소, 50 입력 시 반감)</option>
                         <option value="doom">즉사 (지속시간 종료 시 최대 체력 비례 % 피해)</option>
-                        <option value="silence">침묵 (기본 스킬 장전 및 사용 불가)</option>
-                        <option value="seal">봉인 (특수/특별 스킬 장전 및 사용 불가)</option>
+                        <option value="silence">침묵 (일반 술식 장전 및 사용 불가)</option>
+                        <option value="seal">봉인 (특별/유일 술식 장전 및 사용 불가)</option>
                         <option value="unhealable">치유 불가 (모든 체력 회복 무시)</option>
                         <option value="immune">면역 (새로운 상태이상 부여 무시)</option>
                         <option value="immortal">불사 (체력이 0이 될 때 1로 생존)</option>
@@ -763,20 +772,20 @@
         const TRAIT_DB = {
             '무도가':   { desc: '전투 시작 시 2턴간 도발 효과를 부여하고 민첩 스탯을 20 증가시킵니다.', auto: true },
             '결투가':   { desc: '전투 시작 시 본인에게 500의 보호막을 부여합니다.', auto: true },
-            '제작자':   { desc: '아이템을 제작할 때 20%의 확률로 결과물이 2개씩 생성됩니다. (제작 기능 미구현: GM 판정 필요)', auto: false },
-            '점성술사': { desc: '아군 혹은 적군 한 개체를 선택하여 랜덤 버프 혹은 디버프를 부여합니다. (대상 선택 필요: GM이 직접 상태이상 부여)', auto: false },
+            '제작자':   { desc: '아이템을 제작할 때 20%의 확률로 결과물이 2개씩 생성됩니다.', auto: false },
+            '점성술사': { desc: '아군 혹은 적군 한 개체를 선택하여 랜덤 버프 혹은 디버프를 부여합니다.', auto: false },
             '묘지기':   { desc: '공격 데미지의 20%를 흡혈하여 체력을 회복합니다.', auto: true },
             '은둔자':   { desc: '전투 시작 시 3턴간 공격력이 300 증가하지만, 주위 24칸 내에 생명이 있을 때마다 공격력 수치가 줄어듭니다.', auto: true },
-            '신자':     { desc: '전투 시작 전 얼마나 간절하게 신에게 비는지에 따라 버프가 부여됩니다. (주관적 판정: GM이 직접 상태이상 부여)', auto: false },
+            '신자':     { desc: '전투 시작 전 얼마나 간절하게 신에게 비는지에 따라 버프가 부여됩니다.', auto: false },
             '보살':     { desc: '디버프 저항력을 조금 지닙니다. ▶ 정신력 스탯 증가', auto: true },
             '치료인':   { desc: '타인을 치료할 때 더 좋은 효과를 냅니다. ▶ 지능 스탯 증가', auto: true },
-            '큐레이터': { desc: '물건을 제작할 때 50%의 확률로 결과물이 2개씩 생성됩니다. (제작 기능 미구현: GM 판정 필요)', auto: false },
+            '큐레이터': { desc: '물건을 제작할 때 50%의 확률로 결과물이 2개씩 생성됩니다.', auto: false },
             '처형인':   { desc: '공격 데미지의 40%를 흡혈하여 체력을 회복합니다.', auto: true },
-            '지휘관':   { desc: '영력을 소모하여 적군의 턴을 늦추거나 아군의 턴을 조정할 수 있습니다. (턴 순서 수동 조작 모달 이용)', auto: false },
-            '행운 토용': { desc: '순간 모든 영력을 소모하여 3턴간 아군 전체에게 공격력 200증가, 600의 보호막을 부여합니다. (전체 대상: GM이 직접 발동)', auto: false },
-            '불운 토용': { desc: '순간 모든 영력을 소모하여 적군에게 강화 표식을 남기고, 3턴간 공격력 300감소 디버프를 부여합니다. (강화 표식 ▶ 받는 데미지 15% 증가) (전체 대상: GM이 직접 발동)', auto: false },
+            '지휘관':   { desc: '영력을 소모하여 적군의 턴을 늦추거나 아군의 턴을 조정할 수 있습니다.', auto: false },
+            '행운 토용': { desc: '순간 모든 영력을 소모하여 3턴간 아군 전체에게 공격력 200증가, 600의 보호막을 부여합니다.', auto: false },
+            '불운 토용': { desc: '순간 모든 영력을 소모하여 적군에게 강화 표식을 남기고, 3턴간 공격력 300감소 디버프를 부여합니다. (강화 표식 ▶ 받는 데미지 15% 증가)', auto: false },
             '관세음보살': { desc: '디버프 저항력이 상승하고 20% 확률로 추가피해를 입힙니다.', auto: true },
-            '예술가':   { desc: '정신력이 30 미만으로 내려갔을 때 더 좋은 품질의 생산품을 100% 확률로 제작합니다. (제작 기능 미구현: GM 판정 필요)', auto: false },
+            '예술가':   { desc: '정신력이 30 미만으로 내려갔을 때 더 좋은 품질의 생산품을 100% 확률로 제작합니다.', auto: false },
             '닥터':     { desc: '자신을 치료하지 못하게 되는 대신 타인을 치료할 때 더욱 좋은 효과를 냅니다.', auto: true }
         };
         let itemCatalog = [];
@@ -1623,11 +1632,11 @@
             let isSpecialSkill = ['charSkill', 'constSkill', 'constBless'].includes(skillId);
 
             if (isBasicSkill && owner.statusEffects && owner.statusEffects.some(s => s.type === 'silence')) {
-                alert("침묵 상태입니다. 기본 스킬을 장전할 수 없습니다.");
+                alert("침묵 상태입니다. 일반 술식을 장전할 수 없습니다.");
                 return;
             }
             if (isSpecialSkill && owner.statusEffects && owner.statusEffects.some(s => s.type === 'seal')) {
-                alert("봉인 상태입니다. 특수 스킬을 장전할 수 없습니다.");
+                alert("봉인 상태입니다. 특수/유일 술식을 장전할 수 없습니다.");
                 return;
             }
 
@@ -1642,13 +1651,10 @@
                 currentSkill = extraList[idx];
             }
 
-            if (currentSkill) { skillName = currentSkill.name; } else { skillName = "스킬"; }
+            if (currentSkill) { skillName = currentSkill.name; } else { skillName = "술식"; }
 
             let finalType = skillType;
             const effectStr = currentSkill ? currentSkill.effect : "";
-            if (effectStr.includes('회복') || effectStr.includes('치료') || effectStr.includes('힐')) {
-                finalType = '치료';
-            }
 
             let tType = currentSkill ? currentSkill.targetType : null;
             if (!tType) tType = finalType === '치료' ? 'ally' : 'enemy';
@@ -1685,7 +1691,7 @@
                     enemyDisp.innerText = isReady ? `▶ 발동 대기: [${loadedEnemySkill.name}] (${loadedEnemySkill.range})` : `장전됨: [${loadedEnemySkill.name}]`;
                     enemyDisp.className = isReady ? 'side-skill-indicator enemy-indicator active' : 'side-skill-indicator enemy-indicator';
                 } else {
-                    enemyDisp.innerText = `장전된 스킬 없음`;
+                    enemyDisp.innerText = `장전된 술식 없음`;
                     enemyDisp.className = 'side-skill-indicator enemy-indicator';
                 }
             }
@@ -1695,7 +1701,7 @@
                     apostleDisp.innerText = isReady ? `▶ 발동 대기: [${loadedApostleSkill.name}] (${loadedApostleSkill.range})` : `장전됨: [${loadedApostleSkill.name}]`;
                     apostleDisp.className = isReady ? 'side-skill-indicator apostle-indicator active' : 'side-skill-indicator apostle-indicator';
                 } else {
-                    apostleDisp.innerText = `장전된 스킬 없음`;
+                    apostleDisp.innerText = `장전된 술식 없음`;
                     apostleDisp.className = 'side-skill-indicator apostle-indicator';
                 }
             }
@@ -2308,8 +2314,8 @@
                 <select class="basic-skill-range" style="width:30%; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">${rangeOptions}</select>
                 <select class="basic-skill-target" style="width:30%; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">${targetOptions}</select>
                 <button onclick="this.parentElement.parentElement.remove()" style="padding:4px 10px; background:#e53e3e; color:white; border:none; border-radius:4px; font-size:12px; cursor:pointer;">삭제</button></div>
-                <input type="text" class="basic-skill-name" placeholder="스킬 이름" value="${skillName}" style="width:95%; margin-bottom:8px; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
-                <textarea class="basic-skill-effect" rows="2" placeholder="스킬 효과 (예: [부여:화상:2])" style="width:95%; padding:6px; border-radius:4px; border:1px solid #e2e8f0; resize:vertical;">${skillEffect}</textarea>`;
+                <input type="text" class="basic-skill-name" placeholder="술식 이름" value="${skillName}" style="width:95%; margin-bottom:8px; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
+                <textarea class="basic-skill-effect" rows="2" placeholder="술식 효과 (예: [부여:화상:2])" style="width:95%; padding:6px; border-radius:4px; border:1px solid #e2e8f0; resize:vertical;">${skillEffect}</textarea>`;
             list.appendChild(div);
         }
 
@@ -2328,16 +2334,19 @@
             document.getElementById('inputCharSkillEffect').value = ''; 
             document.getElementById('inputCharSkillRange').value = '단일'; 
             document.getElementById('inputCharSkillTarget').value = 'enemy'; 
+            if (document.getElementById('inputCharSkillType')) document.getElementById('inputCharSkillType').value = '공격';
             document.getElementById('inputConstSkillName').value = ''; 
             document.getElementById('inputConstSkillDesc').value = ''; 
             document.getElementById('inputConstSkillEffect').value = ''; 
             document.getElementById('inputConstSkillRange').value = '단일'; 
             document.getElementById('inputConstSkillTarget').value = 'enemy'; 
+            if (document.getElementById('inputConstSkillType')) document.getElementById('inputConstSkillType').value = '공격';
             document.getElementById('inputConstBlessName').value = ''; 
             document.getElementById('inputConstBlessDesc').value = ''; 
             document.getElementById('inputConstBlessEffect').value = ''; 
             document.getElementById('inputConstBlessRange').value = '단일'; 
             document.getElementById('inputConstBlessTarget').value = 'enemy'; 
+            if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = '그 외';
             document.getElementById('inputHpManual').value = '3000'; 
             
             const charGradeEl = document.getElementById('inputCharGrade');
@@ -2392,8 +2401,8 @@
                 { id: 'tokenColorSection', prop: 'style', val: !isEnemy ? 'flex' : 'none' },
                 { id: 'hpManualSection', prop: 'style', val: isEnemy ? 'flex' : 'none' },
                 { id: 'constSkillSection', prop: 'style', val: !isEnemy ? 'block' : 'none' },
-                { id: 'charSkillSectionTitle', prop: 'innerText', val: isEnemy ? '에너미 스킬' : '캐릭터 스킬' },
-                { id: 'charSkillNameLabel', prop: 'innerText', val: isEnemy ? '에너미 스킬 이름' : '스킬 이름' },
+                { id: 'charSkillSectionTitle', prop: 'innerText', val: isEnemy ? '에너미 술식' : '캐릭터 술식' },
+                { id: 'charSkillNameLabel', prop: 'innerText', val: isEnemy ? '에너미 술식 이름' : '술식 이름' },
                 { id: 'blessSectionTitle', prop: 'innerText', val: !isEnemy ? '패시브' : '패시브' },
                 { id: 'blessNameLabel', prop: 'innerText', val: !isEnemy ? '패시브 이름' : '패시브 이름' },
                 { id: 'blessDescLabel', prop: 'innerText', val: !isEnemy ? '패시브 설명' : '패시브 설명' }
@@ -2446,11 +2455,11 @@
             document.getElementById('inputSpecialName').value = entity.stats.specialName === "특수" ? "" : entity.stats.specialName;
             document.getElementById('inputAbilityName').value = entity.skills.ability.name === "-" ? "" : entity.skills.ability.name; document.getElementById('inputAbilityDesc').value = entity.skills.ability.desc === "-" ? "" : entity.skills.ability.desc;
 
-            document.getElementById('inputCharSkillName').value = entity.skills.charSkill.name === "-" ? "" : entity.skills.charSkill.name; document.getElementById('inputCharSkillDesc').value = entity.skills.charSkill.desc === "-" ? "" : entity.skills.charSkill.desc; document.getElementById('inputCharSkillEffect').value = entity.skills.charSkill.effect === "-" ? "" : entity.skills.charSkill.effect; document.getElementById('inputCharSkillRange').value = entity.skills.charSkill.range || '단일'; document.getElementById('inputCharSkillTarget').value = entity.skills.charSkill.targetType || 'enemy';
+            document.getElementById('inputCharSkillName').value = entity.skills.charSkill.name === "-" ? "" : entity.skills.charSkill.name; document.getElementById('inputCharSkillDesc').value = entity.skills.charSkill.desc === "-" ? "" : entity.skills.charSkill.desc; document.getElementById('inputCharSkillEffect').value = entity.skills.charSkill.effect === "-" ? "" : entity.skills.charSkill.effect; document.getElementById('inputCharSkillRange').value = entity.skills.charSkill.range || '단일'; document.getElementById('inputCharSkillTarget').value = entity.skills.charSkill.targetType || 'enemy'; if (document.getElementById('inputCharSkillType')) document.getElementById('inputCharSkillType').value = entity.skills.charSkill.type || '공격';
 
-            document.getElementById('inputConstSkillName').value = entity.skills.constSkill.name === "-" ? "" : entity.skills.constSkill.name; document.getElementById('inputConstSkillDesc').value = entity.skills.constSkill.desc === "-" ? "" : entity.skills.constSkill.desc; document.getElementById('inputConstSkillEffect').value = entity.skills.constSkill.effect === "-" ? "" : entity.skills.constSkill.effect; document.getElementById('inputConstSkillRange').value = entity.skills.constSkill.range || '단일'; document.getElementById('inputConstSkillTarget').value = entity.skills.constSkill.targetType || 'enemy';
+            document.getElementById('inputConstSkillName').value = entity.skills.constSkill.name === "-" ? "" : entity.skills.constSkill.name; document.getElementById('inputConstSkillDesc').value = entity.skills.constSkill.desc === "-" ? "" : entity.skills.constSkill.desc; document.getElementById('inputConstSkillEffect').value = entity.skills.constSkill.effect === "-" ? "" : entity.skills.constSkill.effect; document.getElementById('inputConstSkillRange').value = entity.skills.constSkill.range || '단일'; document.getElementById('inputConstSkillTarget').value = entity.skills.constSkill.targetType || 'enemy'; if (document.getElementById('inputConstSkillType')) document.getElementById('inputConstSkillType').value = entity.skills.constSkill.type || '공격';
 
-            document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy';
+            document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy'; if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = entity.skills.constBless.type || '그 외';
 
             document.getElementById('extraSkillsList').innerHTML = ''; const extraSkills = entity.skills.extraSkills || entity.skills.enemyBasics || []; extraSkills.forEach(bs => { addExtraSkill(bs.name, bs.type, bs.effect, bs.range, bs.targetType || 'enemy'); });
 
@@ -2791,8 +2800,8 @@
         function renderGrid() {
             const enemyPanel = document.getElementById('enemyPanel'); 
             const apostlePanel = document.getElementById('apostlePanel');
-            if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">에너미</h3><div class="side-skill-indicator enemy-indicator" id="enemySkillDisplay">장전된 스킬 없음</div>`;
-            if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">캐릭터</h3><div class="side-skill-indicator apostle-indicator" id="apostleSkillDisplay">장전된 스킬 없음</div>`;
+            if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">에너미</h3><div class="side-skill-indicator enemy-indicator" id="enemySkillDisplay">장전된 술식 없음</div>`;
+            if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">캐릭터</h3><div class="side-skill-indicator apostle-indicator" id="apostleSkillDisplay">장전된 술식 없음</div>`;
 
             if (typeof entities === 'undefined' || !Array.isArray(entities)) return;
 
@@ -2838,10 +2847,10 @@
                         let cDesc = entity.skills.constSkill.desc;
                         let cEff = entity.skills.constSkill.effect;
                         if (isObserver && entity.skills.constSkill.isSecret) {
-                            cDesc = "🔒 비공개된 스킬입니다.";
+                            cDesc = "🔒 비공개된 술식입니다.";
                             cEff = "🔒 비공개된 효과입니다.";
                         }
-                        constSkillHtml = `<div class="skill-box" onclick="selectSkill('constSkill', '${r}', '${entity.id}', '공격')"><span class="skill-title"><span>[특수 스킬] ${entity.skills.constSkill.name}</span> <span class="range-badge">${r}</span></span><span class="skill-desc">${cDesc}</span><span class="skill-effect">▶ 효과: ${cEff}</span></div>`; 
+                        constSkillHtml = `<div class="skill-box" onclick="selectSkill('constSkill', '${r}', '${entity.id}', '${entity.skills.constSkill.type || "공격"}')"><span class="skill-title"><span>[특수 스킬] ${entity.skills.constSkill.name}</span> <span class="range-badge">${r}</span></span><span class="skill-desc">${cDesc}</span><span class="skill-effect">▶ 효과: ${cEff}</span></div>`; 
                     }
 
                     let extraSkillsHtml = '';
@@ -2855,7 +2864,7 @@
                         extraSkillsHtml += '</div>'; 
                     }
 
-                    const charSkillTitle = isEnemy ? '[에너미 스킬]' : '[캐릭터 스킬]'; 
+                    const charSkillTitle = isEnemy ? '[에너미 술식]' : '[캐릭터 술식]'; 
                     const blessTitle = isEnemy ? '[패시브]' : '[패시브]';
                     const charRange = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.range || '단일' : '단일'; 
                     const blessRange = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.range || '단일' : '단일';
@@ -3033,7 +3042,7 @@
                     ${fullnessHtml}
                     ${potionHtml}
                     ${itemContainerHtml}
-                    <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div><div class="skill-box" style="cursor:default;"><span class="skill-title">[이능력] ${abilityName}</span><span class="skill-desc">${abilityDesc}</span></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '공격')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" onclick="selectSkill('constBless', '${blessRange}', '${entity.id}', '그 외')"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge">${blessRange}</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
+                    <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div><div class="skill-box" style="cursor:default;"><span class="skill-title">[이능력] ${abilityName}</span><span class="skill-desc">${abilityDesc}</span></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '${entity.skills.charSkill.type || "공격"}')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" onclick="selectSkill('constBless', '${blessRange}', '${entity.id}', '${entity.skills.constBless.type || "그 외"}')"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge">${blessRange}</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
                     
                     let equipHtml = '';
                     if (entity.equippedSlots) {
@@ -3210,7 +3219,7 @@
             const affectedEntities = entities.filter(e => e.x !== undefined && e.x !== null && e.stats.currentHp > 0 && targets.some(t => t.x === e.x && t.y === e.y));
 
             const validTargets = affectedEntities.filter(target => {
-                if (target.id === attacker.id && activeSkill.skillType === '공격') return false; 
+                if (target.id === attacker.id && activeSkill.skillType === '공격' && activeSkill.targetType !== 'all') return false; 
                 const isSameTeam = target.type === attacker.type;
                 if (activeSkill.targetType === 'ally') return isSameTeam;
                 if (activeSkill.targetType === 'enemy') return !isSameTeam;
@@ -3632,6 +3641,7 @@
                     }, 
                     charSkill: { 
                         name: document.getElementById('inputCharSkillName') ? document.getElementById('inputCharSkillName').value || "-" : "-", 
+                        type: document.getElementById('inputCharSkillType') ? document.getElementById('inputCharSkillType').value : "공격",
                         range: document.getElementById('inputCharSkillRange') ? document.getElementById('inputCharSkillRange').value : "단일", 
                         targetType: document.getElementById('inputCharSkillTarget') ? document.getElementById('inputCharSkillTarget').value : "enemy", 
                         desc: document.getElementById('inputCharSkillDesc') ? document.getElementById('inputCharSkillDesc').value || "-" : "-", 
@@ -3640,6 +3650,7 @@
                     }, 
                     constSkill: { 
                         name: document.getElementById('inputConstSkillName') ? document.getElementById('inputConstSkillName').value || "-" : "-", 
+                        type: document.getElementById('inputConstSkillType') ? document.getElementById('inputConstSkillType').value : "공격",
                         range: document.getElementById('inputConstSkillRange') ? document.getElementById('inputConstSkillRange').value : "단일", 
                         targetType: document.getElementById('inputConstSkillTarget') ? document.getElementById('inputConstSkillTarget').value : "enemy", 
                         desc: document.getElementById('inputConstSkillDesc') ? document.getElementById('inputConstSkillDesc').value || "-" : "-", 
@@ -3648,6 +3659,7 @@
                     }, 
                     constBless: { 
                         name: document.getElementById('inputConstBlessName') ? document.getElementById('inputConstBlessName').value || "-" : "-", 
+                        type: document.getElementById('inputConstBlessType') ? document.getElementById('inputConstBlessType').value : "그 외",
                         range: document.getElementById('inputConstBlessRange') ? document.getElementById('inputConstBlessRange').value : "단일", 
                         targetType: document.getElementById('inputConstBlessTarget') ? document.getElementById('inputConstBlessTarget').value : "enemy", 
                         desc: document.getElementById('inputConstBlessDesc') ? document.getElementById('inputConstBlessDesc').value || "-" : "-", 
