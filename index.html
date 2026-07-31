@@ -2401,11 +2401,11 @@
                 { id: 'tokenColorSection', prop: 'style', val: !isEnemy ? 'flex' : 'none' },
                 { id: 'hpManualSection', prop: 'style', val: isEnemy ? 'flex' : 'none' },
                 { id: 'constSkillSection', prop: 'style', val: !isEnemy ? 'block' : 'none' },
-                { id: 'charSkillSectionTitle', prop: 'innerText', val: isEnemy ? '에너미 술식' : '캐릭터 술식' },
+                { id: 'charSkillSectionTitle', prop: 'innerText', val: isEnemy ? '유일 술식' : '유일 술식' },
                 { id: 'charSkillNameLabel', prop: 'innerText', val: isEnemy ? '에너미 술식 이름' : '술식 이름' },
-                { id: 'blessSectionTitle', prop: 'innerText', val: !isEnemy ? '패시브' : '패시브' },
-                { id: 'blessNameLabel', prop: 'innerText', val: !isEnemy ? '패시브 이름' : '패시브 이름' },
-                { id: 'blessDescLabel', prop: 'innerText', val: !isEnemy ? '패시브 설명' : '패시브 설명' }
+                { id: 'blessSectionTitle', prop: 'innerText', val: !isEnemy ? '고유 술식' : '고유 술식' },
+                { id: 'blessNameLabel', prop: 'innerText', val: !isEnemy ? '술식 이름' : '술식 이름' },
+                { id: 'blessDescLabel', prop: 'innerText', val: !isEnemy ? '술식 설명' : '술식 설명' }
             ];
 
             mappings.forEach(m => {
@@ -2864,8 +2864,8 @@
                         extraSkillsHtml += '</div>'; 
                     }
 
-                    const charSkillTitle = isEnemy ? '[에너미 술식]' : '[캐릭터 술식]'; 
-                    const blessTitle = isEnemy ? '[패시브]' : '[패시브]';
+                    const charSkillTitle = isEnemy ? '[유일 술식]' : '[유일 술식]'; 
+                    const blessTitle = isEnemy ? '[고유 술식]' : '[고유 술식]';
                     const charRange = (entity.skills && entity.skills.charSkill) ? entity.skills.charSkill.range || '단일' : '단일'; 
                     const blessRange = (entity.skills && entity.skills.constBless) ? entity.skills.constBless.range || '단일' : '단일';
 
