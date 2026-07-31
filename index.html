@@ -2859,7 +2859,7 @@
                         extraSkillsHtml = '<div style="margin-bottom:10px;">'; 
                         extraList.forEach((bs, idx) => { 
                             const r = bs.range || '단일'; 
-                            extraSkillsHtml += `<div class="skill-box basic-skill-box" onclick="selectSkill('extra_${idx}', '${r}', '${entity.id}', '${bs.type}')"><span class="skill-title"><span>[기본 스킬 / ${bs.type}] ${bs.name}</span> <span class="range-badge">${r}</span></span><span class="skill-effect">▶ 효과: ${bs.effect}</span></div>`; 
+                            extraSkillsHtml += `<div class="skill-box basic-skill-box" onclick="selectSkill('extra_${idx}', '${r}', '${entity.id}', '${bs.type}')"><span class="skill-title"><span>[일반 술식 / ${bs.type}] ${bs.name}</span> <span class="range-badge">${r}</span></span><span class="skill-effect">▶ 효과: ${bs.effect}</span></div>`; 
                         }); 
                         extraSkillsHtml += '</div>'; 
                     }
@@ -3178,11 +3178,11 @@
             let isSpecialSkill = ['charSkill', 'constSkill', 'constBless'].includes(activeSkill.id);
 
             if (isBasicSkill && attacker.statusEffects && attacker.statusEffects.some(s => s.type === 'silence')) {
-                alert("시전자가 침묵 상태라서 기본 스킬이 발동되지 않습니다.");
+                alert("시전자가 침묵 상태라서 일반 술식이 발동되지 않습니다.");
                 return;
             }
             if (isSpecialSkill && attacker.statusEffects && attacker.statusEffects.some(s => s.type === 'seal')) {
-                alert("시전자가 봉인 상태라서 특수 스킬이 발동되지 않습니다.");
+                alert("시전자가 봉인 상태라서 유일 술식이 발동되지 않습니다.");
                 return;
             }
 
