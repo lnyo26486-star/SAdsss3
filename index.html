@@ -775,7 +775,7 @@
             '제작자':   { desc: '아이템을 제작할 때 20%의 확률로 결과물이 2개씩 생성됩니다.', auto: false },
             '점성술사': { desc: '아군 혹은 적군 한 개체를 선택하여 랜덤 버프 혹은 디버프를 부여합니다.', auto: false },
             '묘지기':   { desc: '공격 데미지의 20%를 흡혈하여 체력을 회복합니다.', auto: true },
-            '은둔자':   { desc: '전투 시작 시 3턴간 공격력이 300 증가하지만, 주위 24칸 내에 생명이 있을 때마다 공격력 수치가 줄어듭니다.', auto: true },
+            '은둔자':   { desc: '전투 시작 시 3턴간 공격력이 60 증가하지만, 주위 24칸 내에 생명이 있을 때마다 공격력 수치가 줄어듭니다.', auto: true },
             '신자':     { desc: '전투 시작 전 얼마나 간절하게 신에게 비는지에 따라 버프가 부여됩니다.', auto: false },
             '보살':     { desc: '디버프 저항력을 조금 지닙니다. ▶ 정신력 스탯 증가', auto: true },
             '치료인':   { desc: '타인을 치료할 때 더 좋은 효과를 냅니다. ▶ 지능 스탯 증가', auto: true },
@@ -1837,14 +1837,14 @@
                     // 주위 24칸(체비셰프 거리 2, 5x5 범위) 내 생존 개체 수만큼 공격력 증가폭 감소
                     // ⚠️ 개체 1명당 감소량(-50)은 원문에 수치가 명시되어 있지 않아 임의로 정한 기본값입니다.
                     //    코드 내 NEARBY_PENALTY_PER_ENTITY 값만 바꾸면 쉽게 조정할 수 있습니다.
-                    const NEARBY_PENALTY_PER_ENTITY = 25;
+                    const NEARBY_PENALTY_PER_ENTITY = 10;
                     const nearbyCount = entities.filter(e =>
                         e.id !== ent.id && e.stats && e.stats.currentHp > 0 &&
                         e.x !== null && e.x !== undefined && e.y !== null && e.y !== undefined &&
                         ent.x !== null && ent.x !== undefined &&
                         Math.max(Math.abs(e.x - ent.x), Math.abs(e.y - ent.y)) <= 2
                     ).length;
-                    const bonus = Math.max(0, 150 - nearbyCount * NEARBY_PENALTY_PER_ENTITY);
+                    const bonus = Math.max(0, 60 - nearbyCount * NEARBY_PENALTY_PER_ENTITY);
                     ent.statusEffects.push(mk('공격력 증가(은둔자)', 'stat', bonus, 3, '🌲', `은둔자 특성 (주위 24칸 내 생존 개체 ${nearbyCount}명 감지로 감소)`, 'str'));
                     addLog(`&nbsp;&nbsp;🏅 [특성:은둔자] <b>${ent.name}</b>: 주위 24칸 내 ${nearbyCount}명 감지, 근력 +${bonus} (3턴)`, 'log-action', true);
                     break;
@@ -3042,7 +3042,7 @@
                     ${fullnessHtml}
                     ${potionHtml}
                     ${itemContainerHtml}
-                    <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div><div class="skill-box" style="cursor:default;"><span class="skill-title">[이능력] ${abilityName}</span><span class="skill-desc">${abilityDesc}</span></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '${entity.skills.charSkill.type || "공격"}')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" onclick="selectSkill('constBless', '${blessRange}', '${entity.id}', '${entity.skills.constBless.type || "그 외"}')"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge">${blessRange}</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
+                    <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div><div class="skill-box" style="cursor:default;"><span class="skill-title">[영력] ${abilityName}</span><span class="skill-desc">${abilityDesc}</span></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '${entity.skills.charSkill.type || "공격"}')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" onclick="selectSkill('constBless', '${blessRange}', '${entity.id}', '${entity.skills.constBless.type || "그 외"}')"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge">${blessRange}</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
                     
                     let equipHtml = '';
                     if (entity.equippedSlots) {
