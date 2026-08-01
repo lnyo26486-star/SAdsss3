@@ -1837,14 +1837,14 @@
                     // 주위 24칸(체비셰프 거리 2, 5x5 범위) 내 생존 개체 수만큼 공격력 증가폭 감소
                     // ⚠️ 개체 1명당 감소량(-50)은 원문에 수치가 명시되어 있지 않아 임의로 정한 기본값입니다.
                     //    코드 내 NEARBY_PENALTY_PER_ENTITY 값만 바꾸면 쉽게 조정할 수 있습니다.
-                    const NEARBY_PENALTY_PER_ENTITY = 50;
+                    const NEARBY_PENALTY_PER_ENTITY = 25;
                     const nearbyCount = entities.filter(e =>
                         e.id !== ent.id && e.stats && e.stats.currentHp > 0 &&
                         e.x !== null && e.x !== undefined && e.y !== null && e.y !== undefined &&
                         ent.x !== null && ent.x !== undefined &&
                         Math.max(Math.abs(e.x - ent.x), Math.abs(e.y - ent.y)) <= 2
                     ).length;
-                    const bonus = Math.max(0, 300 - nearbyCount * NEARBY_PENALTY_PER_ENTITY);
+                    const bonus = Math.max(0, 150 - nearbyCount * NEARBY_PENALTY_PER_ENTITY);
                     ent.statusEffects.push(mk('공격력 증가(은둔자)', 'stat', bonus, 3, '🌲', `은둔자 특성 (주위 24칸 내 생존 개체 ${nearbyCount}명 감지로 감소)`, 'str'));
                     addLog(`&nbsp;&nbsp;🏅 [특성:은둔자] <b>${ent.name}</b>: 주위 24칸 내 ${nearbyCount}명 감지, 근력 +${bonus} (3턴)`, 'log-action', true);
                     break;
