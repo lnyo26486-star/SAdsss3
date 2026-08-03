@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>전투 웹앱</title>
     <style>
-        body { background-color: #f4f5f7; color: #2d3748; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; padding: 30px; }
+        body { background-color: #f4f5f7; color: #2d3748; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; font-size: 14px; }
         
         /* 다크모드 및 추가 효과 CSS */
         body.dark-mode { background-color: #0a0a0a; transition: background-color 0.5s; }
@@ -17,15 +17,15 @@
         @keyframes floatUpFade { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-35px) scale(1.5); opacity: 0; } }
         .heal-cross { position: absolute; color: #48bb78; font-weight: 900; font-size: 22px; pointer-events: none; animation: floatUpFade 1s forwards; z-index: 20; text-shadow: 0 0 6px rgba(255,255,255,0.9); }
 
-        .control-panel { margin-bottom: 25px; padding: 15px 20px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; }
-        .control-group { display: flex; gap: 12px; align-items: center; }
-        .control-group.left-group { padding-right: 15px; border-right: 2px solid #e2e8f0; }
+        .control-panel { margin-bottom: 18px; padding: 10px 16px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.045); display: flex; justify-content: space-between; align-items: center; }
+        .control-group { display: flex; gap: 10px; align-items: center; }
+        .control-group.left-group { padding-right: 12px; border-right: 1px solid #e6e9ee; }
         
-        .control-group.center-group { flex: 1; justify-content: center; padding: 0 15px; }
-        .dice-container { display: flex; align-items: center; gap: 8px; background: #f7fafc; padding: 8px 15px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; }
-        .dice-container input { width: 55px; text-align: center; padding: 4px; border: 1px solid #cbd5e0; border-radius: 4px; font-family: inherit; font-size: 13px; }
+        .control-group.center-group { flex: 1; justify-content: center; padding: 0 12px; }
+        .dice-container { display: flex; align-items: center; gap: 6px; background: #f7fafc; padding: 6px 12px; border-radius: 7px; border: 1px solid #e6e9ee; font-size: 12.5px; }
+        .dice-container input { width: 50px; text-align: center; padding: 3px; border: 1px solid #cbd5e0; border-radius: 4px; font-family: inherit; font-size: 12.5px; }
         
-        button { padding: 10px 18px; background-color: #edf2f7; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; color: #4a5568; transition: all 0.2s ease-in-out; font-family: inherit; }
+        button { padding: 7px 14px; background-color: #edf2f7; border: 1px solid #e2e8f0; border-radius: 7px; cursor: pointer; font-weight: 600; color: #4a5568; transition: all 0.15s ease-in-out; font-family: inherit; font-size: 13px; }
         button:hover { background-color: #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
         .primary-btn { background-color: #4a5568; color: #ffffff; border: none; }
         .primary-btn:hover { background-color: #2d3748; }
@@ -47,7 +47,7 @@
         .round-bookmark { position: absolute; left: -2px; top: 25px; transform: translateX(-100%); background-color: #2d3748; color: #ffffff; padding: 12px 10px; border-radius: 8px 0 0 8px; font-size: 16px; font-weight: 900; box-shadow: -3px 3px 6px rgba(0,0,0,0.15); text-align: center; line-height: 1.4; letter-spacing: 1px; z-index: 5; border: 1px solid #1a202c; border-right: none; }
 
         .battle-tracker { width: 100%; margin-bottom: 10px; text-align: center; padding-bottom: 10px; border-bottom: 2px dashed #edf2f7; }
-        .turn-order-container { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; justify-content: center; align-items: center; min-height: 35px; }
+        .turn-order-container { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; justify-content: safe center; align-items: center; min-height: 35px; scrollbar-width: thin; }
         .turn-block { padding: 8px 14px; border-radius: 20px; background: #edf2f7; border: 1px solid #cbd5e0; font-size: 13px; font-weight: 700; white-space: nowrap; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #4a5568; }
         .turn-block.active { background: #3182ce; color: white; border-color: #2b6cb0; transform: scale(1.15); box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4); z-index: 2; }
         .turn-block.dead { text-decoration: line-through; opacity: 0.4; background: #e2e8f0; }
@@ -87,65 +87,65 @@
         .side-skill-indicator.active { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-        .character-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s; position: relative; order: 0; }
-        .character-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .character-card.active-turn { order: -1; box-shadow: 0 0 0 3px #3182ce, 0 8px 16px rgba(49, 130, 206, 0.2); border-color: #3182ce; animation: popUp 0.4s ease-out; margin-bottom: 10px; }
-        .character-card.enemy-card { border: 2px solid #fc8181; background-color: #fffaf0; }
-        .character-card.enemy-card.active-turn { box-shadow: 0 0 0 3px #e53e3e, 0 8px 16px rgba(229, 62, 62, 0.2); border-color: #e53e3e; }
+        .character-card { background-color: #ffffff; border: 1px solid #e6e9ee; border-radius: 10px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: all 0.2s; position: relative; order: 0; }
+        .character-card:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.07); }
+        .character-card.active-turn { order: -1; box-shadow: 0 0 0 2px #3182ce, 0 6px 14px rgba(49, 130, 206, 0.18); border-color: #3182ce; animation: popUp 0.4s ease-out; margin-bottom: 8px; }
+        .character-card.enemy-card { border: 1px solid #fc8181; background-color: #fffaf9; }
+        .character-card.enemy-card.active-turn { box-shadow: 0 0 0 2px #e53e3e, 0 6px 14px rgba(229, 62, 62, 0.18); border-color: #e53e3e; }
 
-        .card-header { border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-bottom: 10px; }
-        .enemy-card .card-header { border-bottom: 2px solid #fed7d7; }
-        .card-header-top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 15px; }
-        .card-header-mid { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px; min-height: 24px; }
+        .card-header { border-bottom: 1px solid #edf2f7; padding-bottom: 8px; margin-bottom: 8px; }
+        .enemy-card .card-header { border-bottom: 1px solid #fed7d7; }
+        .card-header-top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; letter-spacing: -0.2px; }
+        .card-header-mid { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px; min-height: 22px; }
         
-        .card-actions { display: flex; flex-wrap: wrap; gap: 4px; }
-        .action-btn { padding: 4px 6px; font-size: 11px; border-radius: 4px; background-color: #ffffff; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 600; }
+        .card-actions { display: flex; flex-wrap: wrap; gap: 3px; }
+        .action-btn { padding: 3px 6px; font-size: 10.5px; border-radius: 4px; background-color: #ffffff; border: 1px solid #e6e9ee; cursor: pointer; font-weight: 600; }
         .action-btn.edit { color: #3182ce; } .action-btn.status { color: #805ad5; } .action-btn.delete { color: #e53e3e; } 
         .action-btn:hover { background-color: #f7fafc; }
 
-        .type-badge { font-size: 11px; padding: 3px 6px; border-radius: 6px; font-weight: 700; }
+        .type-badge { font-size: 10.5px; padding: 2px 6px; border-radius: 5px; font-weight: 700; }
         .type-badge.apostle { background-color: #ebf8ff; color: #2b6cb0; } 
         .type-badge.enemy { background-color: #fed7d7; color: #c53030; } 
         .dead-badge { background-color: #718096; color: #ffffff; margin-left: 6px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; }
-        .modal-content { background-color: #ffffff; margin: 3% auto; padding: 30px; width: 500px; max-height: 80vh; overflow-y: auto; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .modal-content { background-color: #ffffff; margin: 3% auto; padding: 22px; width: 500px; max-height: 80vh; overflow-y: auto; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
         .modal-content::-webkit-scrollbar { width: 8px; } .modal-content::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
         
-        .form-group { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .form-group label { font-weight: 600; font-size: 13px; color: #4a5568; margin-top: 8px; }
-        .form-group input, .form-group select, .form-group textarea { width: 65%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; transition: border-color 0.2s; font-family: inherit; }
-        .form-group textarea { resize: vertical; min-height: 40px; }
-        .form-section-title { margin-top: 25px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #edf2f7; font-size: 15px; font-weight: 700; color: #2d3748; }
+        .form-group { margin-bottom: 9px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .form-group label { font-weight: 600; font-size: 12.5px; color: #4a5568; margin-top: 7px; }
+        .form-group input, .form-group select, .form-group textarea { width: 65%; padding: 7px 9px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; transition: border-color 0.2s; font-family: inherit; font-size: 13px; }
+        .form-group textarea { resize: vertical; min-height: 36px; }
+        .form-section-title { margin-top: 18px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #edf2f7; font-size: 13.5px; font-weight: 700; color: #2d3748; letter-spacing: -0.2px; }
         
-        .details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0; font-size: 13px; line-height: 1.6; }
+        .details { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; font-size: 12.5px; line-height: 1.55; }
         .enemy-card .details { border-top: 1px dashed #feb2b2; }
-        .toggle-btn { width: 100%; margin-top: 12px; padding: 6px; background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; color: #4a5568; }
+        .toggle-btn { width: 100%; margin-top: 10px; padding: 5px; background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 10.5px; font-weight: 600; color: #4a5568; }
         
-        .hp-input { width: 50px; padding: 2px 4px; border: none; border-bottom: 2px solid transparent; background-color: transparent; text-align: right; font-weight: 800; font-size: 14px; color: inherit; outline: none; font-family: inherit; }
+        .hp-input { width: 50px; padding: 2px 4px; border: none; border-bottom: 2px solid transparent; background-color: transparent; text-align: right; font-weight: 800; font-size: 13px; color: inherit; outline: none; font-family: inherit; }
         .hp-input:hover, .hp-input:focus { border-bottom: 2px solid #a0aec0; background-color: rgba(255, 255, 255, 0.7); cursor: text; }
-        .hp-container { margin-bottom: 4px; font-weight: 600; color: #4a5568; display: flex; align-items: baseline; font-size: 13px; }
+        .hp-container { margin-bottom: 4px; font-weight: 600; color: #4a5568; display: flex; align-items: baseline; font-size: 12.5px; }
         .hp-color-apostle { color: #2b6cb0; } .hp-color-enemy { color: #c53030; }
         
-        .hp-bar-bg { width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 3px; margin-bottom: 8px; overflow: hidden; display: flex; }
+        .hp-bar-bg { width: 100%; height: 5px; background-color: #edf1f5; border-radius: 3px; margin-bottom: 7px; overflow: hidden; display: flex; }
         .hp-bar-fill { height: 100%; transition: width 0.3s ease, background-color 0.3s ease; }
         .shield-bar-fill { height: 100%; transition: width 0.3s ease, background-color 0.3s ease; background-color: #63b3ed; }
         
-        .status-container { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-        .status-icon { cursor: help; font-size: 13px; background-color: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; }
+        .status-container { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+        .status-icon { cursor: help; font-size: 12px; background-color: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; }
         .enemy-card .status-icon { background-color: #fff5f5; border-color: #fed7d7; }
-        .status-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; background-color: #f7fafc; }
-        .status-type-badge { font-size: 10px; padding: 2px 4px; background: #2d3748; color: white; border-radius: 4px; margin-left: 5px; }
+        .status-list-item { display: flex; justify-content: space-between; align-items: center; padding: 7px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 5px; background-color: #f7fafc; }
+        .status-type-badge { font-size: 9.5px; padding: 2px 4px; background: #2d3748; color: white; border-radius: 4px; margin-left: 5px; }
 
         .grade-badge { font-weight: bold; color: #3182ce; background-color: #ebf8ff; padding: 2px 6px; border-radius: 4px; }
         .grade-badge.grade-L { color: #ffffff; background-color: #1a202c; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
 
-        .skill-box { background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .skill-box { background-color: #f7fafc; border: 1px solid #e6e9ee; border-radius: 7px; padding: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
         .skill-box:hover { border-color: #a0aec0; transform: translateX(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .skill-box.active-skill { border: 2px solid #e53e3e; background-color: #fff5f5; }
-        .enemy-card .skill-box { background-color: #fff5f5; border-color: #fed7d7; }
+        .enemy-card .skill-box { background-color: #fff8f8; border-color: #fed7d7; }
         .enemy-card .skill-box:hover { border-color: #fc8181; }
-        .basic-skill-box { background-color: #f7fafc; border-color: #e2e8f0; }
+        .basic-skill-box { background-color: #f7fafc; border-color: #e6e9ee; }
         .enemy-card .skill-box.active-skill { border: 2px solid #e53e3e; background-color: #fed7d7; }
         
         .skill-title { font-weight: 700; color: #2d3748; margin-bottom: 4px; display: flex; justify-content: space-between; font-size: 13px; }
@@ -286,13 +286,6 @@
                     <option value="폭풍">폭풍</option>
                     <option value="황사">황사</option>
                 </select>
-                <div style="display:flex; align-items:center; gap:6px; border-left:1px solid #e2e8f0; padding-left:8px;">
-                    <button onclick="document.getElementById('bgmInput').click()" style="padding:4px 8px; font-size:12px; font-weight:600; background:#e2e8f0; border:none; border-radius:4px; cursor:pointer; white-space:nowrap;">🎵 BGM</button>
-                    <input type="file" id="bgmInput" accept="audio/*" style="display:none;" onchange="if(this.files.length>0) { document.getElementById('bgmPlayer').src = URL.createObjectURL(this.files[0]); }">
-                    <input type="range" id="bgmVolume" min="0" max="1" step="0.01" value="0.5" style="width: 40px; margin:0; cursor:pointer;" oninput="document.getElementById('bgmPlayer').volume = this.value">
-                    <audio id="bgmPlayer" loop style="display:none;"></audio>
-                    <button id="bgmPlayBtn" onclick="toggleBGM()" style="padding:4px 8px; border:1px solid #cbd5e0; background:#fff; border-radius:4px; font-size:12px; cursor:pointer; white-space:nowrap; color:#4a5568;">▶ 재생</button>
-                </div>
             </div>
     
             <div style="display: flex; gap: 6px; align-items: center; border-right: 1px solid #e2e8f0; padding-right: 12px; background: #f7fafc; padding: 6px 10px; border-radius: 6px;">
@@ -679,7 +672,7 @@
             </div>
     
             <div id="manualResonanceSection">
-                <div class="form-section-title">영력 증감</div>
+                <div class="form-section-title">영력 증감 (개체 지정)</div>
                 <div class="form-group">
                     <select id="resonanceTargetSelect" style="width: 100%;" onfocus="populateSpiritSelect()">
                         <option value="">캐릭터 선택</option>
@@ -688,6 +681,26 @@
                 <div style="display: flex; gap: 5px; margin-top: 5px;">
                     <input type="number" id="resonanceValue" placeholder="수치" style="flex: 1;">
                     <button onclick="applySpiritChange()" style="padding: 8px 16px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">증감 적용</button>
+                </div>
+
+                <div class="form-section-title" style="margin-top: 16px;">필드 영력 일괄 적용</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                    <select id="globalSpiritTarget" style="flex: 1;">
+                        <option value="all">전원</option>
+                        <option value="apostle">캐릭터만</option>
+                        <option value="enemy">에너미만</option>
+                    </select>
+                    <select id="globalSpiritType" style="flex: 1;">
+                        <option value="flat">고정치</option>
+                        <option value="percent">% (최대영력)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="globalSpiritValue" placeholder="수치" style="width: 100%;">
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="applyGlobalSpirit('gain')" style="flex: 1; padding: 8px; background: #805ad5; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 충전</button>
+                    <button onclick="applyGlobalSpirit('lose')" style="flex: 1; padding: 8px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 소모</button>
                 </div>
             </div>
     
@@ -775,7 +788,7 @@
             '제작자':   { desc: '아이템을 제작할 때 20%의 확률로 결과물이 2개씩 생성됩니다.', auto: false },
             '점성술사': { desc: '아군 혹은 적군 한 개체를 선택하여 랜덤 버프 혹은 디버프를 부여합니다.', auto: false },
             '묘지기':   { desc: '공격 데미지의 20%를 흡혈하여 체력을 회복합니다.', auto: true },
-            '은둔자':   { desc: '전투 시작 시 3턴간 공격력이 60 증가하지만, 주위 24칸 내에 생명이 있을 때마다 공격력 수치가 줄어듭니다.', auto: true },
+            '은둔자':   { desc: '전투 시작 시 3턴간 근력이 60 증가하지만, 주위 24칸 내에 생명이 있을 때마다 근력 증가폭이 10씩 감소합니다.', auto: true },
             '신자':     { desc: '전투 시작 전 얼마나 간절하게 신에게 비는지에 따라 버프가 부여됩니다.', auto: false },
             '보살':     { desc: '디버프 저항력을 조금 지닙니다. ▶ 정신력 스탯 증가', auto: true },
             '치료인':   { desc: '타인을 치료할 때 더 좋은 효과를 냅니다. ▶ 지능 스탯 증가', auto: true },
@@ -917,14 +930,6 @@
             const manualBtn = document.getElementById('manualControlBtn');
             if (manualBtn) manualBtn.style.display = 'none';
 
-            document.body.addEventListener('click', function unlockAudio() {
-                const bgmAudio = document.getElementById('bgm');
-                if (bgmAudio && bgmAudio.paused) {
-                    bgmAudio.play().catch(e => console.log(e));
-                }
-                document.body.removeEventListener('click', unlockAudio);
-            }, { once: true });
-
             window.handleTileClick = function(){ return false; };
             window.selectSkill = function(){ return false; };
             window.updateHp = function(){ return false; };
@@ -933,7 +938,6 @@
         function syncToFirebase() {
             if (!isAdmin) return;
 
-            const bgmAudio = document.getElementById('bgm');
             const logContainer = document.querySelector('.log-panel, #logPanel, #logContainer, .message-box');
             const weatherSelect = document.getElementById('weatherSelect');
 
@@ -950,8 +954,6 @@
                 activeSkill: typeof activeSkill !== 'undefined' ? activeSkill : null,
                 isDarkMode: document.body.classList.contains('dark-mode') || (typeof isDarkMode !== 'undefined' && isDarkMode),
                 currentWeather: weatherSelect ? weatherSelect.value : '',
-                isBgmPlaying: bgmAudio ? !bgmAudio.paused : false,
-                bgmSrc: bgmAudio ? bgmAudio.src : '',
                 logs: logContainer ? logContainer.innerHTML : ''
             };
 
@@ -1060,16 +1062,6 @@
                 } else {
                     document.body.classList.remove('dark-mode');
                     if (typeof isDarkMode !== 'undefined') isDarkMode = false;
-                }
-
-                const bgmAudio = document.getElementById('bgm');
-                if (bgmAudio) {
-                    if (data.bgmSrc && bgmAudio.src !== data.bgmSrc) bgmAudio.src = data.bgmSrc;
-                    if (data.isBgmPlaying && bgmAudio.paused) {
-                        bgmAudio.play().catch(() => console.log("뷰어 화면 클릭 대기 중..."));
-                    } else if (!data.isBgmPlaying && !bgmAudio.paused) {
-                        bgmAudio.pause();
-                    }
                 }
 
                 const logContainer = document.querySelector('.log-panel, #logPanel, #logContainer, .message-box');
@@ -1834,9 +1826,7 @@
                     ent.statusEffects.push(mk('흡혈(처형인)', 'vampire', 40, 999, '🩸', '처형인 특성으로 인한 흡혈'));
                     break;
                 case '은둔자': {
-                    // 주위 24칸(체비셰프 거리 2, 5x5 범위) 내 생존 개체 수만큼 공격력 증가폭 감소
-                    // ⚠️ 개체 1명당 감소량(-50)은 원문에 수치가 명시되어 있지 않아 임의로 정한 기본값입니다.
-                    //    코드 내 NEARBY_PENALTY_PER_ENTITY 값만 바꾸면 쉽게 조정할 수 있습니다.
+                    // 전투 시작 시 3턴간 근력 +60, 주위 24칸(체비셰프 거리 2, 5x5 범위) 내 생존 개체 1명당 -10 (최소 0)
                     const NEARBY_PENALTY_PER_ENTITY = 10;
                     const nearbyCount = entities.filter(e =>
                         e.id !== ent.id && e.stats && e.stats.currentHp > 0 &&
@@ -2350,7 +2340,7 @@
             document.getElementById('inputHpManual').value = '3000'; 
             
             const charGradeEl = document.getElementById('inputCharGrade');
-            if (charGradeEl) charGradeEl.value = 'F';
+            if (charGradeEl) charGradeEl.value = '7';
             document.querySelectorAll('.stat-grade').forEach(sel => { sel.value = 'F'; });
 
             const traitEl = document.getElementById('inputTrait');
@@ -2450,6 +2440,7 @@
                 if (typeof updateTraitDescPreview === 'function') updateTraitDescPreview();
             }
             if (entity.type === '캐릭터') { document.getElementById('inputHpGrade').value = entity.stats.hpGrade || 'F'; } else { document.getElementById('inputHpManual').value = entity.stats.maxHp; }
+            if (document.getElementById('inputCharGrade')) document.getElementById('inputCharGrade').value = entity.stats.charGrade || '7';
             document.getElementById('gradeStr').value = entity.stats.grades.str; document.getElementById('gradeAgi').value = entity.stats.grades.agi; document.getElementById('gradeInt').value = entity.stats.grades.int; document.getElementById('gradeMen').value = entity.stats.grades.men; document.getElementById('gradeLuk').value = entity.stats.grades.luk; document.getElementById('gradeSpecial').value = entity.stats.grades.special;
             if (document.getElementById('gradeSpirit')) document.getElementById('gradeSpirit').value = entity.stats.grades.spirit || 'F';
             document.getElementById('inputSpecialName').value = entity.stats.specialName === "특수" ? "" : entity.stats.specialName;
@@ -2823,7 +2814,7 @@
                     const isActiveTurn = typeof isBattleActive !== 'undefined' && isBattleActive && typeof turnOrder !== 'undefined' && typeof currentTurnIndex !== 'undefined' && turnOrder[currentTurnIndex] === entity.id; 
                     const activeClass = isActiveTurn ? ' active-turn' : '';
                     
-                    const charGradeStr = (entity.stats && entity.stats.charGrade) ? entity.stats.charGrade : 'F';
+                    const charGradeStr = (entity.stats && entity.stats.charGrade) ? entity.stats.charGrade : '7';
                     const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}성</span>` : '';
 
                     // 🌟 특성(패시브) 배지 — 상시 적용되는 특성을 카드 상단에 표시하고, 마우스를 올리면 설명이 보임
@@ -3277,7 +3268,7 @@
             }
             const critProb = getEffectiveStat(attacker, 'luk') / 10 + critUpBonus;
 
-            const charGrade = (attacker.stats && attacker.stats.charGrade) ? attacker.stats.charGrade : 'F';
+            const charGrade = (attacker.stats && attacker.stats.charGrade) ? attacker.stats.charGrade : '7';
             const gradeMultipliers = { '1': 1.5, '2': 1.35, '3': 1.2, '4': 1.1, '5': 1.05, '6': 1.0, '7': 1.0 };
             const gradeMultiplier = gradeMultipliers[charGrade] || 1.0;
 
@@ -3323,10 +3314,12 @@
                         if (attacker.trait === '닥터' && isSelfHeal) {
                             if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [특성:닥터] <b>${attacker.name}</b>은(는) 자신을 치료할 수 없습니다.`, '', true);
                         } else {
-                            let baseHeal = Math.floor(attackerStat * gradeMultiplier * 2.5 * scale * rng);
-                            let hpPercentHeal = Math.floor(target.stats.maxHp * (10 * scale * rng) / 100);
-                            if (isCrit) { baseHeal = Math.floor(baseHeal * 1.7); hpPercentHeal = Math.floor(hpPercentHeal * 1.7); }
-                            let totalHeal = Math.floor((baseHeal + hpPercentHeal) * boostMultiplier);
+                            // 🌟 치료 계산식 개편: 공격 계산식과 동일한 구조로 통일 (지능 × 등급배율 × 사거리계수 × 난수)
+                            //    - 기존의 '대상 최대체력 대비 % 회복' 요소는 제거하여 고체력 대상 과다회복 문제를 해소
+                            //    - 고정 배율(2.5배)도 제거해 공격과 동일한 스케일로 맞춤 → 회복량이 데미지량과 비슷한 수준으로 축소됨
+                            let baseHeal = Math.floor(attackerStat * gradeMultiplier * scale * rng);
+                            if (isCrit) baseHeal = Math.floor(baseHeal * 1.7);
+                            let totalHeal = Math.floor(baseHeal * boostMultiplier);
 
                             // 🌟 특성: 치료인/닥터 - 타인을 치료할 때 효과 +30%
                             if ((attacker.trait === '치료인' || attacker.trait === '닥터') && !isSelfHeal) {
@@ -3695,30 +3688,6 @@
             } catch(e) {}
         }
 
-        function toggleBGM() {
-            const player = document.getElementById('bgmPlayer');
-            const btn = document.getElementById('bgmPlayBtn');
-            const fileInput = document.getElementById('bgmInput');
-            
-            // 오디오 src 텍스트를 검사하는 대신, 파일 첨부 인풋에 실제로 파일이 들어있는지 직접 확인
-            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-                alert("BGM 파일을 먼저 첨부해주세요.");
-                return;
-            }
-
-            if (player.paused) {
-                // 파일은 첨부되었는데 player에 제대로 들어가지 않은 경우를 위한 안전장치
-                if (!player.src || !player.src.startsWith('blob:')) {
-                    player.src = URL.createObjectURL(fileInput.files[0]);
-                }
-                player.play();
-                btn.innerText = '⏸ 정지';
-            } else {
-                player.pause();
-                btn.innerText = '▶ 재생';
-            }
-        }
-
         function resetSpirit(entityId) {
             const entity = entities.find(e => e.id === entityId);
             if (entity && entity.stats) {
@@ -4083,8 +4052,64 @@
             if (typeof updateBattleUI === 'function') updateBattleUI();
             if (typeof renderGrid === 'function') renderGrid();
             if (typeof renderTokens === 'function') renderTokens();
+            if (typeof syncToFirebase === 'function' && typeof isAdmin !== 'undefined' && isAdmin) syncToFirebase();
             
             document.getElementById('globalHpValue').value = '';
+        }
+
+        function applyGlobalSpirit(actionType) {
+            const targetGroup = document.getElementById('globalSpiritTarget').value;
+            const calcType = document.getElementById('globalSpiritType').value;
+            const valStr = document.getElementById('globalSpiritValue').value;
+
+            if (valStr === '') {
+                alert('수치를 입력하세요.');
+                return;
+            }
+
+            const value = parseInt(valStr, 10);
+            if (value <= 0) {
+                alert('0보다 큰 숫자를 입력하세요.');
+                return;
+            }
+
+            const targets = entities.filter(e => {
+                if (e.x === undefined || e.x === null || !e.stats || e.stats.currentHp <= 0) return false;
+                if (targetGroup === 'apostle' && e.type === '에너미') return false;
+                if (targetGroup === 'enemy' && e.type !== '에너미') return false;
+                return true;
+            });
+
+            if (targets.length === 0) {
+                alert('필드에 조건을 만족하는 대상이 없습니다.');
+                return;
+            }
+
+            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? '모든 캐릭터' : '모든 에너미');
+
+            targets.forEach(ent => {
+                const maxSpirit = ent.stats.maxSpirit || 0;
+                if (ent.stats.currentSpirit === undefined || ent.stats.currentSpirit === null) ent.stats.currentSpirit = maxSpirit;
+                const amount = calcType === 'percent' ? Math.floor(maxSpirit * (value / 100)) : value;
+                const delta = actionType === 'gain' ? amount : -amount;
+
+                ent.stats.currentSpirit += delta;
+                if (ent.stats.currentSpirit > maxSpirit) ent.stats.currentSpirit = maxSpirit;
+                if (ent.stats.currentSpirit < 0) ent.stats.currentSpirit = 0;
+            });
+
+            const logMsg = actionType === 'gain'
+                ? `[시스템] ${groupName}에게 영력 ${value}${calcType === 'percent' ? '%' : ''} 충전 효과가 적용되었습니다.`
+                : `[시스템] ${groupName}에게 영력 ${value}${calcType === 'percent' ? '%' : ''} 소모 효과가 적용되었습니다.`;
+
+            if (typeof addLog === 'function') addLog(logMsg, 'log-action');
+
+            if (typeof updateBattleUI === 'function') updateBattleUI();
+            if (typeof renderGrid === 'function') renderGrid();
+            if (typeof renderTokens === 'function') renderTokens();
+            if (typeof syncToFirebase === 'function' && typeof isAdmin !== 'undefined' && isAdmin) syncToFirebase();
+
+            document.getElementById('globalSpiritValue').value = '';
         }
 
         function openManualControlModal() {
