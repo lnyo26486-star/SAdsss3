@@ -374,6 +374,7 @@
                     <select id="inputTrait" onchange="updateTraitDescPreview()">
                         <option value="">특성 없음</option>
                         <option value="무도가">무도가</option>
+                        <option value="교란종">교란종</option>
                         <option value="결투가">결투가</option>
                         <option value="제작자">제작자</option>
                         <option value="점성술사">점성술사</option>
@@ -447,7 +448,10 @@
                     <div class="form-group"><label>적용 대상</label>
                         <select id="inputConstSkillTarget"><option value="enemy">적군만 (기본 타격)</option><option value="ally">아군만 (회복/버프)</option><option value="all">모두 (팀킬 허용)</option></select>
                     </div>
-                    <div class="form-group"><label>술식 설명</label><textarea id="inputConstSkillDesc" rows="2"></textarea></div>
+                    <div class="form-group">
+                        <label>술식 설명 <input type="checkbox" id="inputConstSkillSecret" style="margin-left: 8px;"> 비공개</label>
+                        <textarea id="inputConstSkillDesc" rows="2"></textarea>
+                    </div>
                     <div class="form-group"><label>실제 효과</label><textarea id="inputConstSkillEffect" rows="2"></textarea></div>
                 </div>
 
@@ -519,6 +523,7 @@
                         <option value="immortal">불사 (체력이 0이 될 때 1로 생존)</option>
                         <option value="taunt">도발 (강제 지목 대상 표시 — 카드에 강조 테두리로 표시됨)</option>
                         <option value="crit_up">치명타 확률 증가 (%)</option>
+                        <option value="action_damage">행동피해 (보유자가 행동 시 정산되어 소멸. 공격 스킬이면 가한 피해의 %만큼 본인도 피해)</option>
                     </select>
                 </div>
                 <div class="form-group" id="statusValueGroup" style="display:none;">
@@ -773,7 +778,7 @@
         const specialGradeMap = { "L": 120, "SS": 100, "S": 85, "A": 70, "B": 55, "C": 40, "D": 25, "E": 10, "F": 5 };
         const rangeScales = { "단일": 1.5, "십자": 1.0, "주위 8칸": 0.8, "가로 1줄": 0.7, "세로 1줄": 0.7, "가로세로 1줄씩": 0.5, "대각선": 0.5, "가로 3줄": 0.4, "세로 3줄": 0.4, "전체": 0.15 };
         
-        const typeLabels = { "none": "표시", "dot": "피해(%)", "hot": "회복(%)", "stun": "기절", "stat": "스탯", "shield": "보호막", "vampire": "흡혈(%)", "reflect": "반사(%)", "immune": "면역", "vulnerable": "취약(%)", "silence": "침묵", "seal": "봉인", "unhealable": "치유불가", "doom": "즉사(%)", "immortal": "불사" };
+        const typeLabels = { "none": "표시", "dot": "피해(%)", "hot": "회복(%)", "stun": "기절", "stat": "스탯", "shield": "보호막", "vampire": "흡혈(%)", "reflect": "반사(%)", "immune": "면역", "vulnerable": "취약(%)", "silence": "침묵", "seal": "봉인", "unhealable": "치유불가", "doom": "즉사(%)", "immortal": "불사", "action_damage": "행동피해(%)" };
 
         let entities = [];
         let globalStatusList = []; 
@@ -784,6 +789,7 @@
         //               의존하고 있어, 우선은 카드에 설명만 표시되고 GM이 직접 판정/적용해야 함
         const TRAIT_DB = {
             '무도가':   { desc: '전투 시작 시 2턴간 도발 효과를 부여하고 민첩 스탯을 20 증가시킵니다.', auto: true },
+            '교란종':   { desc: '전투 시작 시 2턴간 무조건적인 도발 효과를 부여한 후, 민첩 스탯을 80 증가시킵니다.', auto: true },
             '결투가':   { desc: '전투 시작 시 본인에게 500의 보호막을 부여합니다.', auto: true },
             '제작자':   { desc: '아이템을 제작할 때 20%의 확률로 결과물이 2개씩 생성됩니다.', auto: false },
             '점성술사': { desc: '아군 혹은 적군 한 개체를 선택하여 랜덤 버프 혹은 디버프를 부여합니다.', auto: false },
@@ -1803,6 +1809,11 @@
                     ent.statusEffects.push(mk('민첩 증가(무도가)', 'stat', 20, 999, '⚡', '무도가 특성으로 인한 민첩 증가', 'agi'));
                     addLog(`&nbsp;&nbsp;🏅 [특성:무도가] <b>${ent.name}</b>에게 도발(2턴)과 민첩 +20 효과가 부여되었습니다.`, 'log-action', true);
                     break;
+                case '교란종':
+                    ent.statusEffects.push(mk('도발(교란종)', 'taunt', 0, 2, '😤', '교란종 특성으로 전투 시작 시 부여된 무조건적인 도발 효과'));
+                    ent.statusEffects.push(mk('민첩 증가(교란종)', 'stat', 80, 999, '⚡', '교란종 특성으로 인한 민첩 증가', 'agi'));
+                    addLog(`&nbsp;&nbsp;🏅 [특성:교란종] <b>${ent.name}</b>에게 무조건적인 도발(2턴)과 민첩 +80 효과가 부여되었습니다.`, 'log-action', true);
+                    break;
                 case '결투가':
                     ent.statusEffects.push(mk('보호막(결투가)', 'shield', 500, 999, '🛡️', '결투가 특성으로 얻은 보호막'));
                     addLog(`&nbsp;&nbsp;🏅 [특성:결투가] <b>${ent.name}</b>에게 500의 보호막이 부여되었습니다.`, 'log-action', true);
@@ -2148,7 +2159,7 @@
             const type = document.getElementById('inputGlobalStatusType').value;
             const valGroup = document.getElementById('statusValueGroup');
             const statGroup = document.getElementById('statusStatGroup');
-            const needsValue = ['dot', 'hot', 'shield', 'vampire', 'reflect', 'vulnerable', 'doom', 'stat', 'reduce_damage'].includes(type);
+            const needsValue = ['dot', 'hot', 'shield', 'vampire', 'reflect', 'vulnerable', 'doom', 'stat', 'reduce_damage', 'action_damage'].includes(type);
             if(valGroup) valGroup.style.display = needsValue ? 'block' : 'none';
             if(statGroup) statGroup.style.display = type === 'stat' ? 'block' : 'none';
         }
@@ -2183,7 +2194,7 @@
             if (globalStatusList.length === 0) { container.innerHTML = '<div style="color: #a0aec0; font-size: 13px; padding: 10px 0;">도감에 등록된 상태이상이 없습니다.</div>'; return; } 
             globalStatusList.forEach((status) => { 
                 const tLabel = typeof typeLabels !== 'undefined' && typeLabels[status.type] ? typeLabels[status.type] : status.type;
-                const valStr = (status.type === 'stat') ? `(${status.targetStat} ${status.value})` : ['dot', 'hot', 'vampire', 'reflect', 'vulnerable', 'doom', 'reduce_damage', 'crit_up'].includes(status.type) ? `(${status.value}%)` : (status.type === 'shield') ? `(방어량: ${status.value})` : '';
+                const valStr = (status.type === 'stat') ? `(${status.targetStat} ${status.value})` : ['dot', 'hot', 'vampire', 'reflect', 'vulnerable', 'doom', 'reduce_damage', 'crit_up', 'action_damage'].includes(status.type) ? `(${status.value}%)` : (status.type === 'shield') ? `(방어량: ${status.value})` : '';
                 const item = document.createElement('div'); item.className = 'status-list-item'; 
                 item.innerHTML = `<div style="flex: 1;"><span style="font-size:16px;">${status.icon}</span> <span style="font-weight:bold;">${status.name}</span> <span class="status-type-badge">${tLabel}${valStr}</span> <div style="font-size:11px; color:#718096; margin-top:3px;">${status.desc}</div></div>
                 <div style="display:flex; gap:4px; align-items:center;">
@@ -2325,18 +2336,21 @@
             document.getElementById('inputCharSkillRange').value = '단일'; 
             document.getElementById('inputCharSkillTarget').value = 'enemy'; 
             if (document.getElementById('inputCharSkillType')) document.getElementById('inputCharSkillType').value = '공격';
+            if (document.getElementById('inputCharSkillSecret')) document.getElementById('inputCharSkillSecret').checked = false;
             document.getElementById('inputConstSkillName').value = ''; 
             document.getElementById('inputConstSkillDesc').value = ''; 
             document.getElementById('inputConstSkillEffect').value = ''; 
             document.getElementById('inputConstSkillRange').value = '단일'; 
             document.getElementById('inputConstSkillTarget').value = 'enemy'; 
             if (document.getElementById('inputConstSkillType')) document.getElementById('inputConstSkillType').value = '공격';
+            if (document.getElementById('inputConstSkillSecret')) document.getElementById('inputConstSkillSecret').checked = false;
             document.getElementById('inputConstBlessName').value = ''; 
             document.getElementById('inputConstBlessDesc').value = ''; 
             document.getElementById('inputConstBlessEffect').value = ''; 
             document.getElementById('inputConstBlessRange').value = '단일'; 
             document.getElementById('inputConstBlessTarget').value = 'enemy'; 
             if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = '그 외';
+            if (document.getElementById('inputConstBlessSecret')) document.getElementById('inputConstBlessSecret').checked = false;
             document.getElementById('inputHpManual').value = '3000'; 
             
             const charGradeEl = document.getElementById('inputCharGrade');
@@ -2446,11 +2460,11 @@
             document.getElementById('inputSpecialName').value = entity.stats.specialName === "특수" ? "" : entity.stats.specialName;
             document.getElementById('inputAbilityName').value = entity.skills.ability.name === "-" ? "" : entity.skills.ability.name; document.getElementById('inputAbilityDesc').value = entity.skills.ability.desc === "-" ? "" : entity.skills.ability.desc;
 
-            document.getElementById('inputCharSkillName').value = entity.skills.charSkill.name === "-" ? "" : entity.skills.charSkill.name; document.getElementById('inputCharSkillDesc').value = entity.skills.charSkill.desc === "-" ? "" : entity.skills.charSkill.desc; document.getElementById('inputCharSkillEffect').value = entity.skills.charSkill.effect === "-" ? "" : entity.skills.charSkill.effect; document.getElementById('inputCharSkillRange').value = entity.skills.charSkill.range || '단일'; document.getElementById('inputCharSkillTarget').value = entity.skills.charSkill.targetType || 'enemy'; if (document.getElementById('inputCharSkillType')) document.getElementById('inputCharSkillType').value = entity.skills.charSkill.type || '공격';
+            document.getElementById('inputCharSkillName').value = entity.skills.charSkill.name === "-" ? "" : entity.skills.charSkill.name; document.getElementById('inputCharSkillDesc').value = entity.skills.charSkill.desc === "-" ? "" : entity.skills.charSkill.desc; document.getElementById('inputCharSkillEffect').value = entity.skills.charSkill.effect === "-" ? "" : entity.skills.charSkill.effect; document.getElementById('inputCharSkillRange').value = entity.skills.charSkill.range || '단일'; document.getElementById('inputCharSkillTarget').value = entity.skills.charSkill.targetType || 'enemy'; if (document.getElementById('inputCharSkillType')) document.getElementById('inputCharSkillType').value = entity.skills.charSkill.type || '공격'; if (document.getElementById('inputCharSkillSecret')) document.getElementById('inputCharSkillSecret').checked = !!entity.skills.charSkill.isSecret;
 
-            document.getElementById('inputConstSkillName').value = entity.skills.constSkill.name === "-" ? "" : entity.skills.constSkill.name; document.getElementById('inputConstSkillDesc').value = entity.skills.constSkill.desc === "-" ? "" : entity.skills.constSkill.desc; document.getElementById('inputConstSkillEffect').value = entity.skills.constSkill.effect === "-" ? "" : entity.skills.constSkill.effect; document.getElementById('inputConstSkillRange').value = entity.skills.constSkill.range || '단일'; document.getElementById('inputConstSkillTarget').value = entity.skills.constSkill.targetType || 'enemy'; if (document.getElementById('inputConstSkillType')) document.getElementById('inputConstSkillType').value = entity.skills.constSkill.type || '공격';
+            document.getElementById('inputConstSkillName').value = entity.skills.constSkill.name === "-" ? "" : entity.skills.constSkill.name; document.getElementById('inputConstSkillDesc').value = entity.skills.constSkill.desc === "-" ? "" : entity.skills.constSkill.desc; document.getElementById('inputConstSkillEffect').value = entity.skills.constSkill.effect === "-" ? "" : entity.skills.constSkill.effect; document.getElementById('inputConstSkillRange').value = entity.skills.constSkill.range || '단일'; document.getElementById('inputConstSkillTarget').value = entity.skills.constSkill.targetType || 'enemy'; if (document.getElementById('inputConstSkillType')) document.getElementById('inputConstSkillType').value = entity.skills.constSkill.type || '공격'; if (document.getElementById('inputConstSkillSecret')) document.getElementById('inputConstSkillSecret').checked = !!entity.skills.constSkill.isSecret;
 
-            document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy'; if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = entity.skills.constBless.type || '그 외';
+            document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy'; if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = entity.skills.constBless.type || '그 외'; if (document.getElementById('inputConstBlessSecret')) document.getElementById('inputConstBlessSecret').checked = !!entity.skills.constBless.isSecret;
 
             document.getElementById('extraSkillsList').innerHTML = ''; const extraSkills = entity.skills.extraSkills || entity.skills.enemyBasics || []; extraSkills.forEach(bs => { addExtraSkill(bs.name, bs.type, bs.effect, bs.range, bs.targetType || 'enemy'); });
 
@@ -3298,6 +3312,8 @@
                 });
             }
 
+            let totalDamageDealtThisAction = 0;
+
             validTargets.forEach(target => {
                 let dodgedAttack = false;
 
@@ -3373,6 +3389,7 @@
                             }
                             
                             let actualDamageDealt = typeof processDamage === 'function' ? processDamage(target, Math.max(0, damage)) : Math.max(0, damage);
+                            totalDamageDealtThisAction += actualDamageDealt;
                             
                             if (actualDamageDealt > 0) {
                                 const panelId = target.type === '에너미' ? 'enemyPanel' : 'apostlePanel';
@@ -3460,6 +3477,29 @@
                     }
                 }
             });
+
+            // 🌟 상태이상: 행동피해 — 보유자가 이번 행동(스킬 사용)으로 정산되어 소멸.
+            //    공격 스킬이었을 경우, 이번 행동으로 자신이 입힌 총 피해의 %만큼 본인도 피해를 입음.
+            //    치료/그 외 스킬을 사용한 경우에는 피해 없이 그냥 정산되어 사라짐.
+            if (attacker.statusEffects && attacker.statusEffects.some(s => s.type === 'action_damage')) {
+                const actionDamageEffects = attacker.statusEffects.filter(s => s.type === 'action_damage');
+                attacker.statusEffects = attacker.statusEffects.filter(s => s.type !== 'action_damage');
+
+                actionDamageEffects.forEach(eff => {
+                    if (!isHeal && !isEtc && totalDamageDealtThisAction > 0 && attacker.stats.currentHp > 0) {
+                        let selfDmg = Math.floor(totalDamageDealtThisAction * (eff.value / 100));
+                        if (selfDmg > 0) {
+                            let actualSelfDmg = typeof processDamage === 'function' ? processDamage(attacker, selfDmg) : selfDmg;
+                            let sKillMsg = attacker.stats.currentHp <= 0 ? " <span style='color:#e53e3e; font-weight:bold;'>(사망)</span>" : "";
+                            if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ [${eff.name}] <b>${attacker.name}</b>이(가) 자신이 입힌 피해의 <b>${eff.value}%</b>만큼(<b>${actualSelfDmg}</b>) 반동 피해를 입고 상태이상이 정산되어 사라졌습니다.${sKillMsg}`, 'log-hit', true);
+                        } else {
+                            if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ <b>${attacker.name}</b>의 [${eff.name}] 효과가 정산되어 사라졌습니다.`, '', true);
+                        }
+                    } else {
+                        if (typeof addLog === 'function') addLog(`&nbsp;&nbsp;↳ <b>${attacker.name}</b>의 [${eff.name}] 효과가 정산되어 사라졌습니다.`, '', true);
+                    }
+                });
+            }
 
             if (typeof renderGrid === 'function') renderGrid(); 
         }
