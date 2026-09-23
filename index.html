@@ -593,15 +593,11 @@
                 <div class="form-group"><label>이름</label><input type="text" id="inputItemName" placeholder="예: 고농축 포션"></div>
                 <div class="form-group"><label>설명</label><input type="text" id="inputItemDesc" placeholder="예: 체력을 500 회복합니다."></div>
                 <div class="form-group"><label>카테고리</label>
-                    <select id="inputItemCategory" onchange="toggleItemFillAmountUI()">
+                    <select id="inputItemCategory">
                         <option value="일반">일반</option>
-                        <option value="음식">음식 (포만도)</option>
-                        <option value="물약">물약 (중독도)</option>
+                        <option value="음식">음식</option>
+                        <option value="물약">물약</option>
                     </select>
-                </div>
-                <div class="form-group" id="itemFillAmountGroup" style="display:none;">
-                    <label id="itemFillAmountLabel">증감량</label>
-                    <input type="number" id="inputItemFillAmount" value="20" style="width:80px;">
                 </div>
                 <div class="form-group"><label>이미지 URL<br><span style="font-size:10px; font-weight:normal; color:#a0aec0;">(선택)</span></label><input type="text" id="inputItemImage" placeholder="https://..."></div>
                 <div class="form-group"><label>효과 키워드</label>
@@ -999,11 +995,6 @@
             if (statusEl) statusEl.innerText = msg;
         }
 
-        // 포만도 / 물약중독 시스템 설정
-        const FULLNESS_MAX = 100;
-        const POTION_MAX = 100;
-        const POTION_ADDICTION_PENALTY = -120; // 물약중독 시 전체 스탯 감소량
-        const POTION_ADDICTION_STATUS_NAME = '물약 중독';
         const specialGradeMap = { "L": 120, "SS": 100, "S": 85, "A": 70, "B": 55, "C": 40, "D": 25, "E": 10, "F": 5 };
         const rangeScales = { "단일": 1.5, "십자": 1.0, "주위 8칸": 0.8, "가로 1줄": 0.7, "세로 1줄": 0.7, "가로세로 1줄씩": 0.5, "대각선": 0.5, "가로 3줄": 0.4, "세로 3줄": 0.4, "전체": 0.15 };
         
@@ -3021,37 +3012,20 @@
             document.getElementById('itemCatalogModal').style.display = 'none';
         }
 
-        function toggleItemFillAmountUI() {
-            const cat = document.getElementById('inputItemCategory').value;
-            const group = document.getElementById('itemFillAmountGroup');
-            const label = document.getElementById('itemFillAmountLabel');
-            if (cat === '음식') {
-                group.style.display = 'flex';
-                label.innerText = '포만도 증감량 (음수 입력 시 감소)';
-            } else if (cat === '물약') {
-                group.style.display = 'flex';
-                label.innerText = '중독도 증감량 (음수 입력 시 감소)';
-            } else {
-                group.style.display = 'none';
-            }
-        }
-
         function addItemToCatalog() {
             const name = document.getElementById('inputItemName').value;
             const desc = document.getElementById('inputItemDesc').value;
             const effect = document.getElementById('inputItemEffect').value;
             const category = document.getElementById('inputItemCategory') ? document.getElementById('inputItemCategory').value : '일반';
-            const fillAmount = document.getElementById('inputItemFillAmount') ? (parseInt(document.getElementById('inputItemFillAmount').value, 10) || 20) : 20;
             const image = document.getElementById('inputItemImage') ? document.getElementById('inputItemImage').value.trim() : '';
             if (!name) return alert("아이템 이름을 입력하세요.");
-            itemCatalog.push({ id: Date.now(), name, desc, effect, category, fillAmount, image });
+            itemCatalog.push({ id: Date.now(), name, desc, effect, category, image });
             renderItemCatalog();
             document.getElementById('inputItemName').value = '';
             document.getElementById('inputItemDesc').value = '';
             document.getElementById('inputItemEffect').value = '';
             document.getElementById('inputItemImage').value = '';
             document.getElementById('inputItemCategory').value = '일반';
-            toggleItemFillAmountUI();
         }
 
         function renderItemCatalog() {
@@ -3066,8 +3040,7 @@
                 const div = document.createElement('div');
                 div.className = 'item-list-item';
                 const thumb = item.image ? `<img src="${item.image}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; margin-right:8px; vertical-align:middle;" onerror="this.style.display='none'">` : '';
-                const fillInfo = (item.category === '음식' || item.category === '물약') ? `<br><span style="font-size:10px; color:#805ad5;">증가량: ${item.fillAmount || 0}</span>` : '';
-                div.innerHTML = `<div style="display:flex; align-items:center;">${thumb}<div><b>${item.name}</b>${catBadge(item.category)}<br><span style="font-size:11px; color:#718096;">${item.desc}</span><br><span style="font-size:10px; color:#c05621;">${item.effect}</span>${fillInfo}</div></div>
+                div.innerHTML = `<div style="display:flex; align-items:center;">${thumb}<div><b>${item.name}</b>${catBadge(item.category)}<br><span style="font-size:11px; color:#718096;">${item.desc}</span><br><span style="font-size:10px; color:#c05621;">${item.effect}</span></div></div>
                 <button onclick="itemCatalog.splice(${idx}, 1); renderItemCatalog();" class="danger-btn" style="padding:4px 8px; font-size:11px;">삭제</button>`;
                 list.appendChild(div);
             });
@@ -3192,22 +3165,18 @@
                 return;
             }
 
-            const catIcon = (cat) => cat === '음식' ? '' : (cat === '물약' ? '' : '');
             list.innerHTML = '';
             itemCatalog.forEach(item => {
                 const category = item.category || '일반';
-                const blocked = category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX;
                 const thumb = item.image ? `<img src="${item.image}" style="width:34px; height:34px; object-fit:cover; border-radius:6px; margin-right:10px; flex-shrink:0;" onerror="this.style.display='none'">` : '';
 
                 const div = document.createElement('div');
-                div.style.cssText = `display:flex; align-items:center; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; ${blocked ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;'}`;
-                div.title = blocked ? '포만 상태라 사용할 수 없습니다.' : (item.desc || '');
-                div.innerHTML = `${thumb}<div style="flex:1; min-width:0;"><b style="font-size:13px;">${catIcon(category)} ${item.name}</b><br><span style="font-size:11px; color:#718096;">${item.desc || ''}</span></div>`;
-                if (!blocked) {
-                    div.onclick = () => selectItemForUse(ownerId, item.id);
-                    div.onmouseenter = () => div.style.background = '#f7fafc';
-                    div.onmouseleave = () => div.style.background = '#fff';
-                }
+                div.style.cssText = `display:flex; align-items:center; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; cursor:pointer;`;
+                div.title = item.desc || '';
+                div.innerHTML = `${thumb}<div style="flex:1; min-width:0;"><b style="font-size:13px;">${item.name}</b><br><span style="font-size:11px; color:#718096;">${item.desc || ''}</span></div>`;
+                div.onclick = () => selectItemForUse(ownerId, item.id);
+                div.onmouseenter = () => div.style.background = '#f7fafc';
+                div.onmouseleave = () => div.style.background = '#fff';
                 list.appendChild(div);
             });
         }
@@ -3216,13 +3185,6 @@
             const owner = entities.find(e => e.id === ownerId);
             const item = itemCatalog.find(i => i.id === catalogItemId);
             if (!owner || !item) return;
-
-            const category = item.category || '일반';
-
-            if (category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
-                alert(`${owner.name}은(는) 포만 상태라 더 이상 음식 아이템을 사용할 수 없습니다.`);
-                return;
-            }
 
             pendingItemUse = { ownerId, catalogItemId };
 
@@ -3239,14 +3201,7 @@
             }
 
             const infoEl = document.getElementById('itemUseCategoryInfo');
-            const fillSign = (item.fillAmount || 0) >= 0 ? '+' : '';
-            if (category === '음식') {
-                infoEl.innerText = ` 포만도 ${fillSign}${item.fillAmount || 0} (현재 ${owner.stats.currentFullness || 0}/${FULLNESS_MAX})`;
-            } else if (category === '물약') {
-                infoEl.innerText = ` 물약중독도 ${fillSign}${item.fillAmount || 0} (현재 ${owner.stats.currentPotion || 0}/${POTION_MAX})`;
-            } else {
-                infoEl.innerText = '';
-            }
+            infoEl.innerText = '';
 
             document.getElementById('itemUseQuantity').value = 1;
 
@@ -3270,23 +3225,9 @@
             let qty = parseInt(document.getElementById('itemUseQuantity').value, 10) || 1;
             if (qty < 1) qty = 1;
 
-            const category = item.category || '일반';
-
-            if (category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) {
-                alert(`${owner.name}은(는) 포만 상태라 더 이상 음식 아이템을 사용할 수 없습니다.`);
-                closeItemUseModal();
-                return;
-            }
-
             let usedCount = 0;
             for (let i = 0; i < qty; i++) {
-                if (category === '음식' && (item.fillAmount || 0) > 0 && (owner.stats.currentFullness || 0) >= FULLNESS_MAX) break;
                 processItemEffects(owner, item.effect, owner.name);
-                if (category === '음식') {
-                    adjustFullness(owner.id, item.fillAmount || 0);
-                } else if (category === '물약') {
-                    adjustPotion(owner.id, item.fillAmount || 0);
-                }
                 usedCount++;
             }
 
@@ -3300,68 +3241,6 @@
         function closeItemUseModal() {
             pendingItemUse = null;
             document.getElementById('itemUseModal').style.display = 'none';
-        }
-
-        function adjustFullness(entityId, amount) {
-            const entity = entities.find(e => e.id === entityId);
-            if (!entity || !entity.stats) return;
-            if (entity.stats.currentFullness === undefined || entity.stats.currentFullness === null) entity.stats.currentFullness = 0;
-            entity.stats.currentFullness += amount;
-            if (entity.stats.currentFullness > FULLNESS_MAX) entity.stats.currentFullness = FULLNESS_MAX;
-            if (entity.stats.currentFullness < 0) entity.stats.currentFullness = 0;
-            if (typeof renderGrid === 'function') renderGrid();
-            if (typeof syncToFirebase === 'function') syncToFirebase();
-        }
-
-        function resetFullness(entityId) {
-            const entity = entities.find(e => e.id === entityId);
-            if (!entity || !entity.stats) return;
-            entity.stats.currentFullness = 0;
-            if (typeof renderGrid === 'function') renderGrid();
-            if (typeof syncToFirebase === 'function') syncToFirebase();
-        }
-
-        function adjustPotion(entityId, amount) {
-            const entity = entities.find(e => e.id === entityId);
-            if (!entity || !entity.stats) return;
-            if (entity.stats.currentPotion === undefined || entity.stats.currentPotion === null) entity.stats.currentPotion = 0;
-            entity.stats.currentPotion += amount;
-            if (entity.stats.currentPotion > POTION_MAX) entity.stats.currentPotion = POTION_MAX;
-            if (entity.stats.currentPotion < 0) entity.stats.currentPotion = 0;
-
-            if (!entity.statusEffects) entity.statusEffects = [];
-            const hasAddiction = entity.statusEffects.some(s => s.name === POTION_ADDICTION_STATUS_NAME);
-
-            if (entity.stats.currentPotion >= POTION_MAX && !hasAddiction) {
-                entity.statusEffects.push({
-                    id: 'addiction_' + Date.now(),
-                    icon: '🧪',
-                    name: POTION_ADDICTION_STATUS_NAME,
-                    desc: '물약을 과다 섭취하여 전체 스탯이 감소했습니다.',
-                    type: 'stat',
-                    targetStat: 'all',
-                    value: POTION_ADDICTION_PENALTY,
-                    duration: 999
-                });
-                addLog(`<b>${entity.name}</b>이(가) 물약을 과다 섭취하여 <b>물약 중독</b> 상태가 되었습니다! (전체 스탯 ${POTION_ADDICTION_PENALTY})`, 'log-hit');
-            } else if (entity.stats.currentPotion < POTION_MAX && hasAddiction) {
-                entity.statusEffects = entity.statusEffects.filter(s => s.name !== POTION_ADDICTION_STATUS_NAME);
-                addLog(`<b>${entity.name}</b>의 물약 중독 상태가 해제되었습니다.`, 'log-heal');
-            }
-
-            if (typeof renderGrid === 'function') renderGrid();
-            if (typeof syncToFirebase === 'function') syncToFirebase();
-        }
-
-        function resetPotion(entityId) {
-            const entity = entities.find(e => e.id === entityId);
-            if (!entity || !entity.stats) return;
-            entity.stats.currentPotion = 0;
-            if (entity.statusEffects) {
-                entity.statusEffects = entity.statusEffects.filter(s => s.name !== POTION_ADDICTION_STATUS_NAME);
-            }
-            if (typeof renderGrid === 'function') renderGrid();
-            if (typeof syncToFirebase === 'function') syncToFirebase();
         }
 
         function renderGrid() {
@@ -3394,7 +3273,7 @@
                     const activeClass = isActiveTurn ? ' active-turn' : '';
                     
                     const charGradeStr = (entity.stats && entity.stats.charGrade) ? entity.stats.charGrade : 'F';
-                    const gradeBadge = !isEnemy ? `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}급</span>` : '';
+                    const gradeBadge = `<span class="type-badge" style="background:#ecc94b; color:#744210; margin-left:4px;">${charGradeStr}급</span>`;
 
                     // 포지션 배지
                     const positionBadge = entity.position ? `<span class="type-badge" style="background:#e2e8f0; color:#2d3748; margin-left:4px;">${POSITION_LABELS[entity.position] || ''}</span>` : '';
@@ -3474,45 +3353,12 @@
                     const resonanceHtml = `
                         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
                             <div style="font-size: 11px; color: #805ad5; white-space: nowrap;">공명도 ${currentResonanceValue} / ${RESONANCE_MAX}${isResonanceReady ? ' <span style="color:#d69e2e;">성좌 스킬 준비완료</span>' : ''}
-                                <button onclick="adjustResonance('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소"></button>
-                                <button onclick="adjustResonance('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가"></button>
-                                <button onclick="resetResonance('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="공명도 0으로 초기화"></button>
+                                <button onclick="adjustResonance('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소">-10</button>
+                                <button onclick="adjustResonance('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가">+10</button>
+                                <button onclick="resetResonance('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="공명도 0으로 초기화">초기화</button>
                             </div>
                             <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
                                 <div style="width: ${resonanceWidth}%; height: 100%; background: linear-gradient(90deg, ${isResonanceReady ? '#f6ad55, #d69e2e' : '#b794f4, #805ad5'}); transition: width 0.3s ease;"></div>
-                            </div>
-                        </div>
-                    `;
-
-                    const curFullness = (entity.stats && entity.stats.currentFullness) || 0;
-                    const curPotion = (entity.stats && entity.stats.currentPotion) || 0;
-                    const isFull = curFullness >= FULLNESS_MAX;
-                    const isAddicted = curPotion >= POTION_MAX;
-                    const fullnessWidth = Math.min(100, Math.max(0, (curFullness / FULLNESS_MAX) * 100));
-                    const potionWidth = Math.min(100, Math.max(0, (curPotion / POTION_MAX) * 100));
-
-                    const fullnessHtml = `
-                        <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
-                            <div style="font-size: 11px; color: #c05621; white-space: nowrap;"> ${curFullness} / ${FULLNESS_MAX}
-                                <button onclick="adjustFullness('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소"></button>
-                                <button onclick="adjustFullness('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가"></button>
-                                <button onclick="resetFullness('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="포만도 초기화"></button>
-                            </div>
-                            <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                                <div style="width: ${fullnessWidth}%; height: 100%; background: linear-gradient(90deg, #f6ad55, #dd6b20); transition: width 0.3s ease;"></div>
-                            </div>
-                        </div>
-                    `;
-
-                    const potionHtml = `
-                        <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
-                            <div style="font-size: 11px; color: ${isAddicted ? '#c53030' : '#805ad5'}; white-space: nowrap;"> ${curPotion} / ${POTION_MAX}${isAddicted ? ' (중독)' : ''}
-                                <button onclick="adjustPotion('${entity.id}', -10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 감소"></button>
-                                <button onclick="adjustPotion('${entity.id}', 10)" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="10 증가"></button>
-                                <button onclick="resetPotion('${entity.id}')" style="background:none; border:none; cursor:pointer; font-size:10px; margin-left:2px; padding:0;" title="중독도 초기화"></button>
-                            </div>
-                            <div style="flex-grow: 1; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                                <div style="width: ${potionWidth}%; height: 100%; background: linear-gradient(90deg, ${isAddicted ? '#fc8181' : '#b794f4'}, ${isAddicted ? '#c53030' : '#805ad5'}); transition: width 0.3s ease;"></div>
                             </div>
                         </div>
                     `;
@@ -3618,8 +3464,6 @@
                         <div class="shield-bar-fill" style="width: ${shieldPct}%;"></div>
                     </div>
                     ${resonanceHtml}
-                    ${fullnessHtml}
-                    ${potionHtml}
                     ${itemContainerHtml}
                     <button class="toggle-btn" onclick="toggleDetails(this)">상세 정보 펼치기/접기</button><div class="details"><div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div>근력: <span class="grade-badge ${entity.stats.grades.str === 'L' ? 'grade-L' : ''}">${entity.stats.grades.str}</span> (${strDisplay})</div><div>민첩: <span class="grade-badge ${entity.stats.grades.agi === 'L' ? 'grade-L' : ''}">${entity.stats.grades.agi}</span> (${agiDisplay})</div><div>지능: <span class="grade-badge ${entity.stats.grades.int === 'L' ? 'grade-L' : ''}">${entity.stats.grades.int}</span> (${intDisplay})</div><div>정신: <span class="grade-badge ${entity.stats.grades.men === 'L' ? 'grade-L' : ''}">${entity.stats.grades.men}</span> (${menDisplay})</div><div>행운: <span class="grade-badge ${entity.stats.grades.luk === 'L' ? 'grade-L' : ''}">${entity.stats.grades.luk}</span> (${lukDisplay})</div><div style="color: #c53030;">${entity.stats.specialName}: <span class="grade-badge ${entity.stats.grades.special === 'L' ? 'grade-L' : ''}">${entity.stats.grades.special}</span> (${specialDisplay})</div></div>${extraSkillsHtml}<div class="skill-box" onclick="selectSkill('charSkill', '${charRange}', '${entity.id}', '${entity.skills.charSkill.type || "공격"}')"><span class="skill-title"><span>${charSkillTitle} ${charSkillName}</span> <span class="range-badge">${charRange}</span></span><span class="skill-desc">${charSkillDesc}</span><span class="skill-effect">▶ 효과: ${charSkillEffect}</span></div>${constSkillHtml}<div class="skill-box" style="cursor:default;"><span class="skill-title"><span>${blessTitle} ${blessName}</span> <span class="range-badge" style="background:#e9d8fd; color:#553c9a;">패시브</span></span><span class="skill-desc">${blessDesc}</span><span class="skill-effect">▶ 효과: ${blessEffect}</span></div></div>`;
                     
@@ -4199,8 +4043,6 @@
             let currentX = null; 
             let currentY = null;
             let currentEquipDurability = {};
-            let currentFullness = 0;
-            let currentPotion = 0;
 
             let currentResonance = 0; // 신규 개체는 공명도 0에서 시작
             
@@ -4213,8 +4055,6 @@
                     currentY = existing.y; 
                     currentEquipDurability = JSON.parse(JSON.stringify(existing.equipDurability || {}));
                     currentResonance = (existing.stats.currentResonance !== undefined && existing.stats.currentResonance !== null) ? Math.min(existing.stats.currentResonance, RESONANCE_MAX) : 0;
-                    currentFullness = existing.stats.currentFullness || 0;
-                    currentPotion = existing.stats.currentPotion || 0;
                 } 
             }
             
@@ -4266,9 +4106,7 @@
                         special: document.getElementById('gradeSpecial') ? document.getElementById('gradeSpecial').value : 'F'
                     }, 
                     specialName: document.getElementById('inputSpecialName') ? document.getElementById('inputSpecialName').value || "특수" : "특수", 
-                    currentResonance: currentResonance,
-                    currentFullness: currentFullness,
-                    currentPotion: currentPotion
+                    currentResonance: currentResonance
                 }, 
                 skills: { 
                     charSkill: { 
