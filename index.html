@@ -932,11 +932,11 @@
 
             // 캐릭터 등급 (S / A / B / C / D / E / F)
             const charGradeEl = document.getElementById('inputCharGrade');
-            if (charGradeEl && s['성급']) {
-                const val = String(s['성급']).trim().toUpperCase();
+            if (charGradeEl && s['등급']) {
+                const val = String(s['등급']).trim().toUpperCase();
                 const hasOption = Array.from(charGradeEl.options).some(o => o.value === val);
                 if (hasOption) { charGradeEl.value = val; filled.push('캐릭터 등급'); }
-                else skipped.push('캐릭터 등급 (시트 값: ' + s['성급'] + ')');
+                else skipped.push('캐릭터 등급 (시트 값: ' + s['등급'] + ')');
             }
 
             // 체력: 시트는 최대 체력을 숫자로 관리, 전투 웹앱은 등급이라 가장 가까운 등급으로 근사 설정
