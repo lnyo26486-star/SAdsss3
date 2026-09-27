@@ -200,6 +200,11 @@
             box-shadow: inset 0 0 20px rgba(66, 153, 225, 0.6);
             border: 2px solid #4299e1 !important;
         }
+        .not-participating {
+            filter: grayscale(100%);
+            opacity: 0.55;
+            order: 999; /* flex/grid 컨테이너 안에서 항상 맨 뒤로 밀려나도록 */
+        }
         @keyframes lowHpPulse {
             0%, 100% { box-shadow: inset 0 0 16px rgba(229, 62, 62, 0.35); border-color: #e53e3e; }
             50% { box-shadow: inset 0 0 26px rgba(229, 62, 62, 0.85); border-color: #ff0000; }
@@ -412,7 +417,7 @@
                 <div id="hpGradeSection" class="form-group"><label>체력 등급</label><select id="inputHpGrade"><option value="SS">SS (1800)</option><option value="S">S (1200)</option><option value="A">A (800)</option><option value="B">B (550)</option><option value="C">C (350)</option><option value="D">D (200)</option><option value="E">E (100)</option><option value="F" selected>F (50)</option></select></div>
                 <div id="hpManualSection" class="form-group" style="display:none;"><label>수동 체력 입력 <input type="checkbox" id="inputHpManualUse" checked style="margin-left:8px;" title="체크하면 위 체력 등급 대신 아래 입력한 수치를 사용합니다."> 이 값 사용</label><input type="number" id="inputHpManual" value="3000"></div>
 
-                <div class="form-section-title">특성 (패시브)</div>
+                <div class="form-section-title">특성</div>
                 <div class="form-group">
                     <label>특성 선택</label>
                     <div style="width:65%; display:flex; gap:6px;">
@@ -424,6 +429,14 @@
                 </div>
                 <div id="traitDescPreview" style="font-size:11px; color:#718096; margin: -8px 0 12px 0; white-space:pre-wrap; word-break:keep-all;"></div>
 
+                <div class="form-group">
+                    <label>상태이상 목록</label>
+                    <div style="width:65%; display:flex; gap:6px;">
+                        <div style="width:100%; font-size:11px; color:#718096; display:flex; align-items:center;">스킬 효과에 쓸 상태이상을 미리 등록해두세요.</div>
+                        <button type="button" onclick="openGlobalStatusModal()" style="padding:8px 10px; font-size:12px; white-space:nowrap;">관리</button>
+                    </div>
+                </div>
+
                 <div class="form-section-title">스탯 등급 설정</div>
                 <div class="form-group"><label>근력</label><select class="stat-grade" id="gradeStr"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
                 <div class="form-group"><label>민첩</label><select class="stat-grade" id="gradeAgi"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
@@ -431,14 +444,14 @@
                 <div class="form-group"><label>정신</label><select class="stat-grade" id="gradeMen"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
                 <div class="form-group"><label>행운</label><select class="stat-grade" id="gradeLuk"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
 
-                <div class="form-section-title">개인 스탯 (다이스 판정)</div>
+                <div class="form-section-title">개인 스탯</div>
                 <div class="form-group"><label>스탯 이름</label><input type="text" id="inputSpecialName" placeholder="예: 불굴"></div>
                 <div class="form-group"><label>스탯 등급</label><select class="stat-grade" id="gradeSpecial"><option value="L" class="enemy-grade-l" hidden disabled>L</option><option value="SS">SS</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
 
                 <div id="extraSkillSection">
-                    <div class="form-section-title">일반 스킬</div>
+                    <div class="form-section-title">기본 스킬</div>
                     <div id="extraSkillsList"></div>
-                    <button onclick="addExtraSkill()" class="toggle-btn" style="margin-top:0; margin-bottom:12px;">+ 일반 스킬 추가</button>
+                    <button onclick="addExtraSkill()" class="toggle-btn" style="margin-top:0; margin-bottom:12px;">+ 기본 스킬 추가</button>
                 </div>
 
                 <div id="charSkillSection">
@@ -540,7 +553,7 @@
                         <option value="vulnerable">취약 (받는 피해 % 증가)</option>
                         <option value="reduce_damage">피해 감소 (받는 피해 % 감소, 50 입력 시 반감)</option>
                         <option value="doom">즉사 (지속시간 종료 시 최대 체력 비례 % 피해)</option>
-                        <option value="silence">침묵 (일반 스킬 장전 및 사용 불가)</option>
+                        <option value="silence">침묵 (기본 스킬 장전 및 사용 불가)</option>
                         <option value="seal">봉인 (캐릭터/성좌 스킬 장전 및 사용 불가)</option>
                         <option value="unhealable">치유 불가 (모든 체력 회복 무시)</option>
                         <option value="immune">면역 (새로운 상태이상 부여 무시)</option>
@@ -905,6 +918,7 @@
                         return;
                     }
                     applyImportedStats_(data.stats, statusEl);
+                    applyImportedSkills_(data.skills, statusEl);
                 })
                 .catch(err => {
                     if (statusEl) statusEl.innerText = "통신 오류: " + err + "\n(시트 웹앱의 CORS/배포 설정을 확인해주세요)";
@@ -947,7 +961,7 @@
                 if (skipped.length === before && s[sheetKey]) filled.push(label);
             });
 
-            // 개인 스탯 (다이스 판정)
+            // 개인 스탯
             const specialNameEl = document.getElementById('inputSpecialName');
             if (specialNameEl && s['개인스탯명']) { specialNameEl.value = s['개인스탯명']; filled.push('개인 스탯명'); }
             setGradeSelect_('gradeSpecial', s['개인스탯'], skipped, '개인 스탯 등급');
@@ -993,6 +1007,63 @@
             let msg = " 불러오기 완료\n반영: " + (filled.length ? filled.join(', ') : '없음');
             if (skipped.length) msg += "\n 확인 필요(수동 설정): " + skipped.join(', ');
             if (statusEl) statusEl.innerText = msg;
+        }
+
+        // 시트의 "스킬" 시트(성좌의 가호/성좌 스킬/기본 스킬 1~4/캐릭터 스킬)를 addModal 입력란에 채워 넣음.
+        //  - 성좌의 가호  -> "성좌의 가호" 입력란
+        //  - 성좌 스킬    -> "성좌 스킬" 입력란
+        //  - 캐릭터 스킬  -> "캐릭터 스킬" 입력란
+        //  - 기본 스킬 1~4 -> "기본 스킬" 목록에 각각 추가 (기존에 있던 기본 스킬은 지우지 않고 뒤에 이어붙임)
+        // 시트에 값이 있는 항목만 반영하며, 스킬 정보 자체가 없으면 아무 것도 하지 않는다.
+        function applyImportedSkills_(skills, statusEl) {
+            if (!skills) return;
+
+            const filled = [];
+
+            if (skills.blessing) {
+                const nameEl = document.getElementById('inputConstBlessName');
+                const descEl = document.getElementById('inputConstBlessDesc');
+                if (nameEl) nameEl.value = skills.blessing;
+                if (descEl) descEl.value = skills.blessingDesc || '';
+                filled.push('성좌의 가호');
+            }
+
+            if (skills.constellationSkill) {
+                const nameEl = document.getElementById('inputConstSkillName');
+                const descEl = document.getElementById('inputConstSkillDesc');
+                if (nameEl) nameEl.value = skills.constellationSkill;
+                if (descEl) descEl.value = skills.constellationSkillDesc || '';
+                filled.push('성좌 스킬');
+            }
+
+            if (skills.characterSkill) {
+                const nameEl = document.getElementById('inputCharSkillName');
+                const descEl = document.getElementById('inputCharSkillDesc');
+                if (nameEl) nameEl.value = skills.characterSkill;
+                if (descEl) descEl.value = skills.characterSkillDesc || '';
+                filled.push('캐릭터 스킬');
+            }
+
+            const basicSkills = [
+                [skills.baseSkill1, skills.baseSkill1Desc],
+                [skills.baseSkill2, skills.baseSkill2Desc],
+                [skills.baseSkill3, skills.baseSkill3Desc],
+                [skills.baseSkill4, skills.baseSkill4Desc]
+            ];
+            basicSkills.forEach(function (pair) {
+                const name = pair[0], desc = pair[1];
+                if (!name) return;
+                if (typeof addExtraSkill === 'function') {
+                    addExtraSkill(name, '공격', desc || '');
+                    filled.push('기본 스킬(' + name + ')');
+                }
+            });
+
+            if (filled.length > 0 && statusEl) {
+                statusEl.innerText += '\n 스킬 정보 반영: ' + filled.join(', ');
+            } else if (statusEl) {
+                statusEl.innerText += '\n 등록된 스킬 정보가 없습니다.';
+            }
         }
 
         const specialGradeMap = { "L": 120, "SS": 100, "S": 85, "A": 70, "B": 55, "C": 40, "D": 25, "E": 10, "F": 5 };
@@ -1928,7 +1999,7 @@
             let isSpecialSkill = ['charSkill', 'constSkill', 'constBless'].includes(skillId);
 
             if (isBasicSkill && owner.statusEffects && owner.statusEffects.some(s => s.type === 'silence')) {
-                alert("침묵 상태입니다. 일반 스킬을 장전할 수 없습니다.");
+                alert("침묵 상태입니다. 기본 스킬을 장전할 수 없습니다.");
                 return;
             }
             if (isSpecialSkill && owner.statusEffects && owner.statusEffects.some(s => s.type === 'seal')) {
@@ -2668,9 +2739,140 @@
             
             document.getElementById('inputGlobalStatusIcon').value = ''; document.getElementById('inputGlobalStatusName').value = ''; document.getElementById('inputGlobalStatusDesc').value = ''; 
             renderGlobalStatusList(); 
+            refreshTagBuilderStatusOptions();
         }
         
-        function deleteGlobalStatus(id) { globalStatusList = globalStatusList.filter(s => s.id !== id); renderGlobalStatusList(); }
+        function deleteGlobalStatus(id) { globalStatusList = globalStatusList.filter(s => s.id !== id); renderGlobalStatusList(); refreshTagBuilderStatusOptions(); }
+
+        // ===== 효과 태그 자동 생성기 =====
+        // [부여:이름:턴] / [자가부여:이름:턴] 같은 태그를 직접 타이핑하지 않고,
+        // 상태이상 목록에서 골라 자동으로 만들어 효과 칸에 넣어주는 UI.
+        // selfOnly가 true면(특성용) "자가부여"만 선택 가능하게 한다.
+        function skillTagBuilderHtml(targetId, selfOnly) {
+            const scopeOptions = selfOnly
+                ? `<option value="자가부여">자가부여</option>`
+                : `<option value="부여">부여(대상)</option><option value="자가부여">자가부여(자신)</option>`;
+            return `<div class="tag-builder" ${targetId ? `data-target-id="${targetId}"` : ''} style="display:flex; gap:4px; margin-top:6px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
+                <select class="tb-scope" style="flex:0 0 88px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0;">${scopeOptions}</select>
+                <select class="tb-status" style="flex:1; min-width:80px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0;"></select>
+                <input type="number" class="tb-turn" placeholder="턴" value="1" min="1" style="width:48px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0;">
+                <button type="button" class="tb-add" onclick="addSkillEffectTag(this)" style="font-size:11px; padding:5px 8px; border:none; border-radius:4px; background:#4a5568; color:#fff; cursor:pointer; white-space:nowrap;">+ 태그 추가</button>
+            </div>`;
+        }
+
+        // 아이템 효과([회복]/[해제]/[부여]/[스탯]/[공명도]) 태그 생성기
+        function itemTagBuilderHtml() {
+            return `<div class="tag-builder-item" style="display:flex; gap:4px; margin-top:6px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
+                <select class="tbi-type" onchange="onItemTagTypeChange(this)" style="flex:0 0 76px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0;">
+                    <option value="회복">회복</option>
+                    <option value="부여">부여</option>
+                    <option value="해제">해제</option>
+                    <option value="스탯">스탯</option>
+                    <option value="공명도">공명도</option>
+                </select>
+                <select class="tbi-status tb-status" style="flex:1; min-width:70px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0;"></select>
+                <input type="text" class="tbi-statname" placeholder="스탯 이름" style="flex:1; min-width:60px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0; display:none;">
+                <input type="number" class="tbi-amount" placeholder="수치" style="width:56px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0;">
+                <input type="number" class="tbi-turn" placeholder="턴" value="1" min="1" style="width:44px; font-size:11px; padding:5px; border-radius:4px; border:1px solid #e2e8f0; display:none;">
+                <button type="button" class="tbi-add" onclick="addItemEffectTag(this)" style="font-size:11px; padding:5px 8px; border:none; border-radius:4px; background:#4a5568; color:#fff; cursor:pointer; white-space:nowrap;">+ 태그 추가</button>
+            </div>`;
+        }
+
+        // 아이템 태그 종류에 따라 필요한 입력칸만 보여줌
+        function onItemTagTypeChange(sel) {
+            const wrap = sel.closest('.tag-builder-item');
+            const type = sel.value;
+            wrap.querySelector('.tbi-status').style.display = (type === '부여' || type === '해제') ? 'inline-block' : 'none';
+            wrap.querySelector('.tbi-statname').style.display = (type === '스탯') ? 'inline-block' : 'none';
+            wrap.querySelector('.tbi-amount').style.display = (type === '회복' || type === '스탯' || type === '공명도') ? 'inline-block' : 'none';
+            wrap.querySelector('.tbi-turn').style.display = (type === '부여') ? 'inline-block' : 'none';
+        }
+
+        // 화면에 떠 있는 모든 상태이상 드롭다운(.tb-status)을 최신 상태이상 목록으로 채움.
+        // 상태이상을 추가/삭제하거나, 캐릭터 추가/수정 모달을 열 때마다 호출해서 항상 최신 상태를 유지한다.
+        function refreshTagBuilderStatusOptions() {
+            const opts = globalStatusList.map(gs => `<option value="${gs.name}">${gs.icon || ''} ${gs.name}</option>`).join('');
+            document.querySelectorAll('.tb-status').forEach(sel => {
+                const cur = sel.value;
+                sel.innerHTML = globalStatusList.length ? opts : '<option value="">(등록된 상태이상 없음)</option>';
+                if (cur && globalStatusList.some(gs => gs.name === cur)) sel.value = cur;
+            });
+            document.querySelectorAll('.tag-builder-item').forEach(wrap => onItemTagTypeChange(wrap.querySelector('.tbi-type')));
+        }
+
+        // 스킬/특성 효과 칸에 [부여:이름:턴] 또는 [자가부여:이름:턴] 태그를 만들어 이어붙임
+        function addSkillEffectTag(btn) {
+            const wrap = btn.closest('.tag-builder');
+            const scope = wrap.querySelector('.tb-scope').value;
+            const statusName = wrap.querySelector('.tb-status').value;
+            const turn = wrap.querySelector('.tb-turn').value || '1';
+            if (!statusName) { alert('상태이상을 먼저 선택해주세요. 목록에 없다면 "상태이상 목록" 관리에서 먼저 추가해주세요.'); return; }
+
+            const targetId = wrap.dataset.targetId;
+            let targetEl = null;
+            if (targetId) {
+                targetEl = document.getElementById(targetId);
+            } else {
+                const item = wrap.closest('.extra-skill-item');
+                targetEl = item ? item.querySelector('.basic-skill-effect') : null;
+            }
+            if (!targetEl) return;
+
+            const tag = `[${scope}:${statusName}:${turn}]`;
+            targetEl.value = (targetEl.value.trim() ? targetEl.value.trim() + ' ' : '') + tag;
+        }
+
+        // 아이템 효과 칸에 [회복]/[해제]/[부여]/[스탯]/[공명도] 태그를 만들어 이어붙임
+        function addItemEffectTag(btn) {
+            const wrap = btn.closest('.tag-builder-item');
+            const type = wrap.querySelector('.tbi-type').value;
+            const statusName = wrap.querySelector('.tbi-status').value;
+            const statName = wrap.querySelector('.tbi-statname').value.trim();
+            const amount = wrap.querySelector('.tbi-amount').value;
+            const turn = wrap.querySelector('.tbi-turn').value || '1';
+
+            let tag = '';
+            if (type === '회복') {
+                if (!amount) return alert('회복 수치를 입력해주세요.');
+                tag = `[회복:${amount}]`;
+            } else if (type === '해제') {
+                if (!statusName) return alert('해제할 상태이상을 선택해주세요.');
+                tag = `[해제:${statusName}]`;
+            } else if (type === '부여') {
+                if (!statusName) return alert('부여할 상태이상을 선택해주세요.');
+                tag = `[부여:${statusName}:${turn}]`;
+            } else if (type === '스탯') {
+                if (!statName || !amount) return alert('스탯 이름과 수치를 입력해주세요.');
+                tag = `[스탯:${statName}:${amount}]`;
+            } else if (type === '공명도') {
+                if (!amount) return alert('공명도 변화 수치를 입력해주세요.');
+                tag = `[공명도:${amount}]`;
+            }
+            if (!tag) return;
+
+            const targetEl = document.getElementById('inputItemEffect');
+            if (targetEl) targetEl.value = (targetEl.value.trim() ? targetEl.value.trim() + ' ' : '') + tag;
+        }
+
+        // 각 효과 입력란 바로 밑에 태그 생성기 UI를 한 번씩 붙여둠 (페이지 로드 시 1회 실행)
+        (function initEffectTagBuilders() {
+            const charEffectEl = document.getElementById('inputCharSkillEffect');
+            if (charEffectEl) charEffectEl.insertAdjacentHTML('afterend', skillTagBuilderHtml('inputCharSkillEffect', false));
+
+            const constEffectEl = document.getElementById('inputConstSkillEffect');
+            if (constEffectEl) constEffectEl.insertAdjacentHTML('afterend', skillTagBuilderHtml('inputConstSkillEffect', false));
+
+            const blessEffectEl = document.getElementById('inputConstBlessEffect');
+            if (blessEffectEl) blessEffectEl.insertAdjacentHTML('afterend', skillTagBuilderHtml('inputConstBlessEffect', false));
+
+            const traitEffectEl = document.getElementById('inputTraitCatEffect');
+            if (traitEffectEl) traitEffectEl.insertAdjacentHTML('afterend', skillTagBuilderHtml('inputTraitCatEffect', true));
+
+            const itemEffectEl = document.getElementById('inputItemEffect');
+            if (itemEffectEl) itemEffectEl.insertAdjacentHTML('afterend', itemTagBuilderHtml());
+
+            refreshTagBuilderStatusOptions();
+        })();
 
         function openStatusModal(id) { activeStatusEntityId = id; renderCharacterStatusList(); const selectBox = document.getElementById('selectGlobalStatus'); selectBox.innerHTML = ''; document.getElementById('inputStatusDuration').value = '1'; if (globalStatusList.length === 0) { selectBox.innerHTML = '<option value="" disabled selected>도감에 등록된 상태이상이 없습니다.</option>'; } else { selectBox.innerHTML = '<option value="" disabled selected>-- 상태이상을 선택하세요 --</option>'; globalStatusList.forEach(gs => { selectBox.innerHTML += `<option value="${gs.id}">${gs.icon} ${gs.name}</option>`; }); } document.getElementById('statusModal').style.display = 'block'; }
         function closeStatusModal() { activeStatusEntityId = null; document.getElementById('statusModal').style.display = 'none'; }
@@ -2734,8 +2936,10 @@
                 <select class="basic-skill-target" style="width:30%; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">${targetOptions}</select>
                 <button onclick="this.parentElement.parentElement.remove()" style="padding:4px 10px; background:#e53e3e; color:white; border:none; border-radius:4px; font-size:12px; cursor:pointer;">삭제</button></div>
                 <input type="text" class="basic-skill-name" placeholder="스킬 이름" value="${skillName}" style="width:95%; margin-bottom:8px; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
-                <textarea class="basic-skill-effect" rows="2" placeholder="스킬 효과 (예: [부여:화상:2])" style="width:95%; padding:6px; border-radius:4px; border:1px solid #e2e8f0; resize:vertical;">${skillEffect}</textarea>`;
+                <textarea class="basic-skill-effect" rows="2" placeholder="스킬 효과 (예: [부여:화상:2])" style="width:95%; padding:6px; border-radius:4px; border:1px solid #e2e8f0; resize:vertical;">${skillEffect}</textarea>
+                ${typeof skillTagBuilderHtml === 'function' ? skillTagBuilderHtml(null, false) : ''}`;
             list.appendChild(div);
+            if (typeof refreshTagBuilderStatusOptions === 'function') refreshTagBuilderStatusOptions();
             if (typeof togglePositionUI === 'function') togglePositionUI();
         }
 
@@ -2798,6 +3002,7 @@
             document.getElementById('modalTitle').innerText = '새 정보 입력'; 
             try { clearForm(); } catch (e) { console.error(e); }
             try { if (typeof populateEquipDropdowns === 'function') populateEquipDropdowns(); } catch (e) { console.error(e); }
+            if (typeof refreshTagBuilderStatusOptions === 'function') refreshTagBuilderStatusOptions();
             document.getElementById('addModal').style.display = 'block'; 
         }
 
@@ -2859,7 +3064,7 @@
             }
         }
 
-        // 포지션에 따른 폼 제약 적용 — 딜러는 일반 스킬을 공격류로만 만들 수 있고 버프를 부여할 수 없습니다.
+        // 포지션에 따른 폼 제약 적용 — 딜러는 기본 스킬을 공격류로만 만들 수 있고 버프를 부여할 수 없습니다.
         function togglePositionUI() {
             const posEl = document.getElementById('inputPosition');
             const position = posEl ? posEl.value : '';
@@ -2869,7 +3074,7 @@
                 if (isDealer) {
                     sel.value = '공격';
                     sel.disabled = true;
-                    sel.title = '딜러는 일반 스킬을 공격류로만 만들 수 있습니다.';
+                    sel.title = '딜러는 기본 스킬을 공격류로만 만들 수 있습니다.';
                 } else {
                     sel.disabled = false;
                     sel.title = '';
@@ -2880,7 +3085,7 @@
             if (hint) {
                 const hints = {
                     tanker: ' 탱커: 체력 +400, 방어력 증가, 주는 피해 -20%. 카드의 "보호막 부여" 행동으로 아군에게 보호막을 줄 수 있습니다. (보호막은 탱커만 부여 가능)',
-                    dealer: ' 딜러: 일반 스킬이 전부 공격류로 고정되고 버프 부여 불가. 주는 피해 +20%, 범위 공격 시 계수 감소 완화. 자가부여 버프가 있는 스킬은 버프가 먼저 적용된 뒤 공격이 들어갑니다.',
+                    dealer: ' 딜러: 기본 스킬이 전부 공격류로 고정되고 버프 부여 불가. 주는 피해 +20%, 범위 공격 시 계수 감소 완화. 자가부여 버프가 있는 스킬은 버프가 먼저 적용된 뒤 공격이 들어갑니다.',
                     healer: ' 힐러: 주는 피해 -20%, 치료 효과 +15%. 카드의 "정화" 행동으로 아군의 디버프를 제거할 수 있습니다.',
                     supporter: ' 서포터: 주는 피해/치료 효과 -20%. 카드의 "버프·디버프 부여" 행동으로 아무 상태이상이나 최대 3턴까지 자유롭게 부여할 수 있습니다.',
                     '': ''
@@ -2936,6 +3141,7 @@
             if(document.getElementById('inputEquipAcc2')) document.getElementById('inputEquipAcc2').value = slots.acc2 || '';
             if(document.getElementById('inputEquipRelic')) document.getElementById('inputEquipRelic').value = slots.relic || '';
 
+            if (typeof refreshTagBuilderStatusOptions === 'function') refreshTagBuilderStatusOptions();
             document.getElementById('addModal').style.display = 'block';
         }
 
@@ -3246,15 +3452,32 @@
         function renderGrid() {
             const enemyPanel = document.getElementById('enemyPanel'); 
             const apostlePanel = document.getElementById('apostlePanel');
-            if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">에너미</h3><div class="side-skill-indicator enemy-indicator" id="enemySkillDisplay">장전된 스킬 없음</div>`;
-            if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">캐릭터</h3><div class="side-skill-indicator apostle-indicator" id="apostleSkillDisplay">장전된 스킬 없음</div>`;
+            if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">A팀</h3>`;
+            if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">B팀</h3>`;
 
             if (typeof entities === 'undefined' || !Array.isArray(entities)) return;
 
-            entities.forEach(entity => {
+            // 전투가 진행 중(턴 순서가 정해진 상태)이면: 턴 순서에 포함된(=전투 참여) 개체는 그 순서대로 위에,
+            // 턴 순서에 없는(=전투 불참) 개체는 회색으로 표시하며 아래로 내려서 보여준다.
+            // 전투 시작 전(턴 순서 없음)에는 기존처럼 그대로 표시한다.
+            const battleStarted = (typeof isBattleActive !== 'undefined' && isBattleActive && Array.isArray(turnOrder) && turnOrder.length > 0);
+
+            const displayEntities = battleStarted ? [...entities].sort((a, b) => {
+                const aIdx = turnOrder.indexOf(a.id);
+                const bIdx = turnOrder.indexOf(b.id);
+                const aIn = aIdx !== -1, bIn = bIdx !== -1;
+                if (aIn && bIn) return aIdx - bIdx;
+                if (aIn && !bIn) return -1;
+                if (!aIn && bIn) return 1;
+                return 0;
+            }) : entities;
+
+            displayEntities.forEach(entity => {
                 try {
                     const isEnemy = entity.type === '에너미'; 
+                    const isParticipating = !battleStarted || turnOrder.indexOf(entity.id) !== -1;
                     let cardClass = isEnemy ? 'character-card enemy-card' : 'character-card'; 
+                    if (!isParticipating) cardClass += ' not-participating';
                     
                     if (entity.statusEffects) {
                         if (entity.statusEffects.some(s => s.type === 'silence' || s.type === 'seal')) cardClass += ' panel-silence';
@@ -3319,7 +3542,7 @@
                         extraSkillsHtml = '<div style="margin-bottom:10px;">'; 
                         extraList.forEach((bs, idx) => { 
                             const r = bs.range || '단일'; 
-                            extraSkillsHtml += `<div class="skill-box basic-skill-box" onclick="selectSkill('extra_${idx}', '${r}', '${entity.id}', '${bs.type}')"><span class="skill-title"><span>[일반 스킬 / ${bs.type}] ${bs.name}</span> <span class="range-badge">${r}</span></span><span class="skill-effect">▶ 효과: ${bs.effect}</span></div>`; 
+                            extraSkillsHtml += `<div class="skill-box basic-skill-box" onclick="selectSkill('extra_${idx}', '${r}', '${entity.id}', '${bs.type}')"><span class="skill-title"><span>[기본 스킬 / ${bs.type}] ${bs.name}</span> <span class="range-badge">${r}</span></span><span class="skill-effect">▶ 효과: ${bs.effect}</span></div>`; 
                         }); 
                         extraSkillsHtml += '</div>'; 
                     }
@@ -3600,7 +3823,7 @@
             let isSpecialSkill = ['charSkill', 'constSkill', 'constBless'].includes(activeSkill.id);
 
             if (isBasicSkill && attacker.statusEffects && attacker.statusEffects.some(s => s.type === 'silence')) {
-                alert("시전자가 침묵 상태라서 일반 스킬이 발동되지 않습니다.");
+                alert("시전자가 침묵 상태라서 기본 스킬이 발동되지 않습니다.");
                 return;
             }
             if (isSpecialSkill && attacker.statusEffects && attacker.statusEffects.some(s => s.type === 'seal')) {
@@ -4060,7 +4283,7 @@
             
             const extraSkills = []; 
             document.querySelectorAll('.extra-skill-item').forEach(item => { 
-                // 딜러는 일반 스킬을 공격류로만 쓸 수 있고 버프 부여가 불가하므로, 저장 시점에 강제로 "공격"으로 고정합니다.
+                // 딜러는 기본 스킬을 공격류로만 쓸 수 있고 버프 부여가 불가하므로, 저장 시점에 강제로 "공격"으로 고정합니다.
                 let skillType = item.querySelector('.basic-skill-type').value;
                 if (position === 'dealer') skillType = '공격';
                 extraSkills.push({ 
