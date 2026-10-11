@@ -197,6 +197,7 @@
             border: 2px dashed #ed8936 !important;
         }
         /* ===== 스킬 이펙트 (이미지 / webp / webm 연출) ===== */
+        #skillFxDim { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; opacity: 0; pointer-events: none; z-index: 99999; transition: opacity 0.2s ease; }
         #skillFxLayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 100000; overflow: hidden; }
         .skill-fx { position: fixed; transform: translate(-50%, -50%); max-width: none !important; pointer-events: none; }
         .skill-fx img, .skill-fx video { display: block; width: 100%; height: auto; max-width: none !important; pointer-events: none; user-select: none; -webkit-user-drag: none; }
@@ -209,7 +210,7 @@
         .fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
         .fx-grid label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; opacity: 0.85; }
         .fx-grid select, .fx-grid input[type=number] { padding: 5px 6px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px; width: 100%; box-sizing: border-box; }
-        .fx-grid label.fx-sound-l { flex-direction: row; align-items: center; gap: 6px; grid-column: 1 / -1; }
+        .fx-grid label.fx-sound-l { flex-direction: row; align-items: center; gap: 6px; align-self: end; padding-bottom: 6px; }
         /* 기본 스킬 항목은 앱의 .form-group 안에 있어서, 그쪽 입력칸/라벨 규칙(폭 65%, 위 여백, 굵은 글씨)이 같이 적용된다. 이펙트 칸 안에서는 되돌린다. */
         .fx-fields input, .fx-fields select { width: auto; }
         .fx-fields .fx-row input { width: 100%; flex: 1; }
@@ -3817,6 +3818,9 @@
         const FX_VIDEO_RE = /\.(webm|mp4|m4v|mov|ogv)(?=$|[?#&])/i;
         const FX_DEFAULT_SIZE = { screen: 60, tile: 18, caster: 18, targets: 18 }; // 보드 가로폭 대비 %
         const FX_IMAGE_DEFAULT_SEC = 1.5;
+        const FX_SCREEN_LIFT = 0.08; // "화면 가운데" 효과를 보드 높이의 이만큼 위로 살짝 올려서 띄운다 (0이면 정중앙)
+        const FX_DEFAULT_DIM = 35;   // 효과가 뜨는 동안 화면을 어둡게 하는 정도(%). 0이면 끔
+        let fxActiveDims = [];       // 지금 떠 있는 효과들의 어둡기 값
         const FX_VIDEO_MAX_SEC = 30;
         const FX_MAX_CONCURRENT = 12;
         const FX_PRELOADED = new Set();
@@ -3831,10 +3835,19 @@
             size = Math.min(300, Math.max(2, size));
             let duration = parseFloat(fx.duration); if (!(duration > 0)) duration = 0;
             duration = Math.min(60, duration);
-            return { url: url, kind: kind, place: place, size: size, duration: duration, sound: !!fx.sound };
+            let dim = parseFloat(fx.dim); if (!(dim >= 0)) dim = FX_DEFAULT_DIM; // 값이 없는 옛 설정은 기본값 적용
+            dim = Math.min(80, dim);
+            return { url: url, kind: kind, place: place, size: size, duration: duration, sound: !!fx.sound, dim: dim };
         }
         function fxKindOf_(fx) { return fx.kind !== 'auto' ? fx.kind : (FX_VIDEO_RE.test(fx.url) ? 'video' : 'image'); }
 
+        // 화면 어둡게: 효과가 여러 개 겹치면 가장 진한 값을 따르고, 모두 끝나면 걷힌다.
+        function fxDimUpdate_() {
+            let el = document.getElementById('skillFxDim');
+            if (!el) { el = document.createElement('div'); el.id = 'skillFxDim'; document.body.appendChild(el); }
+            const m = fxActiveDims.length ? Math.max.apply(null, fxActiveDims) : 0;
+            el.style.opacity = String(m / 100);
+        }
         function fxLayer_() {
             let L = document.getElementById('skillFxLayer');
             if (!L) { L = document.createElement('div'); L.id = 'skillFxLayer'; document.body.appendChild(L); }
@@ -3847,9 +3860,9 @@
         }
         function fxScreenCenter_() {
             const r = fxBoardRect_();
-            let x = r.left + r.width / 2, y = r.top + r.height / 2;
-            if (!(x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight / 2; }
-            return { x: x, y: y };
+            let x = r.left + r.width / 2, y = r.top + r.height / 2, h = r.height;
+            if (!(x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight / 2; h = window.innerHeight; }
+            return { x: x, y: y - h * FX_SCREEN_LIFT };
         }
         function fxTileCenter_(x, y) {
             if (x === undefined || x === null || y === undefined || y === null) return null;
@@ -3887,9 +3900,10 @@
             wrap.style.left = pos.x + 'px'; wrap.style.top = pos.y + 'px'; wrap.style.width = Math.max(8, baseWidth) + 'px';
             layer.appendChild(wrap);
 
-            let finished = false, started = false, timer = null, triedOther = false;
+            let finished = false, started = false, timer = null, triedOther = false, dimmed = false;
             function finish() {
                 if (finished) return; finished = true; clearTimeout(timer);
+                if (dimmed) { dimmed = false; const k = fxActiveDims.indexOf(fx.dim); if (k !== -1) fxActiveDims.splice(k, 1); fxDimUpdate_(); }
                 try {
                     const a = wrap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
                     a.onfinish = function () { wrap.remove(); };
@@ -3898,6 +3912,8 @@
             }
             function onStart(isVideo) {
                 if (started || finished) return; started = true;
+                // 파일이 실제로 열린 뒤에만 어둡게 한다 (못 불러오면 화면이 어두워지지 않음)
+                if (fx.dim > 0) { dimmed = true; fxActiveDims.push(fx.dim); fxDimUpdate_(); }
                 try { wrap.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(0.9)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }], { duration: 180, easing: 'ease-out' }); } catch (e) {}
                 if (isVideo) {
                     // 영상: 시간(초)을 정했으면 그 시간까지(짧으면 잘라내고, 길면 반복), 0이면 끝까지 한 번 재생
@@ -3989,7 +4005,8 @@
                     <label>표시 위치<select class="fx-place" onchange="fxPlaceChanged(this)"><option value="screen">화면 가운데</option><option value="tile">클릭한 칸</option><option value="caster">시전자 위치</option><option value="targets">맞은 대상 각각</option></select></label>
                     <label>크기 (보드 폭 %)<input type="number" class="fx-size" min="2" max="300" value="60" data-auto="1" oninput="this.dataset.auto='0'"></label>
                     <label>표시 시간 (초, 0=자동)<input type="number" class="fx-dur" min="0" max="60" step="0.1" value="0"></label>
-                    <label class="fx-sound-l"><input type="checkbox" class="fx-sound"> 영상 소리 재생 (브라우저가 막으면 소리 없이 재생)</label>
+                    <label>화면 어둡게 (%, 0=끔)<input type="number" class="fx-dim" min="0" max="80" step="5" value="35"></label>
+                    <label class="fx-sound-l" title="브라우저가 막으면 소리 없이 재생돼요"><input type="checkbox" class="fx-sound"> 영상 소리 재생</label>
                 </div>
             </div>`;
         }
@@ -4009,7 +4026,8 @@
                 place: box.querySelector('.fx-place').value,
                 size: box.querySelector('.fx-size').value,
                 duration: box.querySelector('.fx-dur').value,
-                sound: box.querySelector('.fx-sound').checked
+                sound: box.querySelector('.fx-sound').checked,
+                dim: box.querySelector('.fx-dim').value
             }) || undefined;
         }
         function writeFx(box, fx) {
@@ -4023,6 +4041,7 @@
             size.dataset.auto = (!f || f.size === FX_DEFAULT_SIZE[f.place]) ? '1' : '0';
             box.querySelector('.fx-dur').value = f ? f.duration : 0;
             box.querySelector('.fx-sound').checked = f ? f.sound : false;
+            box.querySelector('.fx-dim').value = f ? f.dim : FX_DEFAULT_DIM;
         }
         function fxPreviewFromButton(btn) {
             const fx = readFx(btn.closest('.fx-fields'));
