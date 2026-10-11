@@ -196,6 +196,27 @@
             box-shadow: inset 0 0 20px rgba(237, 137, 54, 0.6);
             border: 2px dashed #ed8936 !important;
         }
+        /* ===== 스킬 이펙트 (이미지 / webp / webm 연출) ===== */
+        #skillFxLayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 100000; overflow: hidden; }
+        .skill-fx { position: fixed; transform: translate(-50%, -50%); max-width: none !important; pointer-events: none; }
+        .skill-fx img, .skill-fx video { display: block; width: 100%; height: auto; max-width: none !important; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+        .fx-fields { width: 100%; box-sizing: border-box; margin: 2px 0 14px; padding: 10px 12px; border: 1px dashed #cbd5e0; border-radius: 8px; }
+        .fx-title { font-size: 12px; font-weight: 700; margin-bottom: 7px; }
+        .fx-title span { font-weight: 400; opacity: 0.6; }
+        .fx-row { display: flex; gap: 6px; margin-bottom: 8px; }
+        .fx-row input { flex: 1; min-width: 0; padding: 6px 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px; }
+        .fx-row button { padding: 6px 12px; font-size: 12px; white-space: nowrap; border-radius: 4px; cursor: pointer; }
+        .fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+        .fx-grid label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; opacity: 0.85; }
+        .fx-grid select, .fx-grid input[type=number] { padding: 5px 6px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px; width: 100%; box-sizing: border-box; }
+        .fx-grid label.fx-sound-l { flex-direction: row; align-items: center; gap: 6px; grid-column: 1 / -1; }
+        /* 기본 스킬 항목은 앱의 .form-group 안에 있어서, 그쪽 입력칸/라벨 규칙(폭 65%, 위 여백, 굵은 글씨)이 같이 적용된다. 이펙트 칸 안에서는 되돌린다. */
+        .fx-fields input, .fx-fields select { width: auto; }
+        .fx-fields .fx-row input { width: 100%; flex: 1; }
+        .fx-fields .fx-grid select, .fx-fields .fx-grid input[type=number] { width: 100%; }
+        .fx-fields input[type=checkbox] { width: auto; margin: 0; padding: 0; }
+        .fx-fields label { margin-top: 0; font-weight: 400; font-size: 11px; color: inherit; }
+        .fx-fields .fx-title { margin-top: 0; }
         .panel-shielded {
             box-shadow: inset 0 0 20px rgba(66, 153, 225, 0.6);
             border: 2px solid #4299e1 !important;
@@ -918,7 +939,7 @@
                         return;
                     }
                     applyImportedStats_(data.stats, statusEl);
-                    applyImportedSkills_(data.skills, statusEl);
+                    applyImportedSkills_(data.skills, statusEl, data.skillsMessage);
                 })
                 .catch(err => {
                     if (statusEl) statusEl.innerText = "통신 오류: " + err + "\n(시트 웹앱의 CORS/배포 설정을 확인해주세요)";
@@ -1009,60 +1030,79 @@
             if (statusEl) statusEl.innerText = msg;
         }
 
-        // 시트의 "스킬" 시트(성좌의 가호/성좌 스킬/기본 스킬 1~4/캐릭터 스킬)를 addModal 입력란에 채워 넣음.
+        // 전투 웹앱 "불러오기"용: 구글 시트의 "스킬" 시트(※ 시트웹앱의 "비공개정보"와는 별개)를 입력란에 채워 넣음.
         //  - 성좌의 가호  -> "성좌의 가호" 입력란
         //  - 성좌 스킬    -> "성좌 스킬" 입력란
         //  - 캐릭터 스킬  -> "캐릭터 스킬" 입력란
         //  - 기본 스킬 1~4 -> "기본 스킬" 목록에 각각 추가 (기존에 있던 기본 스킬은 지우지 않고 뒤에 이어붙임)
-        // 시트에 값이 있는 항목만 반영하며, 스킬 정보 자체가 없으면 아무 것도 하지 않는다.
-        function applyImportedSkills_(skills, statusEl) {
-            if (!skills) return;
+        // 시트에 값이 있는 항목만 반영한다. 스킬 시트에 타입/범위/대상/효과/비공개 열이 있으면 그것도 함께 채운다.
+        function applyImportedSkills_(skills, statusEl, skillsMessage) {
+            if (!skills) {
+                if (statusEl) statusEl.innerText += '\n 스킬 정보를 불러오지 못했습니다' + (skillsMessage ? ': ' + skillsMessage : ' (서버가 스킬 데이터를 보내지 않았어요. 캐릭터 시트 웹앱을 최신 코드로 다시 배포했는지 확인해주세요)');
+                return;
+            }
+
+            const RANGES = ['단일', '주위 8칸', '십자', '전체', '가로 1줄', '세로 1줄', '가로세로 1줄씩', '대각선', '가로 3줄', '세로 3줄'];
+            const mapType = function (v) {
+                v = String(v || '').trim();
+                if (!v) return '';
+                if (v.indexOf('공격') !== -1) return '공격';
+                if (v.indexOf('치료') !== -1 || v.indexOf('회복') !== -1 || v.indexOf('힐') !== -1) return '치료';
+                return '그 외';
+            };
+            const mapRange = function (v) {
+                v = String(v || '').trim();
+                return RANGES.indexOf(v) !== -1 ? v : '';
+            };
+            const mapTarget = function (v) {
+                v = String(v || '').trim().toLowerCase();
+                if (!v) return '';
+                if (v === 'enemy' || v.indexOf('적') !== -1) return 'enemy';
+                if (v === 'ally' || v.indexOf('아군') !== -1) return 'ally';
+                if (v === 'all' || v.indexOf('모두') !== -1 || v.indexOf('전체') !== -1) return 'all';
+                return '';
+            };
+            const setSelect = function (el, value) {
+                if (!el || !value) return;
+                if (Array.from(el.options).some(function (o) { return o.value === value; })) el.value = value;
+            };
 
             const filled = [];
 
-            if (skills.blessing) {
-                const nameEl = document.getElementById('inputConstBlessName');
-                const descEl = document.getElementById('inputConstBlessDesc');
-                if (nameEl) nameEl.value = skills.blessing;
-                if (descEl) descEl.value = skills.blessingDesc || '';
-                filled.push('성좌의 가호');
-            }
-
-            if (skills.constellationSkill) {
-                const nameEl = document.getElementById('inputConstSkillName');
-                const descEl = document.getElementById('inputConstSkillDesc');
-                if (nameEl) nameEl.value = skills.constellationSkill;
-                if (descEl) descEl.value = skills.constellationSkillDesc || '';
-                filled.push('성좌 스킬');
-            }
-
-            if (skills.characterSkill) {
-                const nameEl = document.getElementById('inputCharSkillName');
-                const descEl = document.getElementById('inputCharSkillDesc');
-                if (nameEl) nameEl.value = skills.characterSkill;
-                if (descEl) descEl.value = skills.characterSkillDesc || '';
-                filled.push('캐릭터 스킬');
-            }
-
-            const basicSkills = [
-                [skills.baseSkill1, skills.baseSkill1Desc],
-                [skills.baseSkill2, skills.baseSkill2Desc],
-                [skills.baseSkill3, skills.baseSkill3Desc],
-                [skills.baseSkill4, skills.baseSkill4Desc]
-            ];
-            basicSkills.forEach(function (pair) {
-                const name = pair[0], desc = pair[1];
+            // 고정 입력란이 있는 3종류 (성좌의 가호 / 성좌 스킬 / 캐릭터 스킬)
+            const applyBlock = function (prefix, key, label) {
+                const name = skills[key];
                 if (!name) return;
+                const g = function (suffix) { return document.getElementById(prefix + suffix); };
+                if (g('Name')) g('Name').value = name;
+                if (g('Desc')) g('Desc').value = skills[key + 'Desc'] || '';
+                if (g('Effect') && skills[key + 'Effect']) g('Effect').value = skills[key + 'Effect'];
+                setSelect(g('Type'), mapType(skills[key + 'Type']));
+                setSelect(g('Range'), mapRange(skills[key + 'Range']));
+                setSelect(g('Target'), mapTarget(skills[key + 'Target']));
+                if (g('Secret') && skills[key + 'Secret']) g('Secret').checked = true; // 시트가 비공개라고 할 때만 체크 (직접 체크해둔 걸 해제하지 않음)
+                filled.push(label);
+            };
+            applyBlock('inputConstBless', 'blessing', '성좌의 가호');
+            applyBlock('inputConstSkill', 'constellationSkill', '성좌 스킬');
+            applyBlock('inputCharSkill', 'characterSkill', '캐릭터 스킬');
+
+            // 기본 스킬 1~4는 "기본 스킬" 목록에 각각 추가 (효과 칸이 비어 있으면 설명을 그 칸에 넣음)
+            for (let n = 1; n <= 4; n++) {
+                const name = skills['baseSkill' + n];
+                if (!name) continue;
+                const effect = skills['baseSkill' + n + 'Effect'] || skills['baseSkill' + n + 'Desc'] || '';
                 if (typeof addExtraSkill === 'function') {
-                    addExtraSkill(name, '공격', desc || '');
+                    addExtraSkill(name, mapType(skills['baseSkill' + n + 'Type']) || '공격', effect,
+                                  mapRange(skills['baseSkill' + n + 'Range']) || '단일', mapTarget(skills['baseSkill' + n + 'Target']) || 'enemy');
                     filled.push('기본 스킬(' + name + ')');
                 }
-            });
+            }
 
-            if (filled.length > 0 && statusEl) {
-                statusEl.innerText += '\n 스킬 정보 반영: ' + filled.join(', ');
-            } else if (statusEl) {
-                statusEl.innerText += '\n 등록된 스킬 정보가 없습니다.';
+            if (statusEl) {
+                statusEl.innerText += filled.length > 0
+                    ? '\n 스킬 정보 반영: ' + filled.join(', ')
+                    : '\n 스킬 시트에서 캐릭터를 찾았지만 채울 스킬이 없습니다. (스킬 시트의 열 이름/값을 확인해주세요)';
             }
         }
 
@@ -1347,6 +1387,7 @@
                 if (!data) return;
 
                 if (typeof entities !== 'undefined') entities = data.entities || [];
+                if (typeof fxPreloadEntities === 'function') fxPreloadEntities(entities);
                 if (typeof globalStatusList !== 'undefined' && data.globalStatusList) globalStatusList = data.globalStatusList;
                 if (typeof itemCatalog !== 'undefined') itemCatalog = data.itemCatalog || [];
                 if (typeof equipCatalog !== 'undefined') equipCatalog = data.equipCatalog || [];
@@ -1404,6 +1445,7 @@
                     if (ev.func === 'spawnHealEffect' && _origSpawnHealEffect) _origSpawnHealEffect.apply(null, ev.args);
                     if (ev.func === 'playHealSound' && _origPlayHealSound) _origPlayHealSound.apply(null, ev.args);
                     if (ev.func === 'playHitSound' && _origPlayHitSound) _origPlayHitSound.apply(null, ev.args);
+                    if (ev.func === 'playSkillFx' && typeof playSkillFx === 'function') playSkillFx.apply(null, ev.args);
                 }
             });
         }
@@ -2040,8 +2082,10 @@
                 owner: owner, 
                 skillType: finalType, 
                 targetType: tType,
-                rawEffect: effectStr 
+                rawEffect: effectStr,
+                fx: (currentSkill && currentSkill.fx) ? currentSkill.fx : null
             };
+            if (currentSkill && currentSkill.fx) fxPreload(currentSkill.fx);
             
             if (owner.type === '에너미') {
                 loadedEnemySkill = activeSkill;
@@ -2922,7 +2966,7 @@
         
         function getHpColor(current, max) { if (current <= 0) return '#a0aec0'; const pct = current / max; if (pct > 0.8) return '#48bb78'; if (pct > 0.6) return '#fc8181'; if (pct > 0.4) return '#f56565'; if (pct > 0.2) return '#e53e3e'; return '#c53030'; }
         
-        function addExtraSkill(skillName = '', skillType = '공격', skillEffect = '', skillRange = '단일', skillTarget = 'enemy') {
+        function addExtraSkill(skillName = '', skillType = '공격', skillEffect = '', skillRange = '단일', skillTarget = 'enemy', skillFx = null) {
             const list = document.getElementById('extraSkillsList'); const div = document.createElement('div'); div.className = 'form-group extra-skill-item';
             const isAttack = skillType === '공격' ? 'selected' : ''; const isHeal = skillType === '치료' ? 'selected' : ''; const isEtc = skillType === '그 외' ? 'selected' : '';
             const ranges = ['단일', '주위 8칸', '십자', '전체', '가로 1줄', '세로 1줄', '가로세로 1줄씩', '대각선', '가로 3줄', '세로 3줄'];
@@ -2937,8 +2981,10 @@
                 <button onclick="this.parentElement.parentElement.remove()" style="padding:4px 10px; background:#e53e3e; color:white; border:none; border-radius:4px; font-size:12px; cursor:pointer;">삭제</button></div>
                 <input type="text" class="basic-skill-name" placeholder="스킬 이름" value="${skillName}" style="width:95%; margin-bottom:8px; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
                 <textarea class="basic-skill-effect" rows="2" placeholder="스킬 효과 (예: [부여:화상:2])" style="width:95%; padding:6px; border-radius:4px; border:1px solid #e2e8f0; resize:vertical;">${skillEffect}</textarea>
-                ${typeof skillTagBuilderHtml === 'function' ? skillTagBuilderHtml(null, false) : ''}`;
+                ${typeof skillTagBuilderHtml === 'function' ? skillTagBuilderHtml(null, false) : ''}
+                ${fxFieldsHtml()}`;
             list.appendChild(div);
+            writeFx(div.querySelector('.fx-fields'), skillFx);
             if (typeof refreshTagBuilderStatusOptions === 'function') refreshTagBuilderStatusOptions();
             if (typeof togglePositionUI === 'function') togglePositionUI();
         }
@@ -2974,6 +3020,7 @@
             document.getElementById('inputConstBlessTarget').value = 'enemy'; 
             if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = '그 외';
             if (document.getElementById('inputConstBlessSecret')) document.getElementById('inputConstBlessSecret').checked = false;
+            writeFx(document.getElementById('fxBox_charSkill'), null); writeFx(document.getElementById('fxBox_constSkill'), null); writeFx(document.getElementById('fxBox_constBless'), null);
             document.getElementById('inputHpManual').value = '3000'; 
             
             const charGradeEl = document.getElementById('inputCharGrade');
@@ -3130,7 +3177,8 @@
 
             document.getElementById('inputConstBlessName').value = entity.skills.constBless.name === "-" ? "" : entity.skills.constBless.name; document.getElementById('inputConstBlessDesc').value = entity.skills.constBless.desc === "-" ? "" : entity.skills.constBless.desc; document.getElementById('inputConstBlessEffect').value = entity.skills.constBless.effect === "-" ? "" : entity.skills.constBless.effect; document.getElementById('inputConstBlessRange').value = entity.skills.constBless.range || '단일'; document.getElementById('inputConstBlessTarget').value = entity.skills.constBless.targetType || 'enemy'; if (document.getElementById('inputConstBlessType')) document.getElementById('inputConstBlessType').value = entity.skills.constBless.type || '그 외'; if (document.getElementById('inputConstBlessSecret')) document.getElementById('inputConstBlessSecret').checked = !!entity.skills.constBless.isSecret;
 
-            document.getElementById('extraSkillsList').innerHTML = ''; const extraSkills = entity.skills.extraSkills || entity.skills.enemyBasics || []; extraSkills.forEach(bs => { addExtraSkill(bs.name, bs.type, bs.effect, bs.range, bs.targetType || 'enemy'); });
+            document.getElementById('extraSkillsList').innerHTML = ''; const extraSkills = entity.skills.extraSkills || entity.skills.enemyBasics || []; writeFx(document.getElementById('fxBox_charSkill'), entity.skills.charSkill.fx); writeFx(document.getElementById('fxBox_constSkill'), entity.skills.constSkill.fx); writeFx(document.getElementById('fxBox_constBless'), entity.skills.constBless.fx);
+            extraSkills.forEach(bs => { addExtraSkill(bs.name, bs.type, bs.effect, bs.range, bs.targetType || 'enemy', bs.fx); });
 
             populateEquipDropdowns();
             const slots = entity.equippedSlots || { head: '', body: '', shoes: '', acc1: '', acc2: '', relic: '' };
@@ -3763,6 +3811,234 @@
             }
         }
 
+        // ===== 스킬 이펙트 (이미지 / webp / webm / mp4 …) =====
+        // 스킬에 이미지·영상 주소를 달아두면, 그 스킬을 쓰는 순간 화면에 띄운다.
+        // 진행자가 쓰면 battleEvents로 관전자 화면에도 똑같이 뜬다. (플레이 함수가 좌표만 담은 payload를 받는 이유)
+        const FX_VIDEO_RE = /\.(webm|mp4|m4v|mov|ogv)(?=$|[?#&])/i;
+        const FX_DEFAULT_SIZE = { screen: 60, tile: 18, caster: 18, targets: 18 }; // 보드 가로폭 대비 %
+        const FX_IMAGE_DEFAULT_SEC = 1.5;
+        const FX_VIDEO_MAX_SEC = 30;
+        const FX_MAX_CONCURRENT = 12;
+        const FX_PRELOADED = new Set();
+
+        function fxNormalize_(fx) {
+            if (!fx || typeof fx !== 'object') return null;
+            const url = String(fx.url || '').trim();
+            if (!url) return null;
+            const place = ['screen', 'tile', 'caster', 'targets'].indexOf(fx.place) !== -1 ? fx.place : 'screen';
+            const kind = (fx.kind === 'image' || fx.kind === 'video') ? fx.kind : 'auto';
+            let size = parseFloat(fx.size); if (!(size > 0)) size = FX_DEFAULT_SIZE[place];
+            size = Math.min(300, Math.max(2, size));
+            let duration = parseFloat(fx.duration); if (!(duration > 0)) duration = 0;
+            duration = Math.min(60, duration);
+            return { url: url, kind: kind, place: place, size: size, duration: duration, sound: !!fx.sound };
+        }
+        function fxKindOf_(fx) { return fx.kind !== 'auto' ? fx.kind : (FX_VIDEO_RE.test(fx.url) ? 'video' : 'image'); }
+
+        function fxLayer_() {
+            let L = document.getElementById('skillFxLayer');
+            if (!L) { L = document.createElement('div'); L.id = 'skillFxLayer'; document.body.appendChild(L); }
+            return L;
+        }
+        function fxBoardRect_() {
+            const g = document.getElementById('battleGrid');
+            const r = g ? g.getBoundingClientRect() : null;
+            return (r && r.width > 0) ? r : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+        }
+        function fxScreenCenter_() {
+            const r = fxBoardRect_();
+            let x = r.left + r.width / 2, y = r.top + r.height / 2;
+            if (!(x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight / 2; }
+            return { x: x, y: y };
+        }
+        function fxTileCenter_(x, y) {
+            if (x === undefined || x === null || y === undefined || y === null) return null;
+            const t = document.getElementById('tile-' + x + '-' + y);
+            if (!t) return null;
+            const r = t.getBoundingClientRect();
+            return r.width ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
+        }
+
+        // 미리 받아두기: 스킬을 장전하는 순간 파일을 내려받아 두면, 발동할 때 지연 없이 바로 뜬다.
+        function fxPreload(fx) {
+            fx = fxNormalize_(fx);
+            if (!fx || FX_PRELOADED.has(fx.url)) return;
+            FX_PRELOADED.add(fx.url);
+            try {
+                if (fxKindOf_(fx) === 'video') { const v = document.createElement('video'); v.preload = 'auto'; v.muted = true; v.src = fx.url; }
+                else { const im = new Image(); im.src = fx.url; }
+            } catch (e) {}
+        }
+        function fxPreloadEntities(list) {
+            try {
+                (list || []).forEach(function (en) {
+                    const s = en && en.skills; if (!s) return;
+                    [s.charSkill, s.constSkill, s.constBless].concat(s.extraSkills || s.enemyBasics || []).forEach(function (k) { if (k && k.fx) fxPreload(k.fx); });
+                });
+            } catch (e) {}
+        }
+
+        // 효과 한 개를 화면 좌표 pos에 띄운다. baseWidth: 픽셀 폭.
+        function fxSpawn_(fx, pos, baseWidth) {
+            const layer = fxLayer_();
+            if (layer.children.length >= FX_MAX_CONCURRENT) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'skill-fx';
+            wrap.style.left = pos.x + 'px'; wrap.style.top = pos.y + 'px'; wrap.style.width = Math.max(8, baseWidth) + 'px';
+            layer.appendChild(wrap);
+
+            let finished = false, started = false, timer = null, triedOther = false;
+            function finish() {
+                if (finished) return; finished = true; clearTimeout(timer);
+                try {
+                    const a = wrap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+                    a.onfinish = function () { wrap.remove(); };
+                    setTimeout(function () { wrap.remove(); }, 500);
+                } catch (e) { wrap.remove(); }
+            }
+            function onStart(isVideo) {
+                if (started || finished) return; started = true;
+                try { wrap.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(0.9)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }], { duration: 180, easing: 'ease-out' }); } catch (e) {}
+                if (isVideo) {
+                    // 영상: 시간(초)을 정했으면 그 시간까지(짧으면 잘라내고, 길면 반복), 0이면 끝까지 한 번 재생
+                    timer = setTimeout(finish, (fx.duration > 0 ? fx.duration : FX_VIDEO_MAX_SEC) * 1000);
+                } else {
+                    timer = setTimeout(finish, (fx.duration > 0 ? fx.duration : FX_IMAGE_DEFAULT_SEC) * 1000);
+                }
+            }
+            function fail(kind) {
+                // 종류가 "자동"일 때만 반대 종류로 한 번 더 시도한다 (확장자 없는 링크 대응)
+                if (fx.kind === 'auto' && !triedOther && !finished) { triedOther = true; mount(kind === 'video' ? 'image' : 'video'); return; }
+                if (typeof isAdmin !== 'undefined' && isAdmin && typeof _origShowToast === 'function') _origShowToast('이펙트 파일을 불러오지 못했어요: ' + fx.url.slice(0, 60));
+                console.warn('[스킬 이펙트] 불러오기 실패:', fx.url);
+                finish();
+            }
+            function mount(kind) {
+                wrap.textContent = '';
+                if (kind === 'video') {
+                    const v = document.createElement('video');
+                    v.muted = !fx.sound; v.playsInline = true; v.autoplay = true; v.preload = 'auto';
+                    v.loop = fx.duration > 0;
+                    v.onloadeddata = function () { onStart(true); };
+                    v.onended = finish;
+                    v.onerror = function () { fail('video'); };
+                    v.src = fx.url;
+                    wrap.appendChild(v);
+                    const pr = v.play();
+                    if (pr && pr.catch) pr.catch(function () { v.muted = true; const p2 = v.play(); if (p2 && p2.catch) p2.catch(function () {}); });
+                } else {
+                    const im = document.createElement('img');
+                    im.alt = ''; im.decoding = 'async'; im.referrerPolicy = 'no-referrer';
+                    im.onload = function () { onStart(false); };
+                    im.onerror = function () { fail('image'); };
+                    im.src = fx.url;
+                    wrap.appendChild(im);
+                }
+            }
+            mount(fxKindOf_(fx));
+            // 파일이 끝내 안 열리는 경우를 대비한 안전장치
+            setTimeout(function () { if (!started) finish(); }, 15000);
+        }
+
+        // payload: { fx, clicked:{x,y}, caster:{x,y}|없음, tiles:[{x,y}]|없음, preview:true|없음 }  (좌표만 담아서 관전자 화면에서도 그대로 재생 가능)
+        function playSkillFx(payload) {
+            try {
+                const fx = fxNormalize_(payload && payload.fx);
+                if (!fx) return;
+                const board = fxBoardRect_();
+                const width = (board.width || window.innerWidth) * fx.size / 100;
+                const center = fxScreenCenter_();
+                const clickedPos = payload.clicked ? fxTileCenter_(payload.clicked.x, payload.clicked.y) : null;
+                let positions = [];
+                if (payload.preview || fx.place === 'screen') positions = [center];
+                else if (fx.place === 'tile') positions = [clickedPos || center];
+                else if (fx.place === 'caster') positions = [(payload.caster && fxTileCenter_(payload.caster.x, payload.caster.y)) || center];
+                else if (fx.place === 'targets') {
+                    const tiles = payload.tiles || [];
+                    positions = tiles.map(function (t) { return fxTileCenter_(t.x, t.y); }).filter(Boolean);
+                    if (!positions.length) positions = [clickedPos || center];
+                }
+                positions.forEach(function (pos) { fxSpawn_(fx, pos, width); });
+            } catch (e) { console.warn('[스킬 이펙트]', e); }
+        }
+
+        // 스킬을 발동하는 순간 호출. 진행자면 관전자 화면에도 같은 효과를 보낸다.
+        function fireSkillFx_(skill, c) {
+            const fx = fxNormalize_(skill && skill.fx);
+            if (!fx) return;
+            const payload = JSON.parse(JSON.stringify({
+                fx: fx,
+                clicked: { x: c.cx, y: c.cy },
+                caster: (c.attacker && c.attacker.x !== undefined && c.attacker.x !== null) ? { x: c.attacker.x, y: c.attacker.y } : undefined,
+                tiles: (c.validTargets || []).map(function (t) { return { x: t.x, y: t.y }; })
+            }));
+            playSkillFx(payload);
+            if (typeof broadcast === 'function') broadcast('playSkillFx', [payload]);
+        }
+
+        // ----- 캐릭터 추가/수정 창의 "이펙트" 입력칸 -----
+        function fxFieldsHtml(id) {
+            return `<div class="fx-fields"${id ? ` id="${id}"` : ''}>
+                <div class="fx-title">이펙트 <span>(스킬을 쓰면 화면에 뜨는 이미지/영상)</span></div>
+                <div class="fx-row">
+                    <input type="text" class="fx-url" placeholder="이미지·영상 주소 (png, gif, webp, webm, mp4 …)" spellcheck="false" autocomplete="off">
+                    <button type="button" onclick="fxPreviewFromButton(this)">미리보기</button>
+                </div>
+                <div class="fx-grid">
+                    <label>종류<select class="fx-kind"><option value="auto">자동</option><option value="image">이미지</option><option value="video">영상</option></select></label>
+                    <label>표시 위치<select class="fx-place" onchange="fxPlaceChanged(this)"><option value="screen">화면 가운데</option><option value="tile">클릭한 칸</option><option value="caster">시전자 위치</option><option value="targets">맞은 대상 각각</option></select></label>
+                    <label>크기 (보드 폭 %)<input type="number" class="fx-size" min="2" max="300" value="60" data-auto="1" oninput="this.dataset.auto='0'"></label>
+                    <label>표시 시간 (초, 0=자동)<input type="number" class="fx-dur" min="0" max="60" step="0.1" value="0"></label>
+                    <label class="fx-sound-l"><input type="checkbox" class="fx-sound"> 영상 소리 재생 (브라우저가 막으면 소리 없이 재생)</label>
+                </div>
+            </div>`;
+        }
+        // 표시 위치를 바꾸면, 크기를 직접 고치지 않았을 때만 그 위치에 어울리는 기본 크기로 바꿔준다
+        function fxPlaceChanged(sel) {
+            const box = sel.closest('.fx-fields'); if (!box) return;
+            const size = box.querySelector('.fx-size');
+            if (size && size.dataset.auto !== '0') size.value = FX_DEFAULT_SIZE[sel.value] || 60;
+        }
+        function readFx(box) {
+            if (!box) return undefined;
+            const url = box.querySelector('.fx-url').value.trim();
+            if (!url) return undefined;
+            return fxNormalize_({
+                url: url,
+                kind: box.querySelector('.fx-kind').value,
+                place: box.querySelector('.fx-place').value,
+                size: box.querySelector('.fx-size').value,
+                duration: box.querySelector('.fx-dur').value,
+                sound: box.querySelector('.fx-sound').checked
+            }) || undefined;
+        }
+        function writeFx(box, fx) {
+            if (!box) return;
+            const f = fxNormalize_(fx);
+            box.querySelector('.fx-url').value = f ? f.url : '';
+            box.querySelector('.fx-kind').value = f ? f.kind : 'auto';
+            box.querySelector('.fx-place').value = f ? f.place : 'screen';
+            const size = box.querySelector('.fx-size');
+            size.value = f ? f.size : FX_DEFAULT_SIZE.screen;
+            size.dataset.auto = (!f || f.size === FX_DEFAULT_SIZE[f.place]) ? '1' : '0';
+            box.querySelector('.fx-dur').value = f ? f.duration : 0;
+            box.querySelector('.fx-sound').checked = f ? f.sound : false;
+        }
+        function fxPreviewFromButton(btn) {
+            const fx = readFx(btn.closest('.fx-fields'));
+            if (!fx) { alert('이미지/영상 주소를 먼저 입력해 주세요.'); return; }
+            playSkillFx({ fx: fx, preview: true });
+        }
+        // 고정 스킬(캐릭터/성좌/가호)의 이펙트 칸을 "스킬 효과" 입력칸 바로 아래에 한 번씩 붙여둠
+        (function initSkillFxFields() {
+            [['inputCharSkillEffect', 'charSkill'], ['inputConstSkillEffect', 'constSkill'], ['inputConstBlessEffect', 'constBless']].forEach(function (pair) {
+                const ta = document.getElementById(pair[0]);
+                if (!ta) return;
+                const group = ta.closest('.form-group') || ta;
+                group.insertAdjacentHTML('afterend', fxFieldsHtml('fxBox_' + pair[1]));
+            });
+        })();
+
         function handleTileClick(cx, cy) {
             if (typeof currentTerrainMode !== 'undefined' && currentTerrainMode) {
                 if (typeof handleTerrainClick === 'function') handleTerrainClick(cx, cy);
@@ -3884,6 +4160,9 @@
                 if (activeSkill.targetType === 'enemy') return !isSameTeam;
                 return true; 
             });
+
+            // 스킬 이펙트(이미지/영상): 명중 대상이 없어도 "스킬을 썼다"는 연출은 보여준다
+            fireSkillFx_(activeSkill, { cx: cx, cy: cy, attacker: attacker, validTargets: validTargets });
 
             if (validTargets.length === 0) {
                 if (selfAppliedCount === 0) {
@@ -4291,7 +4570,8 @@
                     range: item.querySelector('.basic-skill-range').value, 
                     targetType: item.querySelector('.basic-skill-target').value, 
                     name: item.querySelector('.basic-skill-name').value, 
-                    effect: item.querySelector('.basic-skill-effect').value 
+                    effect: item.querySelector('.basic-skill-effect').value,
+                    fx: readFx(item.querySelector('.fx-fields'))
                 }); 
             });
             
@@ -4339,7 +4619,8 @@
                         targetType: document.getElementById('inputCharSkillTarget') ? document.getElementById('inputCharSkillTarget').value : "enemy", 
                         desc: document.getElementById('inputCharSkillDesc') ? document.getElementById('inputCharSkillDesc').value || "-" : "-", 
                         effect: document.getElementById('inputCharSkillEffect') ? document.getElementById('inputCharSkillEffect').value || "-" : "-",
-                        isSecret: document.getElementById('inputCharSkillSecret') ? document.getElementById('inputCharSkillSecret').checked : false
+                        isSecret: document.getElementById('inputCharSkillSecret') ? document.getElementById('inputCharSkillSecret').checked : false,
+                        fx: readFx(document.getElementById('fxBox_charSkill'))
                     }, 
                     constSkill: { 
                         name: document.getElementById('inputConstSkillName') ? document.getElementById('inputConstSkillName').value || "-" : "-", 
@@ -4348,7 +4629,8 @@
                         targetType: document.getElementById('inputConstSkillTarget') ? document.getElementById('inputConstSkillTarget').value : "enemy", 
                         desc: document.getElementById('inputConstSkillDesc') ? document.getElementById('inputConstSkillDesc').value || "-" : "-", 
                         effect: document.getElementById('inputConstSkillEffect') ? document.getElementById('inputConstSkillEffect').value || "-" : "-",
-                        isSecret: document.getElementById('inputConstSkillSecret') ? document.getElementById('inputConstSkillSecret').checked : false
+                        isSecret: document.getElementById('inputConstSkillSecret') ? document.getElementById('inputConstSkillSecret').checked : false,
+                        fx: readFx(document.getElementById('fxBox_constSkill'))
                     }, 
                     constBless: { 
                         name: document.getElementById('inputConstBlessName') ? document.getElementById('inputConstBlessName').value || "-" : "-", 
@@ -4357,7 +4639,8 @@
                         targetType: document.getElementById('inputConstBlessTarget') ? document.getElementById('inputConstBlessTarget').value : "enemy", 
                         desc: document.getElementById('inputConstBlessDesc') ? document.getElementById('inputConstBlessDesc').value || "-" : "-", 
                         effect: document.getElementById('inputConstBlessEffect') ? document.getElementById('inputConstBlessEffect').value || "-" : "-",
-                        isSecret: document.getElementById('inputConstBlessSecret') ? document.getElementById('inputConstBlessSecret').checked : false
+                        isSecret: document.getElementById('inputConstBlessSecret') ? document.getElementById('inputConstBlessSecret').checked : false,
+                        fx: readFx(document.getElementById('fxBox_constBless'))
                     }, 
                     extraSkills: extraSkills 
                 },
