@@ -210,7 +210,7 @@
         .fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
         .fx-grid label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; opacity: 0.85; }
         .fx-grid select, .fx-grid input[type=number] { padding: 5px 6px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 12px; width: 100%; box-sizing: border-box; }
-        .fx-grid label.fx-sound-l { flex-direction: row; align-items: center; gap: 6px; align-self: end; padding-bottom: 6px; }
+        .fx-grid label.fx-sound-l { flex-direction: row; align-items: center; gap: 6px; grid-column: 1 / -1; }
         /* 기본 스킬 항목은 앱의 .form-group 안에 있어서, 그쪽 입력칸/라벨 규칙(폭 65%, 위 여백, 굵은 글씨)이 같이 적용된다. 이펙트 칸 안에서는 되돌린다. */
         .fx-fields input, .fx-fields select { width: auto; }
         .fx-fields .fx-row input { width: 100%; flex: 1; }
@@ -3818,7 +3818,7 @@
         const FX_VIDEO_RE = /\.(webm|mp4|m4v|mov|ogv)(?=$|[?#&])/i;
         const FX_DEFAULT_SIZE = { screen: 60, tile: 18, caster: 18, targets: 18 }; // 보드 가로폭 대비 %
         const FX_IMAGE_DEFAULT_SEC = 1.5;
-        const FX_SCREEN_LIFT = 0.08; // "화면 가운데" 효과를 보드 높이의 이만큼 위로 살짝 올려서 띄운다 (0이면 정중앙)
+        const FX_DEFAULT_LIFT = 20;  // "화면 가운데" 효과를 보드 높이의 이 %만큼 위로 올려서 띄운다 (0이면 정중앙). 스킬마다 입력칸에서 바꿀 수 있음
         const FX_DEFAULT_DIM = 35;   // 효과가 뜨는 동안 화면을 어둡게 하는 정도(%). 0이면 끔
         let fxActiveDims = [];       // 지금 떠 있는 효과들의 어둡기 값
         const FX_VIDEO_MAX_SEC = 30;
@@ -3837,7 +3837,9 @@
             duration = Math.min(60, duration);
             let dim = parseFloat(fx.dim); if (!(dim >= 0)) dim = FX_DEFAULT_DIM; // 값이 없는 옛 설정은 기본값 적용
             dim = Math.min(80, dim);
-            return { url: url, kind: kind, place: place, size: size, duration: duration, sound: !!fx.sound, dim: dim };
+            let lift = parseFloat(fx.lift); if (!(lift >= 0)) lift = FX_DEFAULT_LIFT;
+            lift = Math.min(45, lift);
+            return { url: url, kind: kind, place: place, size: size, duration: duration, sound: !!fx.sound, dim: dim, lift: lift };
         }
         function fxKindOf_(fx) { return fx.kind !== 'auto' ? fx.kind : (FX_VIDEO_RE.test(fx.url) ? 'video' : 'image'); }
 
@@ -3858,11 +3860,11 @@
             const r = g ? g.getBoundingClientRect() : null;
             return (r && r.width > 0) ? r : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
         }
-        function fxScreenCenter_() {
+        function fxScreenCenter_(liftPercent) {
             const r = fxBoardRect_();
             let x = r.left + r.width / 2, y = r.top + r.height / 2, h = r.height;
             if (!(x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight / 2; h = window.innerHeight; }
-            return { x: x, y: y - h * FX_SCREEN_LIFT };
+            return { x: x, y: y - h * (liftPercent || 0) / 100 };
         }
         function fxTileCenter_(x, y) {
             if (x === undefined || x === null || y === undefined || y === null) return null;
@@ -3963,7 +3965,7 @@
                 if (!fx) return;
                 const board = fxBoardRect_();
                 const width = (board.width || window.innerWidth) * fx.size / 100;
-                const center = fxScreenCenter_();
+                const center = fxScreenCenter_(fx.lift);
                 const clickedPos = payload.clicked ? fxTileCenter_(payload.clicked.x, payload.clicked.y) : null;
                 let positions = [];
                 if (payload.preview || fx.place === 'screen') positions = [center];
@@ -3978,9 +3980,27 @@
             } catch (e) { console.warn('[스킬 이펙트]', e); }
         }
 
+        // 장전해 둔 스킬(activeSkill)은 장전한 순간의 값을 복사해 들고 있다. 그 뒤에 이펙트 설정을 고쳐 저장해도
+        // 옛 값이 쓰이지 않도록, 발동할 때 시전자의 "지금 저장된" 스킬에서 이펙트 설정을 다시 읽는다.
+        function fxCurrentFor_(skill) {
+            try {
+                const owner = skill && skill.owner ? entities.find(function (e) { return e.id === skill.owner.id; }) : null;
+                const s = owner && owner.skills;
+                if (s) {
+                    let k = null;
+                    if (skill.id === 'charSkill') k = s.charSkill;
+                    else if (skill.id === 'constSkill') k = s.constSkill;
+                    else if (skill.id === 'constBless') k = s.constBless;
+                    else if (String(skill.id).indexOf('extra_') === 0) k = (s.extraSkills || s.enemyBasics || [])[parseInt(String(skill.id).split('_')[1], 10)];
+                    return k ? k.fx : null;
+                }
+            } catch (e) {}
+            return skill ? skill.fx : null;
+        }
+
         // 스킬을 발동하는 순간 호출. 진행자면 관전자 화면에도 같은 효과를 보낸다.
         function fireSkillFx_(skill, c) {
-            const fx = fxNormalize_(skill && skill.fx);
+            const fx = fxNormalize_(fxCurrentFor_(skill));
             if (!fx) return;
             const payload = JSON.parse(JSON.stringify({
                 fx: fx,
@@ -4006,6 +4026,7 @@
                     <label>크기 (보드 폭 %)<input type="number" class="fx-size" min="2" max="300" value="60" data-auto="1" oninput="this.dataset.auto='0'"></label>
                     <label>표시 시간 (초, 0=자동)<input type="number" class="fx-dur" min="0" max="60" step="0.1" value="0"></label>
                     <label>화면 어둡게 (%, 0=끔)<input type="number" class="fx-dim" min="0" max="80" step="5" value="35"></label>
+                    <label title="'화면 가운데' 위치일 때만 적용돼요">위로 올리기 (%, 0=정중앙)<input type="number" class="fx-lift" min="0" max="45" step="1" value="20"></label>
                     <label class="fx-sound-l" title="브라우저가 막으면 소리 없이 재생돼요"><input type="checkbox" class="fx-sound"> 영상 소리 재생</label>
                 </div>
             </div>`;
@@ -4027,7 +4048,8 @@
                 size: box.querySelector('.fx-size').value,
                 duration: box.querySelector('.fx-dur').value,
                 sound: box.querySelector('.fx-sound').checked,
-                dim: box.querySelector('.fx-dim').value
+                dim: box.querySelector('.fx-dim').value,
+                lift: box.querySelector('.fx-lift').value
             }) || undefined;
         }
         function writeFx(box, fx) {
@@ -4042,6 +4064,7 @@
             box.querySelector('.fx-dur').value = f ? f.duration : 0;
             box.querySelector('.fx-sound').checked = f ? f.sound : false;
             box.querySelector('.fx-dim').value = f ? f.dim : FX_DEFAULT_DIM;
+            box.querySelector('.fx-lift').value = f ? f.lift : FX_DEFAULT_LIFT;
         }
         function fxPreviewFromButton(btn) {
             const fx = readFx(btn.closest('.fx-fields'));
