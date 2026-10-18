@@ -304,18 +304,59 @@
         }
 
         /* 날씨 캔버스가 패널이나 그리드 뒤에 숨지 않게 고정 */
-        #rainCanvas, #snowCanvas, #stormCanvas, #dustCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999; /* 패널들보다 높은 위치로 강제 설정 */
-        }
+        .bv-list { max-height: 250px; overflow-y: auto; margin-bottom: 12px; }
+        .bv-item { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; background: #faf5ff; }
+        .bv-item .bv-main { flex: 1; min-width: 0; } .bv-item b { font-size: 13px; } .bv-item code { display: block; font-size: 11px; color: #6b46c1; margin-top: 2px; word-break: break-all; }
+        .bv-item .bv-sum { font-size: 11px; color: #718096; }
+        .bv-badge { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: #e9d8fd; color: #553c9a; margin-left: 4px; }
+        .bv-item button { padding: 4px 8px; font-size: 12px; border: 1px solid #cbd5e0; background: #fff; border-radius: 5px; cursor: pointer; }
+        .bv-item button.go { background: #805ad5; color: #fff; border-color: #805ad5; }
+        .bv-form { border-top: 1px dashed #cbd5e0; padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .bv-row { display: flex; gap: 8px; flex-wrap: wrap; } .bv-row input { flex: 1; min-width: 160px; } .bv-form input, .bv-form select, .bv-form textarea { padding: 7px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit; font-size: 13px; }
+        .bv-chips { display: flex; flex-wrap: wrap; gap: 5px; } .bv-chips button { padding: 3px 8px; font-size: 11px; background: #faf5ff; border: 1px solid #d6bcfa; color: #553c9a; border-radius: 999px; cursor: pointer; }
+        .bv-preview { min-height: 18px; font-size: 12px; color: #553c9a; } .bv-preview.bad { color: #c53030; }
+        .bv-log { font-size: 12px; color: #4a5568; display: flex; gap: 6px; align-items: center; }
+        .on-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38a169; margin-left: 6px; vertical-align: middle; box-shadow: 0 0 0 2px rgba(56,161,105,.25); }
+        .on-row { display: flex; align-items: center; gap: 8px; padding: 7px 4px; border-bottom: 1px solid #edf2f7; font-size: 14px; } .on-row small { margin-left: auto; color: #a0aec0; font-size: 11px; }
+        .bulk-q { padding: 4px 10px; font-size: 12px; background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; border-radius: 5px; cursor: pointer; }
+        .bulk-targets { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .bulk-col { border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; background: #f7fafc; max-height: 300px; overflow-y: auto; }
+        .bulk-col h4 { margin: 0 0 6px; font-size: 13px; }
+        .bulk-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 13px; cursor: pointer; }
+        .bulk-row.dead { opacity: .5; }
+        .bulk-row small { margin-left: auto; color: #a0aec0; font-size: 11px; }
+        .tool-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: -8px 0 14px; }
+        /* ===== 컴팩트 보기 (body.compact): 카드·필드·여백을 줄인다. 글자는 11px 이상 유지 ===== */
+        body.compact .top-bar { padding: 7px 12px !important; margin-bottom: 8px !important; }
+        body.compact .tool-row { margin: 0 0 8px; }
+        body.compact .top-bar > div[style*="flex-shrink: 0"] { padding: 4px 12px !important; min-width: 70px !important; }  /* 현재 라운드 상자 */
+        body.compact .main-battle-container { gap: 12px; margin-bottom: 10px; }
+        body.compact .side-panel { width: 23%; gap: 6px; padding: 0 4px 12px; max-height: calc(100vh - 160px); }
+        body.compact .center-field-wrapper { width: 52%; padding: 10px 14px; }
+        body.compact .panel-header { font-size: 15px; padding-bottom: 3px; }
+        body.compact .battle-tracker { margin-bottom: 6px; padding-bottom: 6px; }
+        body.compact .turn-order-container { padding: 4px; min-height: 28px; }
+        body.compact .grid-coordinate-wrapper { max-width: 600px; }
+        body.compact .battle-log-container { height: 130px; padding: 8px 12px; font-size: 12px; }
+        body.compact .character-card { padding: 9px 11px; border-radius: 10px; }
+        body.compact .card-header { padding-bottom: 6px; margin-bottom: 6px; }
+        body.compact .card-header-top { font-size: 14px; }
+        body.compact .card-header-mid { margin-top: 4px; min-height: 20px; }
+        body.compact .card-actions .action-btn { padding: 3px 5px; }
+        body.compact .hp-container { margin-bottom: 2px; font-size: 12px; }
+        body.compact .hp-bar-bg { margin-bottom: 4px; }
+        body.compact .character-card div[style*="margin-top: 8px"] { margin-top: 4px !important; }
+        body.compact .character-card div[style*="margin-top: 6px"] { margin-top: 3px !important; }
+        body.compact .character-card div[style*="margin-top:10px; border-top"] { margin-top: 5px !important; padding-top: 5px !important; margin-bottom: 4px !important; }
+        body.compact .character-card button[onclick^="openItemUse"] { padding: 4px !important; }
+        body.compact .toggle-btn { margin-top: 4px; padding: 4px; }
+        #weatherCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 800; display: none; } /* 패널 위, 팝업창(1000) 아래 */
+        .weather-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 999px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 700; color: #2d3748; margin-bottom: 6px; }
+        .weather-badge small { font-weight: 500; color: #718096; font-size: 11px; }
     </style>
 </head>
 <body>
+    <canvas id="weatherCanvas"></canvas>
     <div id="gmAuthPanel" style="position: fixed; top: 10px; right: 10px; z-index: 3000; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.12); font-size:12px; display:flex; gap:6px; align-items:center; font-family: inherit;">
         <div id="gmAuthLoggedOut" style="display:flex; gap:4px; align-items:center;">
             <input type="email" id="gmEmail" placeholder="GM 이메일" autocomplete="username" style="width:120px; padding:5px; font-size:11px; border:1px solid #cbd5e0; border-radius:4px;">
@@ -327,16 +368,11 @@
             <button onclick="gmLogout()" style="padding:5px 10px; font-size:11px; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px; cursor:pointer;">로그아웃</button>
         </div>
     </div>
-
-    <canvas id="rainCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
-    <canvas id="snowCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
-    <canvas id="stormCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
-    <canvas id="dustCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; display:none;"></canvas>
     <audio id="rainSound" src="https://www.dropbox.com/scl/fi/xd7milhnmx4jlxnzgyy47/10-ASMR.mp3?rlkey=fm9w841xsyx08jrsi9bxzg89f&st=itdvul22&dl=1" loop></audio>
 
     <div id="toastContainer" class="toast-container"></div>
 
-    <div style="display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; background: #ffffff; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; width: 100%; box-sizing: border-box; overflow-x: auto;">
+    <div class="top-bar" style="display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; background: #ffffff; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; width: 100%; box-sizing: border-box; overflow-x: auto;">
     
         <!-- 왼쪽: 각종 기능 버튼들 (flex-grow: 1을 주어 남는 공간을 밀어냅니다) -->
         <div style="display: flex; flex-wrap: nowrap; gap: 12px; align-items: center; flex-grow: 1;">
@@ -354,14 +390,15 @@
             </div>
     
             <div style="display: flex; gap: 8px; align-items: center; border-right: 1px solid #e2e8f0; padding-right: 12px; background: #f7fafc; padding: 6px 10px; border-radius: 6px;">
-                <select id="weatherSelect" onchange="changeWeather()" style="padding:4px; border:1px solid #cbd5e0; border-radius:4px; font-size:12px; cursor:pointer;">
-                    <option value="맑음">맑음</option>
-                    <option value="비">비</option>
-                    <option value="혹한">혹한</option>
-                    <option value="폭염">폭염</option>
-                    <option value="안개">안개</option>
-                    <option value="폭풍">폭풍</option>
-                    <option value="황사">황사</option>
+                <select id="weatherSelect" onchange="changeWeather()" title="필드 날씨" style="padding:5px 8px; border:1px solid #cbd5e0; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#fff;">
+                    <option value="맑음">☀️ 맑음</option>
+                    <option value="비">🌧️ 비</option>
+                    <option value="혹한">❄️ 혹한</option>
+                    <option value="폭염">🔥 폭염</option>
+                    <option value="안개">🌫️ 안개</option>
+                    <option value="폭풍">⛈️ 폭풍</option>
+                    <option value="황사">🌪️ 황사</option>
+                    <option value="유성우">☄️ 유성우</option>
                 </select>
             </div>
     
@@ -390,13 +427,23 @@
         
     </div>
 
+        <div id="toolRow" class="tool-row">
+            <button class="action-btn" style="background:#38a169; color:white; white-space:nowrap; padding:5px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="openBulkStatusModal()" title="여러 명에게 상태이상을 한 번에 부여/해제">🧪 상태이상 일괄 부여</button>
+            <button class="action-btn" style="background:#805ad5; color:white; white-space:nowrap; padding:5px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="openBattleVarsModal()" title="저장해 둔 전투 변수를 언제든 적용 (관전자에게는 보이지 않음)">🎲 전투 변수</button>
+            <span style="margin-left:auto;"></span>
+            <button id="onlineBtn" class="action-btn" style="background:#f0fff4; color:#276749; white-space:nowrap; padding:5px 10px; font-size:12px; border:1px solid #9ae6b4; border-radius:4px; cursor:pointer;" onclick="openOnlineModal()" title="전투 웹앱에 로그인한 캐릭터 목록">🟢 접속 중 0명</button>
+            <button id="loginBtn" class="action-btn" style="background:#edf2f7; color:#4a5568; white-space:nowrap; padding:5px 10px; font-size:12px; border:1px solid #cbd5e0; border-radius:4px; cursor:pointer;" onclick="openCharLoginModal()" title="캐릭터로 로그인하면 접속 중으로 표시됩니다">🔐 캐릭터 로그인</button>
+            <button id="compactBtn" class="action-btn" style="background:#edf2f7; color:#4a5568; border:1px solid #cbd5e0; white-space:nowrap; padding:5px 10px; font-size:12px; border-radius:4px; cursor:pointer; " onclick="toggleCompact()" title="카드와 필드를 작게 / 크게 (내 화면에만 적용)">↔ 컴팩트 보기: 켬</button>
+        </div>
+
     <div class="main-battle-container">
         <div class="side-panel" id="enemyPanel"></div>
 
         <div class="center-field-wrapper">
             
             <div class="battle-tracker">
-                <div class="turn-order-container" id="turnOrderDisplay"></div>
+                <div><span class="weather-badge" id="weatherBadge"></span></div>
+                    <div class="turn-order-container" id="turnOrderDisplay"></div>
             </div>
 
             <div class="grid-coordinate-wrapper">
@@ -583,6 +630,7 @@
                         <option value="hot">지속 회복 (매 턴 최대 체력 비례 % 회복)</option>
                         <option value="stun">행동 불능 (턴 강제 스킵)</option>
                         <option value="stat">스탯 증감 (전투 중 수치 변화)</option>
+                        <option value="maxhp">최대 체력 증감 (수치만큼 최대 체력 증가, 음수면 감소)</option>
                         <option value="shield">보호막 (입력한 수치만큼 데미지 1회성 흡수)</option>
                         <option value="vampire">흡혈 (가한 피해의 %만큼 체력 회복)</option>
                         <option value="reflect">반사 (받은 피해의 %만큼 공격자에게 피해)</option>
@@ -616,6 +664,99 @@
                 <button id="globalStatusSubmitBtn" class="success-btn" style="width: 100%; margin-top: 10px;" onclick="addGlobalStatus()">도감에 추가하기</button>
             </div>
             <button onclick="closeGlobalStatusModal()" style="width: 100%;">닫기</button>
+        </div>
+    </div>
+
+
+    <div id="bulkStatusModal" class="modal">
+        <div class="modal-content" style="width: 620px; max-width: 94vw;">
+            <h3 style="margin-top:0; color:#1a202c;">상태이상 일괄 부여</h3>
+            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+                <div style="flex:1; min-width:220px;"><label style="font-size:12px; color:#4a5568;">상태이상</label>
+                    <select id="bulkStatusSelect" style="width:100%; padding:7px; border:1px solid #cbd5e0; border-radius:6px;"></select></div>
+                <div><label style="font-size:12px; color:#4a5568;">지속 턴</label>
+                    <input type="number" id="bulkStatusDuration" value="3" min="1" style="width:80px; padding:7px; border:1px solid #cbd5e0; border-radius:6px;"></div>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+                <button type="button" class="bulk-q" onclick="bulkSelect('all')">전체 선택</button>
+                <button type="button" class="bulk-q" onclick="bulkSelect('A')">A팀만</button>
+                <button type="button" class="bulk-q" onclick="bulkSelect('B')">B팀만</button>
+                <button type="button" class="bulk-q" onclick="bulkSelect('alive')">생존자만</button>
+                <button type="button" class="bulk-q" onclick="bulkSelect('none')">선택 해제</button>
+                <span id="bulkCount" style="margin-left:auto; font-size:12px; color:#718096; align-self:center;"></span>
+            </div>
+            <div id="bulkTargets" class="bulk-targets"></div>
+            <div style="display:flex; gap:8px; margin-top:14px;">
+                <button type="button" onclick="closeBulkStatusModal()" style="flex:1;">닫기</button>
+                <button type="button" onclick="bulkRemoveStatus()" style="flex:1; background:#edf2f7; color:#4a5568; border:1px solid #cbd5e0;">선택한 대상에서 해제</button>
+                <button type="button" onclick="bulkApplyStatus()" style="flex:2; background:#38a169; color:#fff;">선택한 대상에게 부여</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="battleVarsModal" class="modal">
+        <div class="modal-content" style="width: 720px; max-width: 95vw;">
+            <h3 style="margin-top:0; color:#1a202c; display:flex; align-items:center; gap:8px;">🎲 전투 변수 <small style="font-size:11px; font-weight:normal; color:#718096;">이 목록은 관전자에게 전달되지 않고 이 브라우저에만 저장됩니다</small></h3>
+            <div id="bvList" class="bv-list"></div>
+            <div class="bv-form">
+                <div class="bv-row"><input id="bvName" placeholder="변수 이름 (예: 독안개)" maxlength="30">
+                    <select id="bvScope"><option value="all">전원 (생존자)</option><option value="A">A팀</option><option value="B">B팀</option><option value="pick">적용할 때 고르기</option></select>
+                    <select id="bvAuto" title="자동 적용"><option value="off">자동 적용 안 함</option><option value="round">매 라운드 시작마다</option></select></div>
+                <textarea id="bvEffect" rows="2" placeholder="효과 키워드 — 예: [스탯:전체:-10:3] [최대체력:+30:3]"></textarea>
+                <div class="bv-chips">
+                    <button type="button" onclick="bvChip('[스탯:전체:-10:3]')">📉 스탯 감소</button>
+                    <button type="button" onclick="bvChip('[스탯:근력:+10:3]')">📈 스탯 증가</button>
+                    <button type="button" onclick="bvChip('[최대체력:+30:3]')">❤️ 최대 체력</button>
+                    <button type="button" onclick="bvChip('[회복:30]')">💚 회복</button>
+                    <button type="button" onclick="bvChip('[피해:20]')">💥 피해</button>
+                    <button type="button" onclick="bvChip('[공명도:+20]')">🌟 공명도</button>
+                    <button type="button" onclick="bvChip('[포만도:-20]')">🍖 포만도</button>
+                    <button type="button" onclick="bvChip('[부여:화상:3]')">🔖 상태이상 부여</button>
+                    <button type="button" onclick="bvChip('[해제:화상]')">✂️ 해제</button>
+                </div>
+                <div id="bvPreview" class="bv-preview"></div>
+                <label class="bv-log"><input type="checkbox" id="bvLog"> 적용할 때 전투 기록(관전자에게도 보임)에 남기기</label>
+                <div style="display:flex; gap:8px;"><button type="button" onclick="closeBattleVarsModal()" style="flex:1;">닫기</button>
+                    <button type="button" id="bvSave" onclick="saveBattleVarForm()" style="flex:2; background:#805ad5; color:#fff;">변수 저장</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="targetPickModal" class="modal">
+        <div class="modal-content" style="width: 460px; max-width: 94vw;">
+            <h3 id="tpTitle" style="margin-top:0;">대상 고르기</h3>
+            <div id="tpList" class="bulk-targets" style="grid-template-columns:1fr 1fr;"></div>
+            <div style="display:flex; gap:8px; margin-top:14px;"><button type="button" onclick="document.getElementById('targetPickModal').style.display='none'" style="flex:1;">취소</button>
+                <button type="button" onclick="tpOk()" style="flex:2; background:#805ad5; color:#fff;">적용</button></div>
+        </div>
+    </div>
+
+
+    <div id="charLoginModal" class="modal">
+        <div class="modal-content" style="width: 380px; max-width: 94vw;">
+            <h3 style="margin-top:0; color:#1a202c;">🔐 캐릭터 로그인</h3>
+            <div id="clLoggedOut">
+                <p style="font-size:12px; color:#718096; margin:0 0 10px;">시트 웹앱과 같은 아이디·비밀번호로 로그인하면 접속 중인 캐릭터로 표시됩니다. (비밀번호는 저장하지 않아요)</p>
+                <input id="clId" placeholder="아이디" autocomplete="username" style="width:100%; box-sizing:border-box; padding:9px; margin-bottom:8px; border:1px solid #cbd5e0; border-radius:6px;">
+                <input id="clPw" type="password" placeholder="비밀번호" autocomplete="current-password" onkeydown="if (event.key === 'Enter') charLoginSubmit()" style="width:100%; box-sizing:border-box; padding:9px; margin-bottom:8px; border:1px solid #cbd5e0; border-radius:6px;">
+                <div id="clMsg" style="min-height:18px; font-size:12px; color:#c53030; margin-bottom:6px;"></div>
+                <button type="button" id="clSubmit" onclick="charLoginSubmit()" style="width:100%; background:#2f855a; color:#fff; padding:9px;">로그인</button>
+            </div>
+            <div id="clLoggedIn" style="display:none;">
+                <div style="padding:14px; background:#f0fff4; border:1px solid #9ae6b4; border-radius:8px; margin-bottom:10px;"><b id="clName"></b>님으로 접속 중입니다.</div>
+                <button type="button" onclick="charLogout()" style="width:100%; padding:9px;">로그아웃</button>
+            </div>
+            <button type="button" onclick="closeCharLoginModal()" style="width:100%; margin-top:8px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="onlineModal" class="modal">
+        <div class="modal-content" style="width: 360px; max-width: 94vw;">
+            <h3 style="margin-top:0; color:#1a202c;">🟢 접속 중인 캐릭터</h3>
+            <div id="onlineList" style="max-height:320px; overflow-y:auto;"></div>
+            <div style="font-size:11px; color:#a0aec0; margin-top:8px;">전투 웹앱에 캐릭터로 로그인한 사람만 표시됩니다.</div>
+            <button type="button" onclick="closeOnlineModal()" style="width:100%; margin-top:10px;">닫기</button>
         </div>
     </div>
 
@@ -654,7 +795,7 @@
                 </div>
                 <div class="form-group"><label>이미지 URL<br><span style="font-size:10px; font-weight:normal; color:#a0aec0;">(선택)</span></label><input type="text" id="inputItemImage" placeholder="https://..."></div>
                 <div class="form-group"><label>효과 키워드</label>
-                    <textarea id="inputItemEffect" placeholder="[회복:500] [해제:화상] [부여:버프:3] [공명도:30]"></textarea>
+                    <textarea id="inputItemEffect" placeholder="[회복:500] [피해:30] [해제:화상] [부여:버프:3] [스탯:근력:-10:3] [최대체력:50:3] [공명도:30] [포만도:20]"></textarea>
                 </div>
                 <button class="success-btn" style="width:100%" onclick="addItemToCatalog()">도감에 아이템 추가</button>
             </div>
@@ -907,8 +1048,9 @@
         // 성좌 스킬을 사용하면 공명도는 다시 0으로 초기화됩니다.
         const RESONANCE_MAX = 100;
         const FULLNESS_MAX = 100;   // 🍖 포만도 최대치 (음식 아이템으로 오르고, 가득 차면 음식을 더 못 먹는다)
-        const RESONANCE_GAIN_PER_TURN = 10; // 자신의 턴이 돌아왔을 때 오르는 공명도
-        const RESONANCE_GAIN_PER_ACTION = 10; // 스킬(행동)을 사용했을 때 오르는 공명도
+        const RESONANCE_GAIN_MIN = 10; // 턴이 돌아오거나 행동할 때 오르는 공명도의 최솟값
+        const RESONANCE_GAIN_MAX = 20; // 최댓값 (매번 이 사이에서 무작위로 정해진다)
+        function rollResonanceGain() { return RESONANCE_GAIN_MIN + Math.floor(Math.random() * (RESONANCE_GAIN_MAX - RESONANCE_GAIN_MIN + 1)); }
 
         // 포지션 시스템 설정값 — 아래 숫자만 바꾸면 밸런스를 쉽게 조정할 수 있습니다.
         const POSITION_TANKER_HP_BONUS = 400; // 탱커 기본 체력 추가치
@@ -1300,7 +1442,7 @@
         // (캐릭터 카드 펼치기/접기, 아이템/장비/상태이상 도감 열람만 허용)
         // 이 목록에 없는 onclick 함수를 호출하는 버튼은 관전자에게 전부 숨김 처리됩니다.
         const SPECTATOR_ALLOWED_ACTIONS = new Set([
-            'toggleDetails',
+            'toggleDetails', 'toggleCompact', 'openCharLoginModal', 'closeCharLoginModal', 'charLoginSubmit', 'charLogout', 'openOnlineModal', 'closeOnlineModal',
             'openItemCatalogModal', 'closeItemCatalogModal',
             'equipCatalogModal', 'closeEquipCatalogModal',
             'openTraitCatalogModal', 'closeTraitCatalogModal',
@@ -1369,7 +1511,8 @@
                 logs: logContainer ? logContainer.innerHTML : ''
             };
 
-            const cleanData = JSON.parse(JSON.stringify(rawData));
+            // 전투 변수로 걸린 효과의 내부 표시(source)는 관전자에게 보내지 않는다
+            const cleanData = JSON.parse(JSON.stringify(rawData, (k, v) => (k === 'source' && typeof v === 'string' && v.indexOf('var_') === 0) ? undefined : v));
             battleDataRef.set(cleanData).catch(err => console.error("데이터 동기화 실패:", err));
         }
 
@@ -1636,15 +1779,11 @@
         }
 
         function resizeWeatherCanvases() {
-            const cRain = document.getElementById('rainCanvas');
-            const cSnow = document.getElementById('snowCanvas');
-            const cStorm = document.getElementById('stormCanvas');
-            const cDust = document.getElementById('dustCanvas');
-            
-            if (cRain) { cRain.width = window.innerWidth; cRain.height = window.innerHeight; }
-            if (cSnow) { cSnow.width = window.innerWidth; cSnow.height = window.innerHeight; }
-            if (cStorm) { cStorm.width = window.innerWidth; cStorm.height = window.innerHeight; }
-            if (cDust) { cDust.width = window.innerWidth; cDust.height = window.innerHeight; }
+            const cv = document.getElementById('weatherCanvas');
+            if (!cv) return;
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            cv.width = Math.round(window.innerWidth * dpr); cv.height = Math.round(window.innerHeight * dpr);
+            if (typeof WX !== 'undefined') WX.dpr = dpr;
         }
         window.onresize = resizeWeatherCanvases;
         // 버그 수정: 창을 한 번도 리사이즈하지 않으면 캔버스가 브라우저 기본 크기(300x150)로
@@ -1857,7 +1996,7 @@
 
                         const tokenHasShield = (ent.statusEffects || []).some(s => s.type === 'shield' && s.value > 0);
                         if (tokenHasShield) token.classList.add('token-shielded');
-                        const tokenHpRatio = ent.stats.maxHp > 0 ? ent.stats.currentHp / ent.stats.maxHp : 1;
+                        const tokenHpRatio = getEffectiveMaxHp(ent) > 0 ? ent.stats.currentHp / getEffectiveMaxHp(ent) : 1;
                         if (tokenHpRatio <= LOW_HP_THRESHOLD) token.classList.add('token-low-hp');
 
                         tile.appendChild(token);
@@ -2083,7 +2222,29 @@
                     }
                 });
             }
+            // 상태이상 "최대 체력 증감"(type: maxhp) 합산
+            if (entity.statusEffects) {
+                entity.statusEffects.forEach(eff => { if (eff && eff.type === 'maxhp') baseMaxHp += parseInt(eff.value, 10) || 0; });
+            }
             return Math.max(1, baseMaxHp); // 최소 체력은 1
+        }
+
+        // 장비·상태이상으로 최대 체력이 늘면 현재 체력도 늘어난 만큼 오르고, 줄면 새 최대치까지만 남긴다. (진행자 화면에서만 계산 → 관전자와 어긋나지 않음)
+        // 늘어나는 부분만 인정한다: 깎였던 최대 체력이 원래대로 돌아오는 것은 회복이 아님.
+        function reconcileMaxHpBonus() {
+            if (typeof isAdmin === 'undefined' || !isAdmin || typeof entities === 'undefined') return;
+            entities.forEach(e => {
+                if (!e || !e.stats) return;
+                const bonus = getEffectiveMaxHp(e) - (e.stats.maxHp || 0);
+                if (e._hpBonus === undefined || e._hpBonus === null) { e._hpBonus = bonus; return; }
+                if (bonus === e._hpBonus) return;
+                if (e.stats.currentHp > 0) {
+                    const gain = Math.max(0, bonus) - Math.max(0, e._hpBonus);
+                    if (gain > 0) e.stats.currentHp += gain;
+                    else e.stats.currentHp = Math.min(e.stats.currentHp, getEffectiveMaxHp(e));
+                }
+                e._hpBonus = bonus;
+            });
         }
 
         function selectSkill(skillId, range, ownerId, skillType = '공격') {
@@ -2329,9 +2490,81 @@
             if (!ent || !ent.stats || ent.stats.currentHp <= 0) return;
             if (ent.stats.currentResonance === undefined || ent.stats.currentResonance === null) ent.stats.currentResonance = 0;
             const wasReady = ent.stats.currentResonance >= RESONANCE_MAX;
+            const before = ent.stats.currentResonance;
             ent.stats.currentResonance = Math.min(RESONANCE_MAX, ent.stats.currentResonance + amount);
+            if (typeof addLog === 'function' && ent.stats.currentResonance > before) {
+                addLog(`&nbsp;&nbsp; <b>${ent.name}</b>의 공명도 +${ent.stats.currentResonance - before}${reasonLabel ? ' (' + reasonLabel + ')' : ''}`, '', true);
+            }
             if (!wasReady && ent.stats.currentResonance >= RESONANCE_MAX && typeof addLog === 'function') {
                 addLog(`&nbsp;&nbsp; <b>${ent.name}</b>의 공명도가 가득 찼습니다! 성좌 스킬을 사용할 수 있습니다.`, 'log-action', true);
+            }
+        }
+
+        // 라운드가 시작될 때마다 날씨가 개체들에게 주는 효과
+        function applyWeatherRoundEffects() {
+                    let weather = document.getElementById('weatherSelect').value;
+                    const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
+
+                    if (weather === '폭염') {
+                        addLog(`<b>[날씨: 폭염]</b> 찜통더위로 인해 모든 개체가 최대 체력의 5% 화상 피해를 입습니다!`, 'log-hit');
+                        aliveEntities.forEach(e => {
+                            let dmg = Math.max(1, Math.floor(getEffectiveMaxHp(e) * 0.05));
+                            processDamage(e, dmg);
+                        });
+                    } else if (weather === '혹한') {
+                        addLog(`<b>[날씨: 혹한]</b> 매서운 추위로 인해 개체들이 얼어붙을 위험이 있습니다.`, 'log-action');
+                        aliveEntities.forEach(e => {
+                            if (Math.random() < 0.2) { 
+                                if (!e.statusEffects) e.statusEffects = [];
+                                e.statusEffects.push({ name: "동결", type: "stun", value: 0, duration: 1, id: Date.now() + Math.random() });
+                                addLog(`&nbsp;&nbsp; <b>${e.name}</b>이(가) 추위에 몸이 얼어붙었습니다! (1턴간 행동불능)`, 'log-action');
+                            }
+                        });
+                    } else if (weather === '비') {
+                        addLog(`<b>[날씨: 비]</b> 쏟아지는 빗줄기가 시야를 방해합니다.`, 'log-action');
+                        aliveEntities.forEach(e => {
+                            if (Math.random() < 0.2) { 
+                                if (!e.statusEffects) e.statusEffects = [];
+                                e.statusEffects.push({ name: "실명", type: "stat", targetStat: "agi", value: -20, duration: 1, id: Date.now() + Math.random() });
+                                addLog(`&nbsp;&nbsp; <b>${e.name}</b>이(가) 빗물에 시야가 가려졌습니다! (민첩 -20)`, 'log-action');
+                            }
+                        });
+                    } else if (weather === '폭풍') {
+                        addLog(`[날씨: 폭풍] 거센 바람이 불어와 개체들의 활력이 돋습니다.`, 'log-action');
+                        let stormAudio = document.getElementById('stormSound'); 
+                        if (stormAudio) { stormAudio.play(); }
+
+                        aliveEntities.forEach(e => {
+                            if (!e.statusEffects) e.statusEffects = [];
+                            let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === "활력") : null;
+                            if (!globalStatus) globalStatus = { id: 'auto_storm', icon: '💨', name: "활력", desc: "폭풍으로 인한 활력", type: "stat", targetStat: "agi", value: 10 };
+                            
+                            if (!e.statusEffects.some(s => s.name === "활력")) {
+                                e.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 1 })));
+                            }
+                        });
+                    } else if (weather === '황사') {
+                        addLog(`[날씨: 황사] 짙은 흙먼지가 시야를 가립니다.`, 'log-action');
+                        aliveEntities.forEach(e => {
+                            if (Math.random() < 0.3) { 
+                                if (!e.statusEffects) e.statusEffects = [];
+                                let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === "실명") : null;
+                                if (!globalStatus) globalStatus = { id: 'auto_dust', icon: '🌪️', name: "실명", desc: "황사로 인한 실명", type: "stat", targetStat: "agi", value: -20 };
+                                
+                                e.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 1 })));
+                                addLog(`&nbsp;&nbsp; ${e.name}이(가) 모래먼지에 시야를 잃었습니다!`, 'log-action');
+                            }
+                        });
+                    }
+            if (weather === '유성우') {
+                addLog(`<b>[날씨: 유성우]</b> 밤하늘에서 별똥별이 쏟아집니다. 별빛이 공명을 일으킵니다.`, 'log-action');
+                let hit = aliveEntities.filter(() => Math.random() < 0.4);
+                if (!hit.length && aliveEntities.length) hit = [aliveEntities[Math.floor(Math.random() * aliveEntities.length)]];   // 아무도 안 맞으면 한 명은 반드시
+                hit.forEach(e => {
+                    const amount = rollResonanceGain();
+                    gainResonance(e, amount, '유성우');
+                    addLog(`&nbsp;&nbsp; ☄️ <b>${e.name}</b>에게 별똥별이 떨어져 공명도가 ${amount} 올랐습니다!`, 'log-action');
+                });
             }
         }
 
@@ -2350,7 +2583,7 @@
                         return true; 
                     } else { 
                         if (effect.type === 'doom') {
-                            let dmg = Math.max(1, Math.floor(prevEntity.stats.maxHp * (effect.value / 100)));
+                            let dmg = Math.max(1, Math.floor(getEffectiveMaxHp(prevEntity) * (effect.value / 100)));
                             addLog(`&nbsp;&nbsp;▶ [즉사] 발동! <b>${prevEntity.name}</b>에게 <b>${dmg}</b>의 피해!`, 'log-hit');
                             processDamage(prevEntity, dmg);
                             if (prevEntity.stats.currentHp <= 0) {
@@ -2402,60 +2635,8 @@
                     globalRound++; currentTurnIndex = 0;
                     addLog(`<b>[시스템]</b> 새로운 라운드가 시작되었습니다. (라운드: ${globalRound})`, 'log-action');
                     
-                    let weather = document.getElementById('weatherSelect').value;
-                    const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
-
-                    if (weather === '폭염') {
-                        addLog(`<b>[날씨: 폭염]</b> 찜통더위로 인해 모든 개체가 최대 체력의 5% 화상 피해를 입습니다!`, 'log-hit');
-                        aliveEntities.forEach(e => {
-                            let dmg = Math.max(1, Math.floor(e.stats.maxHp * 0.05));
-                            processDamage(e, dmg);
-                        });
-                    } else if (weather === '혹한') {
-                        addLog(`<b>[날씨: 혹한]</b> 매서운 추위로 인해 개체들이 얼어붙을 위험이 있습니다.`, 'log-action');
-                        aliveEntities.forEach(e => {
-                            if (Math.random() < 0.2) { 
-                                if (!e.statusEffects) e.statusEffects = [];
-                                e.statusEffects.push({ name: "동결", type: "stun", value: 0, duration: 1, id: Date.now() + Math.random() });
-                                addLog(`&nbsp;&nbsp; <b>${e.name}</b>이(가) 추위에 몸이 얼어붙었습니다! (1턴간 행동불능)`, 'log-action');
-                            }
-                        });
-                    } else if (weather === '비') {
-                        addLog(`<b>[날씨: 비]</b> 쏟아지는 빗줄기가 시야를 방해합니다.`, 'log-action');
-                        aliveEntities.forEach(e => {
-                            if (Math.random() < 0.2) { 
-                                if (!e.statusEffects) e.statusEffects = [];
-                                e.statusEffects.push({ name: "실명", type: "stat", targetStat: "agi", value: -20, duration: 1, id: Date.now() + Math.random() });
-                                addLog(`&nbsp;&nbsp; <b>${e.name}</b>이(가) 빗물에 시야가 가려졌습니다! (민첩 -20)`, 'log-action');
-                            }
-                        });
-                    } else if (weather === '폭풍') {
-                        addLog(`[날씨: 폭풍] 거센 바람이 불어와 개체들의 활력이 돋습니다.`, 'log-action');
-                        let stormAudio = document.getElementById('stormSound'); 
-                        if (stormAudio) { stormAudio.play(); }
-
-                        aliveEntities.forEach(e => {
-                            if (!e.statusEffects) e.statusEffects = [];
-                            let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === "활력") : null;
-                            if (!globalStatus) globalStatus = { id: 'auto_storm', icon: '💨', name: "활력", desc: "폭풍으로 인한 활력", type: "stat", targetStat: "agi", value: 10 };
-                            
-                            if (!e.statusEffects.some(s => s.name === "활력")) {
-                                e.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 1 })));
-                            }
-                        });
-                    } else if (weather === '황사') {
-                        addLog(`[날씨: 황사] 짙은 흙먼지가 시야를 가립니다.`, 'log-action');
-                        aliveEntities.forEach(e => {
-                            if (Math.random() < 0.3) { 
-                                if (!e.statusEffects) e.statusEffects = [];
-                                let globalStatus = typeof globalStatusList !== 'undefined' ? globalStatusList.find(s => s.name === "실명") : null;
-                                if (!globalStatus) globalStatus = { id: 'auto_dust', icon: '🌪️', name: "실명", desc: "황사로 인한 실명", type: "stat", targetStat: "agi", value: -20 };
-                                
-                                e.statusEffects.push(JSON.parse(JSON.stringify({ ...globalStatus, duration: 1 })));
-                                addLog(`&nbsp;&nbsp; ${e.name}이(가) 모래먼지에 시야를 잃었습니다!`, 'log-action');
-                            }
-                        });
-                    }
+                    applyWeatherRoundEffects();
+                    if (typeof applyAutoBattleVars === 'function') applyAutoBattleVars();
                 }
                 
                 const nextEntity = entities.find(e => e.id === turnOrder[currentTurnIndex]);
@@ -2464,7 +2645,7 @@
                     if (typeof playTurnChangeSound === 'function') playTurnChangeSound();
                     addLog(`<b>${nextEntity.name}</b>의 턴입니다.`, '');
 
-                    if (typeof gainResonance === 'function') gainResonance(nextEntity, RESONANCE_GAIN_PER_TURN, '턴 시작');
+                    if (typeof gainResonance === 'function') gainResonance(nextEntity, rollResonanceGain(), '턴 시작');
 
                     // 가시덤불: 전투가 끝날 때까지 지속되는 지형지물 — 그 위에 서 있는 개체는
                     // 자신의 턴이 시작될 때마다 지정된 고정 피해를 계속 입습니다. (상태이상처럼 지속시간이 따로 없음)
@@ -2489,7 +2670,7 @@
                         let logMsgs = [];
                         nextEntity.statusEffects.forEach(eff => {
                             if (eff.type === 'dot') {
-                                let dmg = Math.max(1, Math.floor(nextEntity.stats.maxHp * (eff.value / 100)));
+                                let dmg = Math.max(1, Math.floor(getEffectiveMaxHp(nextEntity) * (eff.value / 100)));
                                 const dotShieldBefore = nextEntity.statusEffects.filter(s => s.type === 'shield').reduce((sum, s) => sum + s.value, 0);
                                 const dotActualDamage = processDamage(nextEntity, dmg);
                                 const dotShieldAfter = nextEntity.statusEffects.filter(s => s.type === 'shield').reduce((sum, s) => sum + s.value, 0);
@@ -2504,7 +2685,7 @@
                                     if (dotActualDamage > 0) spawnFloatingNumber(nextEntity.x, nextEntity.y, '-' + dotActualDamage, 'dmg-num');
                                 }
                             } else if (eff.type === 'hot') {
-                                let heal = Math.max(1, Math.floor(nextEntity.stats.maxHp * (eff.value / 100)));
+                                let heal = Math.max(1, Math.floor(getEffectiveMaxHp(nextEntity) * (eff.value / 100)));
                                 let actualHealed = processHeal(nextEntity, heal);
                                 if (actualHealed > 0) {
                                     spawnHealEffect(nextEntity.x, nextEntity.y);
@@ -2538,7 +2719,7 @@
                                     return true; 
                                 } else { 
                                     if (effect.type === 'doom') {
-                                        let dmg = Math.max(1, Math.floor(nextEntity.stats.maxHp * (effect.value / 100)));
+                                        let dmg = Math.max(1, Math.floor(getEffectiveMaxHp(nextEntity) * (effect.value / 100)));
                                         addLog(`&nbsp;&nbsp;▶ [즉사] 발동! <b>${nextEntity.name}</b>에게 <b>${dmg}</b>의 피해!`, 'log-hit');
                                         processDamage(nextEntity, dmg);
                                         if (nextEntity.stats.currentHp <= 0) {
@@ -2788,7 +2969,8 @@
                 itemCatalog: typeof itemCatalog !== 'undefined' ? itemCatalog : [],
                 equipCatalog: typeof equipCatalog !== 'undefined' ? equipCatalog : [],
                 traitCatalog: typeof traitCatalog !== 'undefined' ? traitCatalog : [],
-                terrains: typeof terrains !== 'undefined' ? terrains : []
+                terrains: typeof terrains !== 'undefined' ? terrains : [],
+                battleVars: typeof battleVars !== 'undefined' ? battleVars : []   // 진행자 본인의 저장 파일에만 들어간다 (관전자 동기화와 무관)
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToSave));
             const downloadAnchorNode = document.createElement('a');
@@ -2843,7 +3025,7 @@
             const type = document.getElementById('inputGlobalStatusType').value;
             const valGroup = document.getElementById('statusValueGroup');
             const statGroup = document.getElementById('statusStatGroup');
-            const needsValue = ['dot', 'hot', 'shield', 'vampire', 'reflect', 'vulnerable', 'doom', 'stat', 'reduce_damage', 'action_damage'].includes(type);
+            const needsValue = ['dot', 'hot', 'shield', 'vampire', 'reflect', 'vulnerable', 'doom', 'stat', 'maxhp', 'reduce_damage', 'action_damage'].includes(type);
             if(valGroup) valGroup.style.display = needsValue ? 'block' : 'none';
             if(statGroup) statGroup.style.display = type === 'stat' ? 'block' : 'none';
         }
@@ -3068,6 +3250,248 @@
 
             refreshTagBuilderStatusOptions();
         })();
+
+        // ===== 컴팩트 보기 (이 브라우저에만 저장, 기본 켬) =====
+        function applyCompact(on) {
+            document.body.classList.toggle('compact', on);
+            const b = document.getElementById('compactBtn'); if (b) b.innerText = on ? '↔ 컴팩트 보기: 켬' : '↔ 컴팩트 보기: 끔';
+        }
+        function toggleCompact() {
+            const on = !document.body.classList.contains('compact'); applyCompact(on);
+            try { localStorage.setItem('compactView', on ? '1' : '0'); } catch (e) {}
+        }
+        document.addEventListener('DOMContentLoaded', () => { let v = '1'; try { const s = localStorage.getItem('compactView'); if (s !== null) v = s; } catch (e) {} applyCompact(v !== '0'); });
+
+        // ===== 🔐 캐릭터 로그인 / 🟢 접속 중 표시 (시트 웹앱 서버 연동) =====
+        // 로그인하면 임시 토큰을 받아 이 브라우저에 저장하고(비밀번호는 저장 안 함), 30초마다 "접속 중"을 알린다.
+        // 접속 중 목록은 20초마다 가져와서 카드 이름 옆 초록 점과 [접속 중] 버튼에 표시한다. (진행자·관전자 모두)
+        let BATTLE_PING_MS = 30000, BATTLE_ONLINE_POLL_MS = 20000;
+        const BATTLE_LOGIN_STORE = 'battleCharLogin';
+        let charSession = null, onlineNames = new Set(), onlineList = [], pingTimer = null, onlinePollTimer = null;
+        function sheetConfigured() { return typeof SHEET_API_URL === 'string' && SHEET_API_URL && SHEET_API_URL.indexOf('여기에') !== 0; }
+        function clSetUi() {
+            const lo = document.getElementById('clLoggedOut'), li = document.getElementById('clLoggedIn');
+            if (lo) lo.style.display = charSession ? 'none' : 'block'; if (li) li.style.display = charSession ? 'block' : 'none';
+            const nm = document.getElementById('clName'); if (nm && charSession) nm.innerText = charSession.name;
+            const b = document.getElementById('loginBtn'); if (b) b.innerText = charSession ? `🔐 ${charSession.name}` : '🔐 캐릭터 로그인';
+        }
+        function openCharLoginModal() { clSetUi(); document.getElementById('clMsg').innerText = ''; document.getElementById('charLoginModal').style.display = 'block'; }
+        function closeCharLoginModal() { document.getElementById('charLoginModal').style.display = 'none'; }
+        function charLoginSubmit() {
+            const id = document.getElementById('clId').value.trim(), pw = document.getElementById('clPw').value, msg = document.getElementById('clMsg');
+            if (!sheetConfigured()) { msg.innerText = '시트 웹앱 주소가 설정되지 않았습니다.'; return; }
+            if (!id || !pw) { msg.innerText = '아이디와 비밀번호를 입력해 주세요.'; return; }
+            const btn = document.getElementById('clSubmit'); btn.disabled = true; msg.innerText = '';
+            sheetPost({ action: 'battleLogin', id: id, pw: pw }).then(res => {
+                if (!res || !res.success) { msg.innerText = (res && res.message) || '로그인하지 못했습니다.'; return; }
+                charSession = { name: res.name, token: res.token };
+                try { localStorage.setItem(BATTLE_LOGIN_STORE, JSON.stringify(charSession)); } catch (e) {}
+                document.getElementById('clPw').value = ''; document.getElementById('clId').value = '';
+                clSetUi(); charPingStart(); onlineRefresh();
+            }).catch(err => { msg.innerText = '연결하지 못했습니다: ' + err.message; }).finally(() => { btn.disabled = false; });
+        }
+        function charPing() {
+            if (!charSession) return;
+            sheetPost({ action: 'battlePing', token: charSession.token }).then(res => {
+                if (res && res.expired) charSessionClear();   // 로그인이 만료되면 조용히 로그아웃 상태로 돌아간다
+            }).catch(() => {});
+        }
+        function charPingStart() { clearInterval(pingTimer); charPing(); pingTimer = setInterval(charPing, BATTLE_PING_MS); }
+        function charSessionClear() {
+            charSession = null; clearInterval(pingTimer); pingTimer = null;
+            try { localStorage.removeItem(BATTLE_LOGIN_STORE); } catch (e) {}
+            clSetUi(); onlineRefresh();
+        }
+        function charLogout() {
+            const tok = charSession && charSession.token;
+            if (tok && sheetConfigured()) sheetPost({ action: 'battleLogout', token: tok }).catch(() => {});
+            charSessionClear();
+        }
+        function onlineRefresh() {
+            if (!sheetConfigured()) return;
+            fetch(SHEET_API_URL + '?action=online&key=' + encodeURIComponent(SHEET_API_KEY)).then(r => r.json()).then(res => {
+                if (!res || !res.success) return;
+                onlineList = res.online || [];
+                const next = new Set(onlineList.map(o => o.name)), changed = next.size !== onlineNames.size || [...next].some(n => !onlineNames.has(n));
+                onlineNames = next;
+                const b = document.getElementById('onlineBtn'); if (b) b.innerText = `🟢 접속 중 ${onlineList.length}명`;
+                if (changed && typeof renderGrid === 'function') renderGrid();
+                const m = document.getElementById('onlineModal'); if (m && m.style.display === 'block') onlineRender();
+            }).catch(() => {});
+        }
+        function onlineRender() {
+            const box = document.getElementById('onlineList');
+            box.innerHTML = onlineList.length ? onlineList.map(o => {
+                const onBoard = typeof entities !== 'undefined' && entities.some(e => e.name === o.name);
+                return `<div class="on-row"><i class="on-dot" style="margin:0;"></i> <b>${bvEsc(o.name)}</b>${onBoard ? '<span style="font-size:11px; color:#2b6cb0;">전투 참여</span>' : ''}<small>${o.ago < 45 ? '방금' : Math.round(o.ago / 60) + '분 전'}</small></div>`;
+            }).join('') : '<div style="color:#a0aec0; font-size:13px; padding:12px 0;">접속 중인 캐릭터가 없습니다.</div>';
+        }
+        function openOnlineModal() { onlineRefresh(); onlineRender(); document.getElementById('onlineModal').style.display = 'block'; }
+        function closeOnlineModal() { document.getElementById('onlineModal').style.display = 'none'; }
+        function charSessionBoot() {
+            try { const s = JSON.parse(localStorage.getItem(BATTLE_LOGIN_STORE) || 'null'); if (s && s.name && s.token) charSession = s; } catch (e) {}
+            clSetUi(); if (charSession && sheetConfigured()) charPingStart();
+            onlineRefresh();
+            clearInterval(onlinePollTimer); onlinePollTimer = setInterval(() => { if (document.visibilityState !== 'hidden') onlineRefresh(); }, BATTLE_ONLINE_POLL_MS);
+        }
+        document.addEventListener('DOMContentLoaded', charSessionBoot);
+
+        // ===== 🎲 전투 변수 (진행자 전용) =====
+        // 효과 키워드(아이템과 같은 문법)를 이름 붙여 저장해 두고, 전원/팀/선택한 대상에게 언제든 적용한다.
+        // 목록은 syncToFirebase에 포함되지 않고(관전자에게 전달 안 됨) 이 브라우저의 localStorage에만 저장된다.
+        let battleVars = [], bvEditingId = null, bvPending = null;
+        const BV_STORE = 'battleVarsV1';
+        function bvLoad() { try { const v = JSON.parse(localStorage.getItem(BV_STORE) || '[]'); battleVars = Array.isArray(v) ? v : []; } catch (e) { battleVars = []; } }
+        function bvSave() { try { localStorage.setItem(BV_STORE, JSON.stringify(battleVars)); } catch (e) {} }
+        bvLoad();
+        const BV_SCOPE_LABEL = { all: '전원', A: 'A팀', B: 'B팀', pick: '고르기' };
+        function bvDescribe(str) {   // 키워드를 사람이 읽는 문장으로
+            const out = [], s = String(str || ''), kor = k => STAT_KOR_BY_KEY[STAT_KEY_BY_KOR[k.trim()] || k.trim()] || k.trim();
+            const sg = n => (parseInt(n, 10) >= 0 ? '+' : '') + parseInt(n, 10);
+            Array.from(s.matchAll(/\[(회복|피해|공명도|포만도|해제|부여|스탯|최대\s*체력)\s*:\s*([^\]]*)\]/g)).forEach(m => {
+                const k = m[1].replace(/\s/g, ''), a = m[2].split(':').map(x => x.trim());
+                if (k === '회복') out.push(`회복 ${a[0]}`); else if (k === '피해') out.push(`피해 ${a[0]}`);
+                else if (k === '공명도') out.push(`공명도 ${sg(a[0])}`); else if (k === '포만도') out.push(`포만도 ${sg(a[0])}`);
+                else if (k === '해제') out.push(`[${a[0]}] 해제`); else if (k === '부여') out.push(`[${a[0]}] ${a[1] || '?'}턴 부여`);
+                else if (k === '스탯') out.push(`${kor(a[0])} ${sg(a[1])}${a[2] ? ` (${a[2]}턴)` : ''}`);
+                else if (k === '최대체력') out.push(`최대 체력 ${sg(a[0])}${a[1] ? ` (${a[1]}턴)` : ''}`);
+            });
+            return out;
+        }
+        function bvChip(text) { const ta = document.getElementById('bvEffect'); ta.value = (ta.value.trim() ? ta.value.trim() + ' ' : '') + text; bvPreview(); ta.focus(); }
+        function bvPreview() {
+            const el = document.getElementById('bvPreview'), d = bvDescribe(document.getElementById('bvEffect').value);
+            el.classList.toggle('bad', !d.length && !!document.getElementById('bvEffect').value.trim());
+            el.innerText = d.length ? '→ ' + d.join(' · ') : (document.getElementById('bvEffect').value.trim() ? '인식된 효과가 없습니다. 위의 버튼으로 키워드를 넣어 보세요.' : '');
+        }
+        function openBattleVarsModal() { bvRender(); bvResetForm(); document.getElementById('battleVarsModal').style.display = 'block'; }
+        function closeBattleVarsModal() { document.getElementById('battleVarsModal').style.display = 'none'; document.getElementById('bvList').innerHTML = ''; }  // 닫을 때 목록을 화면에서 지운다
+        function bvResetForm() {
+            bvEditingId = null; ['bvName', 'bvEffect'].forEach(i => { document.getElementById(i).value = ''; });
+            document.getElementById('bvScope').value = 'all'; document.getElementById('bvAuto').value = 'off'; document.getElementById('bvLog').checked = false;
+            document.getElementById('bvSave').innerText = '변수 저장'; bvPreview();
+        }
+        function bvRender() {
+            const box = document.getElementById('bvList');
+            if (!battleVars.length) { box.innerHTML = '<div style="color:#a0aec0; font-size:13px; padding:10px 0;">저장된 전투 변수가 없습니다. 아래에서 만들어 보세요.</div>'; return; }
+            box.innerHTML = battleVars.map(v => `<div class="bv-item"><div class="bv-main"><b>${bvEsc(v.name)}</b><span class="bv-badge">${BV_SCOPE_LABEL[v.scope] || '전원'}</span>${v.auto === 'round' ? '<span class="bv-badge" style="background:#fefcbf;color:#744210;">매 라운드</span>' : ''}
+                <div class="bv-sum">${bvEsc(bvDescribe(v.effect).join(' · '))}</div><code>${bvEsc(v.effect)}</code></div>
+                <button class="go" onclick="applyBattleVar('${v.id}')" title="지금 적용">▶ 적용</button>
+                <button onclick="clearBattleVar('${v.id}')" title="이 변수로 걸린 효과를 모두 해제">↩ 해제</button>
+                <button onclick="editBattleVar('${v.id}')" title="수정">✏️</button>
+                <button onclick="deleteBattleVar('${v.id}')" title="삭제">🗑️</button></div>`).join('');
+        }
+        // 진행자 화면에서만 뜨는 알림. showToast는 관전자에게도 방송되므로 원본 함수를 쓴다. (변수 이름이 관전자에게 새면 안 됨)
+        function bvLocalToast(msg) { try { (typeof _origShowToast === 'function' ? _origShowToast : function () {})(msg); } catch (e) {} }
+        function bvEsc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function saveBattleVarForm() {
+            const name = document.getElementById('bvName').value.trim(), effect = document.getElementById('bvEffect').value.trim();
+            if (!name) return alert('변수 이름을 입력하세요.');
+            if (!bvDescribe(effect).length) return alert('효과 키워드를 입력하세요. 예: [스탯:전체:-10:3]');
+            const scope = document.getElementById('bvScope').value; let auto = document.getElementById('bvAuto').value;
+            if (scope === 'pick') auto = 'off';   // 고르기 변수는 자동 적용할 수 없다
+            const data = { name, scope, auto, effect, log: document.getElementById('bvLog').checked };
+            if (bvEditingId) Object.assign(battleVars.find(v => v.id === bvEditingId) || {}, data); else battleVars.push({ id: 'bv_' + Date.now().toString(36) + Math.floor(Math.random() * 1000), ...data });
+            bvSave(); bvRender(); bvResetForm();
+        }
+        function editBattleVar(id) {
+            const v = battleVars.find(x => x.id === id); if (!v) return;
+            bvEditingId = id; document.getElementById('bvName').value = v.name; document.getElementById('bvEffect').value = v.effect; document.getElementById('bvScope').value = v.scope;
+            document.getElementById('bvAuto').value = v.auto || 'off'; document.getElementById('bvLog').checked = !!v.log; document.getElementById('bvSave').innerText = '수정 저장'; bvPreview();
+        }
+        function deleteBattleVar(id) {
+            const v = battleVars.find(x => x.id === id); if (!v || !confirm(`[${v.name}] 변수를 삭제할까요?`)) return;
+            battleVars = battleVars.filter(x => x.id !== id); bvSave(); bvRender();
+        }
+        function bvTargets(v, pickedIds) {
+            return entities.filter(e => e.stats && e.stats.currentHp > 0 && (v.scope === 'all' || (v.scope === 'A' && bulkTeam(e) === 'A') || (v.scope === 'B' && bulkTeam(e) === 'B') || (v.scope === 'pick' && (pickedIds || []).includes(e.id))));
+        }
+        function applyBattleVar(id, pickedIds, quiet) {
+            const v = battleVars.find(x => x.id === id); if (!v) return 0;
+            if (v.scope === 'pick' && !pickedIds) { bvPending = id; tpOpen(v.name); return 0; }
+            const targets = bvTargets(v, pickedIds);
+            targets.forEach(e => processItemEffects(e, v.effect, '진행자', { silent: true, source: 'var_' + v.id }));
+            if (v.log && !quiet) addLog(`<b>[전투 변수]</b> ${bvEsc(v.name)} — ${targets.length}명에게 적용되었습니다.`, 'log-action');
+            renderGrid(); if (typeof syncToFirebase === 'function') syncToFirebase();
+            if (!quiet) bvLocalToast(`[${v.name}] ${targets.length}명에게 적용`);
+            return targets.length;
+        }
+        function clearBattleVar(id) {
+            const src = 'var_' + id; let n = 0;
+            entities.forEach(e => { const b = (e.statusEffects || []).length; e.statusEffects = (e.statusEffects || []).filter(s => s.source !== src); if (e.statusEffects.length < b) n++; });
+            renderGrid(); if (typeof syncToFirebase === 'function') syncToFirebase();
+            bvLocalToast(`${n}명에게서 변수 효과를 해제했습니다.`);
+        }
+        function applyAutoBattleVars() { battleVars.filter(v => v.auto === 'round' && v.scope !== 'pick').forEach(v => applyBattleVar(v.id, null, true)); }
+        // ----- 적용할 때 대상 고르기 -----
+        function tpOpen(title) {
+            document.getElementById('tpTitle').innerText = `[${title}] 적용할 대상`;
+            const col = (team, label) => `<div class="bulk-col"><h4 style="color:${team === 'A' ? '#c53030' : '#2b6cb0'};">${label}</h4>` + entities.filter(e => bulkTeam(e) === team && e.stats.currentHp > 0).map(e => `<label class="bulk-row"><input type="checkbox" class="tp-cb" data-id="${e.id}"> ${bvEsc(e.name)}</label>`).join('') + '</div>';
+            document.getElementById('tpList').innerHTML = col('A', 'A팀') + col('B', 'B팀');
+            document.getElementById('targetPickModal').style.display = 'block';
+        }
+        function tpOk() {
+            const ids = Array.from(document.querySelectorAll('#tpList .tp-cb:checked')).map(c => c.dataset.id);
+            if (!ids.length) return alert('대상을 한 명 이상 고르세요.');
+            document.getElementById('targetPickModal').style.display = 'none'; const id = bvPending; bvPending = null; applyBattleVar(id, ids);
+        }
+        document.addEventListener('input', e => { if (e.target && e.target.id === 'bvEffect') bvPreview(); });
+
+        // ===== 상태이상 일괄 부여 =====
+        function bulkTeam(e) { return e.type === '에너미' ? 'A' : 'B'; }
+        function openBulkStatusModal() {
+            const sel = document.getElementById('bulkStatusSelect');
+            sel.innerHTML = globalStatusList.length ? globalStatusList.map(s => `<option value="${s.id}">${s.icon || ''} ${s.name}</option>`).join('') : '<option value="">(상태이상 목록이 비어 있습니다)</option>';
+            const box = document.getElementById('bulkTargets');
+            const col = (team, title) => {
+                const list = entities.filter(e => bulkTeam(e) === team);
+                return `<div class="bulk-col"><h4 style="color:${team === 'A' ? '#c53030' : '#2b6cb0'};">${title}</h4>` + (list.length ? list.map(e => {
+                    const dead = e.stats.currentHp <= 0;
+                    return `<label class="bulk-row${dead ? ' dead' : ''}"><input type="checkbox" class="bulk-cb" data-id="${e.id}" data-team="${team}" data-dead="${dead ? 1 : 0}" onchange="bulkCount()"> ${e.name}<small>${e.stats.currentHp}/${getEffectiveMaxHp(e)}${dead ? ' 쓰러짐' : ''}</small></label>`;
+                }).join('') : '<div style="color:#a0aec0; font-size:12px;">없음</div>') + '</div>';
+            };
+            box.innerHTML = col('A', 'A팀') + col('B', 'B팀');
+            bulkCount();
+            document.getElementById('bulkStatusModal').style.display = 'block';
+        }
+        function closeBulkStatusModal() { document.getElementById('bulkStatusModal').style.display = 'none'; }
+        function bulkCount() {
+            const n = document.querySelectorAll('#bulkTargets .bulk-cb:checked').length;
+            const el = document.getElementById('bulkCount'); if (el) el.innerText = n ? `${n}명 선택` : '';
+        }
+        function bulkSelect(mode) {
+            document.querySelectorAll('#bulkTargets .bulk-cb').forEach(cb => {
+                cb.checked = mode === 'all' ? true : mode === 'none' ? false : mode === 'alive' ? cb.dataset.dead !== '1' : cb.dataset.team === mode;
+            });
+            bulkCount();
+        }
+        function bulkPicked() { return Array.from(document.querySelectorAll('#bulkTargets .bulk-cb:checked')).map(cb => entities.find(e => e.id === cb.dataset.id)).filter(Boolean); }
+        function bulkApplyStatus() {
+            const gs = globalStatusList.find(s => s.id === document.getElementById('bulkStatusSelect').value);
+            if (!gs) return alert('부여할 상태이상을 고르세요. (상태이상 목록이 비어 있으면 먼저 추가하세요.)');
+            const targets = bulkPicked(); if (!targets.length) return alert('대상을 한 명 이상 고르세요.');
+            const duration = Math.max(1, parseInt(document.getElementById('bulkStatusDuration').value, 10) || 1);
+            const given = [], blocked = [];
+            targets.forEach(e => {
+                if (!e.statusEffects) e.statusEffects = [];
+                if (e.statusEffects.some(s => s.type === 'immune')) { blocked.push(e.name); return; }
+                e.statusEffects.push(JSON.parse(JSON.stringify({ ...gs, duration: duration })));
+                given.push(e.name);
+            });
+            addLog(`<b>[일괄 부여]</b> [${gs.name}]${josa_(gs.name, '이', '가')} ${given.length}명에게 부여되었습니다. (${given.join(', ')})${blocked.length ? ` — 면역으로 무시: ${blocked.join(', ')}` : ''}`, 'log-action');
+            renderGrid(); if (typeof syncToFirebase === 'function') syncToFirebase();
+            closeBulkStatusModal();
+        }
+        function bulkRemoveStatus() {
+            const gs = globalStatusList.find(s => s.id === document.getElementById('bulkStatusSelect').value);
+            if (!gs) return alert('해제할 상태이상을 고르세요.');
+            const targets = bulkPicked(); if (!targets.length) return alert('대상을 한 명 이상 고르세요.');
+            const cleared = [];
+            targets.forEach(e => { const n = (e.statusEffects || []).length; e.statusEffects = (e.statusEffects || []).filter(s => s.name !== gs.name); if (e.statusEffects.length < n) cleared.push(e.name); });
+            addLog(`<b>[일괄 해제]</b> [${gs.name}] 상태가 ${cleared.length}명에게서 해제되었습니다.${cleared.length ? ' (' + cleared.join(', ') + ')' : ''}`, 'log-action');
+            renderGrid(); if (typeof syncToFirebase === 'function') syncToFirebase();
+            closeBulkStatusModal();
+        }
 
         function openStatusModal(id) { activeStatusEntityId = id; renderCharacterStatusList(); const selectBox = document.getElementById('selectGlobalStatus'); selectBox.innerHTML = ''; document.getElementById('inputStatusDuration').value = '1'; if (globalStatusList.length === 0) { selectBox.innerHTML = '<option value="" disabled selected>도감에 등록된 상태이상이 없습니다.</option>'; } else { selectBox.innerHTML = '<option value="" disabled selected>-- 상태이상을 선택하세요 --</option>'; globalStatusList.forEach(gs => { selectBox.innerHTML += `<option value="${gs.id}">${gs.icon} ${gs.name}</option>`; }); } document.getElementById('statusModal').style.display = 'block'; }
         function closeStatusModal() { activeStatusEntityId = null; document.getElementById('statusModal').style.display = 'none'; }
@@ -3344,67 +3768,71 @@
             document.getElementById('addModal').style.display = 'block';
         }
 
-        function processItemEffects(target, effectStr, actorName) {
-            const healMatch = effectStr.match(/\[회복\s*:\s*(\d+)\]/);
-            const clearMatch = effectStr.match(/\[해제\s*:\s*([^\]]+)\]/);
-            const applyMatch = effectStr.match(/\[부여\s*:\s*([^\]:]+)\s*:\s*(\d+)\]/);
-            const statMatch = effectStr.match(/\[스탯\s*:\s*([^\]:]+)\s*:\s*(-?\d+)\]/);
-            const resonanceMatch = effectStr.match(/\[공명도\s*:\s*(-?\d+)\]/);
+        // 효과 키워드: [회복:N] [피해:N] [해제:이름] [부여:이름:턴] [스탯:대상:수치(:턴)] [최대체력:수치(:턴)] [공명도:N] [포만도:N]
+        //  - 스탯 대상: 근력/민첩/지능/정신/행운, 또는 전체(전원)  /  턴을 생략하면 전투가 끝날 때까지 유지
+        //  - 같은 키워드를 여러 번 써도 모두 적용된다.
+        // opts: { silent: 기록·연출 없이, source: 이 표시가 붙은 상태이상은 다시 적용할 때 먼저 지운다(겹쳐 쌓이지 않게) }
+        const STAT_KEY_BY_KOR = { '근력': 'str', '민첩': 'agi', '지능': 'int', '정신': 'men', '정신력': 'men', '행운': 'luk', '전체': 'all', '전원': 'all', '모두': 'all', '모든': 'all', 'all': 'all' };
+        const STAT_KOR_BY_KEY = { str: '근력', agi: '민첩', int: '지능', men: '정신', luk: '행운', all: '전체' };
+        function processItemEffects(target, effectStr, actorName, opts) {
+            opts = opts || {};
+            const quiet = !!opts.silent;
+            const log = (m, c) => { if (!quiet) addLog(m, c); };
+            effectStr = String(effectStr || '');
+            if (!target.statusEffects) target.statusEffects = [];
+            if (opts.source) target.statusEffects = target.statusEffects.filter(s => s.source !== opts.source);
+            const tagged = (st) => { if (opts.source) st.source = opts.source; return st; };
+            const all = (re) => Array.from(effectStr.matchAll(re));
 
-            if (healMatch) {
-                let amount = parseInt(healMatch[1]);
-                let actual = processHeal(target, amount); 
+            all(/\[회복\s*:\s*\+?(\d+)\]/g).forEach(m => {
+                const actual = processHeal(target, parseInt(m[1], 10));
                 if (actual > 0) {
-                    spawnHealEffect(target.x, target.y);
-                    spawnFloatingNumber(target.x, target.y, '+' + actual, 'heal-num');
-                    playHealSound();
-                    addLog(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 체력을 <b>${actual}</b> 회복했습니다.`, 'log-heal');
+                    if (!quiet) { spawnHealEffect(target.x, target.y); spawnFloatingNumber(target.x, target.y, '+' + actual, 'heal-num'); playHealSound(); }
+                    log(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 체력을 <b>${actual}</b> 회복했습니다.`, 'log-heal');
                 }
-            }
-
-            if (resonanceMatch) {
-                let amount = parseInt(resonanceMatch[1]);
+            });
+            all(/\[피해\s*:\s*\+?(\d+)\]/g).forEach(m => {
+                if (typeof processDamage === 'function') processDamage(target, parseInt(m[1], 10));
+                log(`<b>${target.name}</b>이(가) <b>${parseInt(m[1], 10)}</b>의 피해를 입었습니다.`, 'log-hit');
+            });
+            all(/\[공명도\s*:\s*([+-]?\d+)\]/g).forEach(m => {
+                const amount = parseInt(m[1], 10);
                 if (typeof adjustResonance === 'function') adjustResonance(target.id, amount);
-                if (amount > 0) {
-                    addLog(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 공명도를 <b>${amount}</b> 회복했습니다.`, 'log-heal');
-                } else if (amount < 0) {
-                    addLog(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 공명도가 <b>${Math.abs(amount)}</b> 감소했습니다.`, 'log-hit');
-                }
-            }
-
-            if (clearMatch) {
-                let statusName = clearMatch[1].trim();
-                let beforeLen = target.statusEffects ? target.statusEffects.length : 0;
-                if(target.statusEffects) {
-                    target.statusEffects = target.statusEffects.filter(s => s.name !== statusName);
-                    if (beforeLen > target.statusEffects.length) {
-                        addLog(`<b>${target.name}</b>의 [${statusName}] 상태가 해제되었습니다.`, 'log-action');
-                    }
-                }
-            }
-
-            if (applyMatch) {
-                let name = applyMatch[1].trim();
-                let dur = parseInt(applyMatch[2]);
+                if (amount > 0) log(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 공명도를 <b>${amount}</b> 회복했습니다.`, 'log-heal');
+                else if (amount < 0) log(`<b>${actorName}</b>이(가) <b>${target.name}</b>에게 아이템을 사용! 공명도가 <b>${Math.abs(amount)}</b> 감소했습니다.`, 'log-hit');
+            });
+            all(/\[포만도\s*:\s*([+-]?\d+)\]/g).forEach(m => {
+                adjustFullness(target.id, parseInt(m[1], 10), true);
+                log(`<b>${target.name}</b>의 포만도가 ${parseInt(m[1], 10) >= 0 ? '+' : ''}${parseInt(m[1], 10)} 변했습니다.`, 'log-action');
+            });
+            all(/\[해제\s*:\s*([^\]]+)\]/g).forEach(m => {
+                const statusName = m[1].trim(), before = target.statusEffects.length;
+                target.statusEffects = target.statusEffects.filter(s => s.name !== statusName);
+                if (before > target.statusEffects.length) log(`<b>${target.name}</b>의 [${statusName}] 상태가 해제되었습니다.`, 'log-action');
+            });
+            all(/\[부여\s*:\s*([^\]:]+)\s*:\s*(\d+)\]/g).forEach(m => {
+                const name = m[1].trim(), dur = parseInt(m[2], 10);
                 let gs = globalStatusList.find(s => s.name === name);
-                if (!gs) gs = { id: 'auto_' + Date.now(), icon: '✨', name: name, desc: '아이템 부여 상태이상', type: 'none', value: 0 };
-                
-                if (target.statusEffects && target.statusEffects.some(s => s.type === 'immune')) {
-                    addLog(`&nbsp;&nbsp;↳ [면역] <b>${target.name}</b>은(는) [${name}] 부여를 무시했습니다!`, '', true);
+                if (!gs) gs = { id: 'auto_' + Date.now() + Math.random(), icon: '✨', name: name, desc: '아이템 부여 상태이상', type: 'none', value: 0 };
+                if (target.statusEffects.some(s => s.type === 'immune')) {
+                    log(`&nbsp;&nbsp;↳ [면역] <b>${target.name}</b>은(는) [${name}] 부여를 무시했습니다!`, '');
                 } else {
-                    target.statusEffects.push(JSON.parse(JSON.stringify({...gs, duration: dur})));
-                    addLog(`<b>${target.name}</b>에게 [${name}] 효과가 부여되었습니다.`, 'log-action');
+                    target.statusEffects.push(tagged(JSON.parse(JSON.stringify({ ...gs, duration: dur }))));
+                    log(`<b>${target.name}</b>에게 [${name}] 효과가 부여되었습니다.`, 'log-action');
                 }
-            }
-            
-            if (statMatch) {
-                let statTarget = statMatch[1].trim();
-                let val = parseInt(statMatch[2]);
-                let gs = { id: 'stat_' + Date.now(), icon: '📈', name: '스탯 변화', desc: `${statTarget} ${val}`, type: 'stat', value: val, targetStat: statTarget, duration: 99 };
-                target.statusEffects.push(JSON.parse(JSON.stringify(gs)));
-                addLog(`<b>${target.name}</b>의 스탯이 변화했습니다.`, 'log-action');
-            }
-
+            });
+            all(/\[스탯\s*:\s*([^\]:]+)\s*:\s*([+-]?\d+)(?:\s*:\s*(\d+))?\]/g).forEach(m => {
+                const raw = m[1].trim(), key = STAT_KEY_BY_KOR[raw] || raw, val = parseInt(m[2], 10), dur = m[3] ? parseInt(m[3], 10) : 99;
+                const kor = STAT_KOR_BY_KEY[key] || raw;
+                target.statusEffects.push(tagged({ id: 'stat_' + Date.now() + Math.random(), icon: val >= 0 ? '📈' : '📉', name: '스탯 변화', desc: `${kor} ${val >= 0 ? '+' : ''}${val}`, type: 'stat', value: val, targetStat: key, duration: dur }));
+                log(`<b>${target.name}</b>의 ${kor}이(가) ${val >= 0 ? '+' : ''}${val} 변화했습니다.`, 'log-action');
+            });
+            all(/\[최대\s*체력\s*:\s*([+-]?\d+)(?:\s*:\s*(\d+))?\]/g).forEach(m => {
+                const val = parseInt(m[1], 10), dur = m[2] ? parseInt(m[2], 10) : 99;
+                target.statusEffects.push(tagged({ id: 'maxhp_' + Date.now() + Math.random(), icon: val >= 0 ? '❤️' : '💔', name: '최대 체력 ' + (val >= 0 ? '증가' : '감소'),
+                    desc: `최대 체력 ${val >= 0 ? '+' : ''}${val}`, type: 'maxhp', value: val, duration: dur }));
+                log(`<b>${target.name}</b>의 최대 체력이 ${val >= 0 ? '+' : ''}${val} 변화했습니다.`, val >= 0 ? 'log-heal' : 'log-hit');
+            });
             renderGrid();
         }
 
@@ -3537,7 +3965,7 @@
             const chosen = debuffs[Math.floor(Math.random() * debuffs.length)];
             target.statusEffects = target.statusEffects.filter(e => e !== chosen);
             if (typeof addLog === 'function') addLog(`&nbsp;&nbsp; <b>[정화]</b> <b>${caster.name}</b>이(가) <b>${target.name}</b>의 [${chosen.name}]을(를) 무작위로 해제했습니다.`, 'log-heal', true);
-            if (typeof gainResonance === 'function') gainResonance(caster, RESONANCE_GAIN_PER_ACTION, '정화');
+            if (typeof gainResonance === 'function') gainResonance(caster, rollResonanceGain(), '정화');
             renderPurifyTargetList();
             if (typeof renderGrid === 'function') renderGrid();
             if (typeof syncToFirebase === 'function' && typeof isAdmin !== 'undefined' && isAdmin) syncToFirebase();
@@ -3551,7 +3979,7 @@
             const chosen = target.statusEffects[effIndex];
             target.statusEffects.splice(effIndex, 1);
             if (typeof addLog === 'function') addLog(`&nbsp;&nbsp; <b>[정화]</b> <b>${caster.name}</b>이(가) <b>${target.name}</b>의 [${chosen.name}]을(를) 선택하여 해제했습니다.`, 'log-heal', true);
-            if (typeof gainResonance === 'function') gainResonance(caster, RESONANCE_GAIN_PER_ACTION, '정화');
+            if (typeof gainResonance === 'function') gainResonance(caster, rollResonanceGain(), '정화');
             renderPurifyTargetList();
             if (typeof renderGrid === 'function') renderGrid();
             if (typeof syncToFirebase === 'function' && typeof isAdmin !== 'undefined' && isAdmin) syncToFirebase();
@@ -3682,6 +4110,7 @@
         }
 
         function renderGrid() {
+            if (typeof reconcileMaxHpBonus === 'function') reconcileMaxHpBonus();
             const enemyPanel = document.getElementById('enemyPanel'); 
             const apostlePanel = document.getElementById('apostlePanel');
             if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">A팀</h3>`;
@@ -3722,7 +4151,7 @@
                     const badgeClass = isEnemy ? 'type-badge enemy' : 'type-badge apostle'; 
                     const hpColorClass = isEnemy ? 'hp-color-enemy' : 'hp-color-apostle'; 
                     const isDead = entity.stats.currentHp <= 0;
-                    const hpRatioForWarning = entity.stats.maxHp > 0 ? entity.stats.currentHp / entity.stats.maxHp : 1;
+                    const hpRatioForWarning = getEffectiveMaxHp(entity) > 0 ? entity.stats.currentHp / getEffectiveMaxHp(entity) : 1;
                     if (!isDead && hpRatioForWarning <= LOW_HP_THRESHOLD) cardClass += ' panel-low-hp';
                     const isActiveTurn = typeof isBattleActive !== 'undefined' && isBattleActive && typeof turnOrder !== 'undefined' && typeof currentTurnIndex !== 'undefined' && turnOrder[currentTurnIndex] === entity.id; 
                     const activeClass = isActiveTurn ? ' active-turn' : '';
@@ -3744,10 +4173,10 @@
                     }
 
                     let totalShield = (entity.statusEffects || []).filter(s => s.type === 'shield').reduce((sum, s) => sum + s.value, 0);
-                    let barMax = Math.max(entity.stats.maxHp, entity.stats.currentHp + totalShield);
+                    let barMax = Math.max(getEffectiveMaxHp(entity), entity.stats.currentHp + totalShield);
                     const hpPct = (entity.stats.currentHp / barMax) * 100;
                     const shieldPct = (totalShield / barMax) * 100;
-                    const barColor = typeof getHpColor === 'function' ? getHpColor(entity.stats.currentHp, entity.stats.maxHp) : '#48bb78';
+                    const barColor = typeof getHpColor === 'function' ? getHpColor(entity.stats.currentHp, getEffectiveMaxHp(entity)) : '#48bb78';
 
                     const isObserver = typeof isAdmin !== 'undefined' && !isAdmin;
 
@@ -3797,7 +4226,7 @@
                         statusHtml = `<span style="display:inline-block; width:1px; height:22px;"></span>`; 
                     }
 
-                    let hpDisplay = `HP <input type="number" class="hp-input ${hpColorClass}" value="${entity.stats.currentHp}" onchange="updateHp('${entity.id}', this.value)"> <span style="margin-left: 4px;">/ ${entity.stats.maxHp}</span>`;
+                    let hpDisplay = `HP <input type="number" class="hp-input ${hpColorClass}" value="${entity.stats.currentHp}" onchange="updateHp('${entity.id}', this.value)"> <span style="margin-left: 4px;">/ ${getEffectiveMaxHp(entity)}</span>`;
                     if (totalShield > 0) {
                         hpDisplay += ` <span style="color:#3182ce; font-weight:bold; font-size:12px; margin-left:6px;">(+${totalShield})</span>`;
                     }
@@ -3921,7 +4350,7 @@
                         blessEffect = " 비공개된 효과입니다.";
                     }
 
-                    card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">${entity.type}</span>${gradeBadge}${positionBadge}${traitBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
+                    card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${(typeof onlineNames !== 'undefined' && onlineNames.has(entity.name)) ? '<i class="on-dot" title="접속 중"></i>' : ''}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">${entity.type}</span>${gradeBadge}${positionBadge}${traitBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
                     <div class="card-actions">
                         <button class="action-btn" onclick="togglePlacement('${entity.id}')" style="background:#ebf8ff; color:#2b6cb0; border-color:#90cdf4;">배치</button>
                         <button class="action-btn" onclick="removeToken('${entity.id}')" style="background:#fff5f5; color:#c53030; border-color:#fed7d7;">회수</button>
@@ -4464,7 +4893,7 @@
                 attacker.stats.currentResonance = 0;
                 if (typeof addLog === 'function') addLog(`&nbsp;&nbsp; <b>${attacker.name}</b>이(가) 공명도를 모두 사용하여 성좌 스킬을 발동합니다!`, 'log-action', true);
             } else {
-                if (typeof gainResonance === 'function') gainResonance(attacker, RESONANCE_GAIN_PER_ACTION, '행동');
+                if (typeof gainResonance === 'function') gainResonance(attacker, rollResonanceGain(), '행동');
             }
 
             const boostMultiplier = 1;
@@ -4527,7 +4956,7 @@
 
                         {
                             let baseHeal = Math.floor(attackerStat * gradeMultiplier * 2.5 * scale * rng);
-                            let hpPercentHeal = Math.floor(target.stats.maxHp * (10 * scale * rng) / 100);
+                            let hpPercentHeal = Math.floor(getEffectiveMaxHp(target) * (10 * scale * rng) / 100);
                             if (isCrit) { baseHeal = Math.floor(baseHeal * 1.7); hpPercentHeal = Math.floor(hpPercentHeal * 1.7); }
                             let totalHeal = Math.floor((baseHeal + hpPercentHeal) * boostMultiplier * getPositionHealMult(attacker.position));
 
@@ -4781,6 +5210,7 @@
                         try { equipCatalog = parsed.equipCatalog || []; } catch(err){}
                         try { if (parsed.traitCatalog) traitCatalog = parsed.traitCatalog; } catch(err){}
                         try { terrains = parsed.terrains || []; } catch(err){}
+                    try { if (Array.isArray(parsed.battleVars)) { battleVars = parsed.battleVars; bvSave(); } } catch(err){}
                     } 
                     
                     entities.forEach(ent => { 
@@ -4973,66 +5403,172 @@
         let snowAnimReq = null;
         let snowflakes = [];
     
-        function changeWeather() {
-            // 1. 기존 애니메이션 정지
-            if (typeof rainReq !== 'undefined' && rainReq) cancelAnimationFrame(rainReq);
-            if (typeof snowAnimReq !== 'undefined') cancelAnimationFrame(snowAnimReq);
-            if (typeof stormReq !== 'undefined') cancelAnimationFrame(stormReq);
-            if (typeof dustReq !== 'undefined') cancelAnimationFrame(dustReq);
-
-            let weather = document.getElementById('weatherSelect').value;
-            const rainCanvas = document.getElementById('rainCanvas');
-            const snowCanvas = document.getElementById('snowCanvas');
-            const stormCanvas = document.getElementById('stormCanvas');
-            const dustCanvas = document.getElementById('dustCanvas');
-
-            // 2. 모든 날씨 캔버스 숨기기
-            if (rainCanvas) rainCanvas.style.display = 'none';
-            if (snowCanvas) snowCanvas.style.display = 'none';
-            if (stormCanvas) stormCanvas.style.display = 'none';
-            if (dustCanvas) dustCanvas.style.display = 'none';
-
-            // 3. 필터 및 효과 초기화
-            const container = document.querySelector('.main-battle-container');
-            if (container) container.style.filter = "none";
-            document.body.style.boxShadow = "none";
-
-            // 4. 날씨별 로직
-            if (weather === '비') {
-                if (rainCanvas) {
-                    rainCanvas.style.display = 'block';
-                    if (typeof initRain === 'function') initRain();
-                    drawRain();
-                }
-            } else if (weather === '혹한') {
-                if (snowCanvas) {
-                    snowCanvas.style.display = 'block';
-                    if(snowflakes.length === 0) {
-                        for(let i=0; i<250; i++) snowflakes.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 2 + 1, xs: -1 + Math.random() * 2, ys: Math.random() * 2 + 1 });
+        // ===================== 날씨 (캔버스 한 장에 그린다) =====================
+        const WEATHER_INFO = {
+            '맑음': { icon: '☀️', desc: '' },
+            '비': { icon: '🌧️', desc: '매 라운드 20% 확률로 시야를 잃습니다 (민첩 -20, 1턴)' },
+            '혹한': { icon: '❄️', desc: '매 라운드 20% 확률로 얼어붙습니다 (1턴 행동불능)' },
+            '폭염': { icon: '🔥', desc: '매 라운드 모든 개체가 최대 체력의 5% 화상 피해' },
+            '안개': { icon: '🌫️', desc: '' },
+            '폭풍': { icon: '⛈️', desc: '매 라운드 모든 개체의 민첩 +10 (1턴)' },
+            '황사': { icon: '🌪️', desc: '매 라운드 30% 확률로 시야를 잃습니다 (민첩 -20, 1턴)' },
+            '유성우': { icon: '☄️', desc: '매 라운드 무작위 개체의 공명도가 10~20 오릅니다' }
+        };
+        const WX = { name: '맑음', raf: 0, last: 0, t: 0, dpr: 1, items: [], sprites: {}, flash: 0, nextFlash: 0, bolt: null, nextMeteor: 0, frames: 0 };
+        function wxSprite(key, color) {   // 부드러운 빛 번짐 점 (한 번만 만들어 재사용)
+            if (WX.sprites[key]) return WX.sprites[key];
+            const c = document.createElement('canvas'); c.width = c.height = 64;
+            const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gr.addColorStop(0, color.replace('A', '1')); gr.addColorStop(0.35, color.replace('A', '0.55')); gr.addColorStop(1, color.replace('A', '0'));
+            g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+            return (WX.sprites[key] = c);
+        }
+        function wxScale() { return Math.min(2, Math.max(0.6, (window.innerWidth * window.innerHeight) / (1280 * 720))); }
+        function wxInit(name) {
+            const W = window.innerWidth, H = window.innerHeight, k = wxScale(), R = Math.random, a = [];
+            WX.flash = 0; WX.bolt = null; WX.nextFlash = 3 + R() * 4; WX.nextMeteor = 0.3;
+            if (name === '비') for (let i = 0; i < 130 * k; i++) a.push({ x: R() * (W + 200), y: R() * H, l: 12 + R() * 14, v: 900 + R() * 500, o: 0.22 + R() * 0.3 });
+            if (name === '폭풍') for (let i = 0; i < 230 * k; i++) a.push({ x: R() * (W + 400), y: R() * H, l: 20 + R() * 16, v: 1500 + R() * 600, o: 0.25 + R() * 0.35 });
+            if (name === '혹한') for (let i = 0; i < 110 * k; i++) a.push({ x: R() * W, y: R() * H, r: 1.4 + R() * 3.4, v: 28 + R() * 50, ph: R() * 6.28, amp: 10 + R() * 26, o: 0.5 + R() * 0.45 });
+            if (name === '폭염') for (let i = 0; i < 46 * k; i++) a.push({ x: R() * W, y: R() * H, r: 1.4 + R() * 2.6, v: 30 + R() * 70, ph: R() * 6.28, amp: 8 + R() * 22, o: 0.4 + R() * 0.5 });
+            if (name === '안개') for (let i = 0; i < 8; i++) a.push({ x: R() * W, y: R() * H, r: 260 + R() * 280, v: (R() < 0.5 ? -1 : 1) * (8 + R() * 16), o: 0.10 + R() * 0.08 });
+            if (name === '황사') {
+                for (let i = 0; i < 7; i++) a.push({ haze: true, x: R() * W, y: R() * H, r: 240 + R() * 260, v: 18 + R() * 22, o: 0.10 + R() * 0.08 });
+                for (let i = 0; i < 90 * k; i++) a.push({ x: R() * W, y: R() * H, r: 0.8 + R() * 1.8, v: 90 + R() * 150, ph: R() * 6.28, amp: 6 + R() * 14, o: 0.25 + R() * 0.45 });
+            }
+            if (name === '유성우') {
+                for (let i = 0; i < 90 * k; i++) a.push({ star: true, x: R() * W, y: R() * H * 0.9, r: 0.5 + R() * 1.4, ph: R() * 6.28, sp: 0.8 + R() * 2.2 });
+            }
+            WX.items = a;
+        }
+        function wxTint(g, W, H, color) { g.fillStyle = color; g.fillRect(0, 0, W, H); }
+        function wxVignette(g, W, H, edge, inner) {
+            const gr = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.hypot(W, H) / 2);
+            gr.addColorStop(0, inner || 'rgba(0,0,0,0)'); gr.addColorStop(1, edge);
+            g.fillStyle = gr; g.fillRect(0, 0, W, H);
+        }
+        function wxBolt(W, H) {   // 번개 줄기: 위에서 아래로 꺾이며 내려온다
+            let x = W * (0.15 + Math.random() * 0.7), y = 0; const pts = [[x, y]];
+            const end = H * (0.45 + Math.random() * 0.35);
+            while (y < end) { y += 26 + Math.random() * 36; x += (Math.random() - 0.5) * 70; pts.push([x, y]); }
+            return pts;
+        }
+        function wxDraw(now) {
+            WX.raf = requestAnimationFrame(wxDraw);
+            const cv = document.getElementById('weatherCanvas'); if (!cv) return;
+            const dt = Math.min(0.05, (now - (WX.last || now)) / 1000); WX.last = now; WX.t += dt; WX.frames++;
+            const g = cv.getContext('2d'), dpr = WX.dpr || 1, W = window.innerWidth, H = window.innerHeight, name = WX.name, items = WX.items, t = WX.t;
+            g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.lineCap = 'round';
+            if (name === '비' || name === '폭풍') {
+                const storm = name === '폭풍', dx = storm ? -0.42 : -0.16;
+                wxTint(g, W, H, storm ? 'rgba(28,38,66,0.26)' : 'rgba(70,90,120,0.10)');
+                const top = g.createLinearGradient(0, 0, 0, H * 0.4); top.addColorStop(0, storm ? 'rgba(15,22,45,0.30)' : 'rgba(40,55,80,0.18)'); top.addColorStop(1, 'rgba(0,0,0,0)');
+                g.fillStyle = top; g.fillRect(0, 0, W, H * 0.4);
+                g.lineWidth = storm ? 1.5 : 1.1; g.strokeStyle = 'rgb(205,222,245)';
+                items.forEach(d => {
+                    d.y += d.v * dt; d.x += d.v * dx * dt;
+                    if (d.y > H + 20 || d.x < -60) { d.y = -30 - Math.random() * 60; d.x = Math.random() * (W + 300); }
+                    g.globalAlpha = d.o; g.beginPath(); g.moveTo(d.x, d.y); g.lineTo(d.x - d.l * dx * 0.9, d.y - d.l); g.stroke();
+                });
+                g.globalAlpha = 1;
+                if (storm) {   // 번개
+                    WX.nextFlash -= dt;
+                    if (WX.nextFlash <= 0) { WX.flash = 1; WX.bolt = wxBolt(W, H); WX.nextFlash = 4 + Math.random() * 5; }
+                    if (WX.flash > 0) {
+                        g.fillStyle = `rgba(225,235,255,${(WX.flash * 0.5).toFixed(3)})`; g.fillRect(0, 0, W, H);
+                        if (WX.bolt && WX.flash > 0.45) {
+                            g.strokeStyle = `rgba(240,245,255,${WX.flash.toFixed(3)})`; g.lineWidth = 2.4; g.shadowColor = 'rgba(160,190,255,0.9)'; g.shadowBlur = 18;
+                            g.beginPath(); WX.bolt.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.stroke(); g.shadowBlur = 0;
+                        }
+                        WX.flash = Math.max(0, WX.flash - dt * 2.6);
                     }
-                    drawSnow();
                 }
-            } else if (weather === '폭염') {
-                document.body.style.boxShadow = "inset 0 0 150px rgba(229, 62, 62, 0.15)";
-            } else if (weather === '안개') {
-                if (container) container.style.filter = "blur(1px) contrast(0.9)";
-            } else if (weather === '폭풍') {
-                if (stormCanvas) {
-                    stormCanvas.style.display = 'block';
-                    if (typeof initStorm === 'function') initStorm();
-                    drawStorm();
+            } else if (name === '혹한') {
+                wxTint(g, W, H, 'rgba(185,215,255,0.07)'); wxVignette(g, W, H, 'rgba(190,225,255,0.24)');
+                const sp = wxSprite('snow', 'rgba(255,255,255,A)');
+                items.forEach(f => {
+                    f.y += f.v * dt; f.ph += dt * 0.9; const x = f.x + Math.sin(f.ph) * f.amp;
+                    if (f.y > H + 10) { f.y = -10; f.x = Math.random() * W; }
+                    g.globalAlpha = f.o; g.drawImage(sp, x - f.r * 2, f.y - f.r * 2, f.r * 4, f.r * 4);
+                });
+                g.globalAlpha = 1;
+            } else if (name === '폭염') {
+                const pulse = 0.5 + 0.5 * Math.sin(t * 1.3);
+                wxTint(g, W, H, 'rgba(255,150,50,0.05)'); wxVignette(g, W, H, `rgba(255,80,25,${(0.17 + 0.07 * pulse).toFixed(3)})`);
+                const sp = wxSprite('ember', 'rgba(255,170,70,A)');
+                items.forEach(f => {
+                    f.y -= f.v * dt; f.ph += dt * 1.2; const x = f.x + Math.sin(f.ph) * f.amp;
+                    if (f.y < -10) { f.y = H + 10; f.x = Math.random() * W; }
+                    g.globalAlpha = f.o * (0.6 + 0.4 * Math.sin(f.ph * 2)); g.drawImage(sp, x - f.r * 3, f.y - f.r * 3, f.r * 6, f.r * 6);
+                });
+                g.globalAlpha = 1;
+            } else if (name === '안개' || name === '황사') {
+                const dust = name === '황사';
+                wxTint(g, W, H, dust ? 'rgba(205,165,100,0.15)' : 'rgba(225,232,240,0.10)');
+                const haze = wxSprite(dust ? 'hazeD' : 'hazeF', dust ? 'rgba(215,175,110,A)' : 'rgba(238,243,248,A)');
+                items.forEach(b => {
+                    if (b.r > 100) {   // 큰 안개 덩어리
+                        b.x += b.v * dt; if (b.v > 0 && b.x - b.r > W) b.x = -b.r; if (b.v < 0 && b.x + b.r < 0) b.x = W + b.r;
+                        g.globalAlpha = b.o; g.drawImage(haze, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+                    } else {           // 흙먼지 알갱이
+                        b.x += b.v * dt; b.ph += dt; const y = b.y + Math.sin(b.ph) * b.amp;
+                        if (b.x > W + 10) { b.x = -10; b.y = Math.random() * H; }
+                        g.globalAlpha = b.o; g.fillStyle = 'rgb(195,155,95)'; g.beginPath(); g.arc(b.x, y, b.r, 0, 6.283); g.fill();
+                    }
+                });
+                g.globalAlpha = 1;
+            } else if (name === '유성우') {
+                const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, 'rgba(8,12,44,0.55)'); sky.addColorStop(1, 'rgba(24,18,60,0.24)');
+                g.fillStyle = sky; g.fillRect(0, 0, W, H);
+                items.forEach(s => { if (!s.star) return; s.ph += dt * s.sp; g.globalAlpha = 0.25 + 0.6 * Math.abs(Math.sin(s.ph)); g.fillStyle = '#eaf0ff'; g.beginPath(); g.arc(s.x, s.y, s.r, 0, 6.283); g.fill(); });
+                g.globalAlpha = 1;
+                WX.nextMeteor -= dt;
+                if (WX.nextMeteor <= 0) {
+                    const ang = (0.62 + Math.random() * 0.4), big = Math.random() < 0.2;
+                    items.push({ meteor: true, x: W * (0.25 + Math.random() * 0.85), y: -30, vx: -Math.cos(ang), vy: Math.sin(ang), v: 650 + Math.random() * 500, len: big ? 300 : 120 + Math.random() * 140, big: big, life: 0 });
+                    WX.nextMeteor = 0.35 + Math.random() * 1.0;
                 }
-            } else if (weather === '황사') {
-                if (dustCanvas) {
-                    dustCanvas.style.display = 'block';
-                    if (typeof initDust === 'function') initDust();
-                    drawDust();
+                for (let i = items.length - 1; i >= 0; i--) {
+                    const m = items[i]; if (!m.meteor) continue;
+                    m.x += m.vx * m.v * dt; m.y += m.vy * m.v * dt; m.life += dt;
+                    if (m.y > H + 60 || m.x < -300) { items.splice(i, 1); continue; }
+                    const tx = m.x - m.vx * m.len, ty = m.y - m.vy * m.len, tail = g.createLinearGradient(m.x, m.y, tx, ty);
+                    tail.addColorStop(0, m.big ? 'rgba(255,225,170,0.95)' : 'rgba(235,242,255,0.9)'); tail.addColorStop(1, 'rgba(180,200,255,0)');
+                    const halo = g.createLinearGradient(m.x, m.y, tx, ty);   // 밝은 화면에서도 보이도록 푸른 빛 번짐을 먼저 깐다
+                    halo.addColorStop(0, m.big ? 'rgba(255,170,90,0.55)' : 'rgba(110,130,255,0.55)'); halo.addColorStop(1, 'rgba(110,130,255,0)');
+                    g.strokeStyle = halo; g.lineWidth = m.big ? 11 : 7; g.beginPath(); g.moveTo(m.x, m.y); g.lineTo(tx, ty); g.stroke();
+                    g.strokeStyle = tail; g.lineWidth = m.big ? 3.4 : 2.2; g.beginPath(); g.moveTo(m.x, m.y); g.lineTo(tx, ty); g.stroke();
+                    g.globalAlpha = 0.9; const hs = wxSprite(m.big ? 'meteorW' : 'meteorB', m.big ? 'rgba(255,225,160,A)' : 'rgba(190,210,255,A)'), hr = m.big ? 17 : 11;
+                    g.drawImage(hs, m.x - hr, m.y - hr, hr * 2, hr * 2); g.globalAlpha = 1;
                 }
             }
-
-            if (typeof showToast === 'function') showToast(`필드 환경이 [${weather}](으)로 변경되었습니다.`);
+        }
+        function wxStop() {
+            if (WX.raf) cancelAnimationFrame(WX.raf); WX.raf = 0;
+            const cv = document.getElementById('weatherCanvas');
+            if (cv) { cv.getContext('2d').setTransform(1, 0, 0, 1, 0, 0); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.style.display = 'none'; }
+        }
+        function wxStart(name) {
+            wxStop();
+            WX.name = name; WX.items = []; WX.last = 0; WX.t = 0;
+            if (name === '맑음') return;
+            const cv = document.getElementById('weatherCanvas'); if (!cv) return;
+            resizeWeatherCanvases(); cv.style.display = 'block'; wxInit(name);
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { wxDraw(performance.now()); cancelAnimationFrame(WX.raf); WX.raf = 0; return; }   // 움직임 줄이기 설정이면 정지 화면 한 장
+            WX.raf = requestAnimationFrame(wxDraw);
+        }
+        function updateWeatherBadge(name) {
+            const el = document.getElementById('weatherBadge'); if (!el) return;
+            const info = WEATHER_INFO[name] || WEATHER_INFO['맑음'];
+            el.innerHTML = `${info.icon} ${name}${info.desc ? ` <small>· ${info.desc}</small>` : ''}`;
+        }
+        function changeWeather() {
+            const name = document.getElementById('weatherSelect').value;
+            wxStart(name); updateWeatherBadge(name);
+            if (typeof showToast === 'function') showToast(`필드 환경이 [${name}]${josa_(name, '으로', '로')} 변경되었습니다.`);
             if (typeof syncToFirebase === 'function') syncToFirebase();
         }
+        document.addEventListener('DOMContentLoaded', () => updateWeatherBadge((document.getElementById('weatherSelect') || {}).value || '맑음'));
 
         function drawSnow() {
             const canvas = document.getElementById('snowCanvas');
