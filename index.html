@@ -49,6 +49,21 @@
         .battle-tracker { width: 100%; margin-bottom: 10px; text-align: center; padding-bottom: 10px; border-bottom: 2px dashed #edf2f7; }
         .turn-order-container { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; justify-content: center; align-items: center; min-height: 35px; }
         .turn-block { padding: 8px 14px; border-radius: 20px; background: #edf2f7; border: 1px solid #cbd5e0; font-size: 13px; font-weight: 700; white-space: nowrap; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #4a5568; }
+        .turn-block { position: relative; }
+        .turn-block[draggable="true"] { cursor: grab; } .turn-block.dragging { opacity: .4; } .turn-block.drop-target { outline: 2px dashed #3182ce; outline-offset: 2px; }
+        .turn-block .turn-x { display: none; position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; border-radius: 50%; background: #e53e3e; color: #fff; font-size: 11px; line-height: 18px; text-align: center; cursor: pointer; }
+        .turn-block:hover .turn-x { display: block; }
+        .turn-add { border: 1px dashed #a0aec0; background: #fff; color: #4a5568; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 14px; font-weight: 700; }
+        .turn-add:hover { border-color: #3182ce; color: #3182ce; }
+        .turn-hint { text-align: center; font-size: 11px; color: #a0aec0; margin-top: -2px; min-height: 0; }
+        .turn-menu { position: fixed; z-index: 2000; background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 6px; min-width: 240px; max-height: 320px; overflow: auto; }
+        .turn-menu .tm-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 5px 6px; font-size: 13px; border-top: 1px solid #edf2f7; }
+        .turn-menu .tm-row:first-of-type { border-top: 0; } .turn-menu button, .tq-btns button, .tq-top { padding: 3px 8px; font-size: 11px; border: 1px solid #cbd5e0; background: #f7fafc; border-radius: 5px; cursor: pointer; margin-left: 3px; }
+        .tq-top { margin-left: 0; padding: 4px 10px; font-size: 12px; }
+        .tq-cur { background: #3182ce; color: #fff; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-left: 8px; font-weight: 600; }
+        .tq-n { font-style: normal; font-size: 11px; color: #3182ce; background: #ebf8ff; padding: 0 6px; border-radius: 8px; margin-left: 6px; }
+        .turn-setup-item.tq-is-cur { border-color: #3182ce; box-shadow: 0 0 0 2px rgba(49,130,206,.18); }
+        .turn-setup-item.dragging { opacity: .4; } .turn-setup-item.drop-target { border-style: dashed; border-color: #3182ce; }
         .turn-block.active { background: #3182ce; color: white; border-color: #2b6cb0; transform: scale(1.15); box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4); z-index: 2; }
         .turn-block.dead { text-decoration: line-through; opacity: 0.4; background: #e2e8f0; }
 
@@ -318,6 +333,41 @@
         .bv-log { font-size: 12px; color: #4a5568; display: flex; gap: 6px; align-items: center; }
         .on-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38a169; margin-left: 6px; vertical-align: middle; box-shadow: 0 0 0 2px rgba(56,161,105,.25); }
         .on-row { display: flex; align-items: center; gap: 8px; padding: 7px 4px; border-bottom: 1px solid #edf2f7; font-size: 14px; } .on-row small { margin-left: auto; color: #a0aec0; font-size: 11px; }
+        /* ===== 스킬 및 현황 ===== */
+        .ov-wrap { width: 1180px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; padding: 18px 20px; margin: 3vh auto; overflow: hidden; }
+        .ov-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .ov-x { border: 0; background: #edf2f7; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; }
+        .ov-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .ov-chip { padding: 4px 12px; font-size: 12px; background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; border-radius: 999px; cursor: pointer; }
+        .ov-chip.on { background: #2c7a7b; color: #fff; border-color: #2c7a7b; }
+        .ov-check { font-size: 12px; color: #4a5568; display: flex; align-items: center; gap: 5px; margin-left: 8px; }
+        .ov-body { overflow-y: auto; flex: 1; min-height: 0; padding-right: 4px; }
+        .ov-sum { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; background: #f7fafc; }
+        .ov-sum h4 { margin: 0 0 8px; font-size: 13px; color: #2d3748; } .ov-sum h4 small { font-weight: normal; color: #718096; margin-left: 6px; }
+        .ov-groups { display: flex; flex-wrap: wrap; gap: 8px; }
+        .ov-group { border-radius: 8px; padding: 6px 10px; font-size: 12px; border: 1px solid; min-width: 150px; }
+        .ov-group b { font-size: 13px; } .ov-group div { margin-top: 3px; color: #4a5568; }
+        .tone-bad { background: #fff5f5; border-color: #feb2b2; } .tone-good { background: #f0fff4; border-color: #9ae6b4; } .tone-warn { background: #fffaf0; border-color: #fbd38d; } .tone-neutral { background: #f7fafc; border-color: #cbd5e0; }
+        .ov-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; align-items: start; }
+        .ov-card { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; overflow: hidden; }
+        .ov-card.A { border-top: 3px solid #e53e3e; } .ov-card.B { border-top: 3px solid #3182ce; } .ov-card.dead { opacity: .55; } .ov-card.turn { box-shadow: 0 0 0 2px #3182ce; }
+        .ov-ch { padding: 9px 12px; cursor: pointer; display: grid; gap: 5px; background: #fafbfc; }
+        .ov-ch-top { display: flex; align-items: center; gap: 6px; } .ov-ch-top b { font-size: 14px; } .ov-ch-top .arrow { margin-left: auto; color: #a0aec0; transition: transform .15s; }
+        .ov-card.collapsed .arrow { transform: rotate(-90deg); }
+        .ov-tag { font-size: 10px; padding: 1px 7px; border-radius: 8px; background: #edf2f7; color: #4a5568; } .ov-tag.turn { background: #3182ce; color: #fff; }
+        .ov-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; } .ov-bar i { display: block; height: 100%; }
+        .ov-nums { display: flex; gap: 10px; font-size: 11px; color: #718096; flex-wrap: wrap; }
+        .ov-mini { display: flex; flex-wrap: wrap; gap: 4px; } .ov-mini span { font-size: 11px; padding: 1px 7px; border-radius: 8px; border: 1px solid; white-space: nowrap; }
+        .ov-cb { padding: 8px 12px 12px; display: grid; gap: 10px; } .ov-card.collapsed .ov-cb { display: none; }
+        .ov-sec h5 { margin: 0 0 5px; font-size: 12px; color: #4a5568; }
+        .ov-st { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 8px; align-items: baseline; padding: 6px 8px; border: 1px solid; border-radius: 7px; margin-bottom: 4px; font-size: 12px; }
+        .ov-st .ic { font-size: 15px; } .ov-st b { font-size: 12.5px; } .ov-st .tn { font-size: 11px; font-weight: 700; white-space: nowrap; } .ov-st .ds { grid-column: 2 / 4; color: #4a5568; font-size: 11.5px; }
+        .ov-sk { border-left: 3px solid #cbd5e0; padding: 4px 0 4px 9px; margin-bottom: 6px; font-size: 12px; } .ov-sk.const { border-color: #805ad5; } .ov-sk.bless { border-color: #38a169; } .ov-sk.basic { border-color: #a0aec0; } .ov-sk.trait { border-color: #d69e2e; }
+        .ov-sk b { font-size: 12.5px; } .ov-sk .rg { font-size: 10px; background: #edf2f7; color: #4a5568; padding: 0 6px; border-radius: 6px; margin-left: 5px; }
+        .ov-sk p { margin: 2px 0 0; color: #4a5568; } .ov-sk .ef { color: #c05621; } .ov-sk .ready { color: #2f855a; font-weight: 700; font-size: 11px; margin-left: 6px; } .ov-sk .lock { color: #a0aec0; font-size: 11px; margin-left: 6px; }
+        .ov-none { color: #a0aec0; font-size: 12px; padding: 2px 0; }
+        @media (max-width: 760px) { .ov-wrap { padding: 12px; } .ov-cards { grid-template-columns: 1fr; } }
+        .ov-sum .tone-good, .ov-mini .tone-good, .ov-st.tone-good { color: #276749; } .ov-mini .tone-bad, .ov-st.tone-bad { color: #9b2c2c; } .ov-mini .tone-warn, .ov-st.tone-warn { color: #975a16; }
         .bulk-q { padding: 4px 10px; font-size: 12px; background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; border-radius: 5px; cursor: pointer; }
         .bulk-targets { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .bulk-col { border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; background: #f7fafc; max-height: 300px; overflow-y: auto; }
@@ -331,12 +381,12 @@
         body.compact .tool-row { margin: 0 0 8px; }
         body.compact .top-bar > div[style*="flex-shrink: 0"] { padding: 4px 12px !important; min-width: 70px !important; }  /* 현재 라운드 상자 */
         body.compact .main-battle-container { gap: 12px; margin-bottom: 10px; }
-        body.compact .side-panel { width: 23%; gap: 6px; padding: 0 4px 12px; max-height: calc(100vh - 160px); }
+        body.compact .side-panel { width: 23%; gap: 6px; padding: 0 4px 12px; box-sizing: border-box; height: var(--field-h, auto); max-height: var(--field-h, calc(100vh - 160px)); }
         body.compact .center-field-wrapper { width: 52%; padding: 10px 14px; }
         body.compact .panel-header { font-size: 15px; padding-bottom: 3px; }
         body.compact .battle-tracker { margin-bottom: 6px; padding-bottom: 6px; }
         body.compact .turn-order-container { padding: 4px; min-height: 28px; }
-        body.compact .grid-coordinate-wrapper { max-width: 600px; }
+        body.compact .grid-coordinate-wrapper { max-width: 700px; }
         body.compact .battle-log-container { height: 130px; padding: 8px 12px; font-size: 12px; }
         body.compact .character-card { padding: 9px 11px; border-radius: 10px; }
         body.compact .card-header { padding-bottom: 6px; margin-bottom: 6px; }
@@ -350,6 +400,13 @@
         body.compact .character-card div[style*="margin-top:10px; border-top"] { margin-top: 5px !important; padding-top: 5px !important; margin-bottom: 4px !important; }
         body.compact .character-card button[onclick^="openItemUse"] { padding: 4px !important; }
         body.compact .toggle-btn { margin-top: 4px; padding: 4px; }
+        /* 한쪽에 개체가 4명 이상이면: 아이템 사용·상세 정보 버튼을 한 줄에 나란히, 여백을 더 줄여 한 화면에 더 많이 */
+        body.compact .side-panel.dense .character-card { padding: 7px 9px; }
+        body.compact .side-panel.dense .card-header { margin-bottom: 4px; padding-bottom: 4px; }
+        body.compact .side-panel.dense .character-card > div[style*="border-top"] { display: inline-block !important; width: calc(50% - 5px) !important; vertical-align: top; margin: 4px 0 0 !important; padding: 0 !important; border-top: 0 !important; box-sizing: border-box; }
+        body.compact .side-panel.dense .character-card > div[style*="border-top"] button { width: 100% !important; padding: 3px !important; font-size: 11px !important; margin: 0 0 2px !important; }
+        body.compact .side-panel.dense .character-card > .toggle-btn { display: inline-block !important; width: calc(50% - 5px) !important; vertical-align: top; margin: 4px 0 0 !important; padding: 3px !important; font-size: 11px; box-sizing: border-box; }
+        body.compact .side-panel.dense .character-card div[style*="margin-top: 6px"] { margin-top: 2px !important; }
         #weatherCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 800; display: none; } /* 패널 위, 팝업창(1000) 아래 */
         .weather-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 999px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 700; color: #2d3748; margin-bottom: 6px; }
         .weather-badge small { font-weight: 500; color: #718096; font-size: 11px; }
@@ -382,6 +439,7 @@
                 <button class="action-btn" style="background:#3182ce; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="openItemCatalogModal()">아이템 도감</button>
                 <button class="action-btn" style="background:#3182ce; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="equipCatalogModal()">장비 도감</button>
                 <button class="action-btn" style="background:#3182ce; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="openTraitCatalogModal()">특성 도감</button>
+                    <button class="action-btn" style="background:#2c7a7b; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="openOverviewModal()" title="모든 개체의 상태이상과 스킬을 한 화면에서">스킬 및 현황</button>
                 <button class="action-btn" style="background:#805ad5; color:white; white-space:nowrap; padding:6px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;" onclick="toggleDarkMode()">다크 모드</button>
                 <button class="action-btn" style="background:#edf2f7; color:#4a5568; border:1px solid #cbd5e0; white-space:nowrap; padding:6px 10px; font-size:12px; border-radius:4px; cursor:pointer;" onclick="exportData()">저장</button>
                 <label style="background:#edf2f7; color:#4a5568; border:1px solid #cbd5e0; white-space:nowrap; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin:0; display:inline-block; text-align:center;">
@@ -461,12 +519,16 @@
     <div class="battle-log-container" id="battleLog"></div>
 
     <div id="turnOrderModal" class="modal">
-        <div class="modal-content" style="width: 600px;">
-            <h3 style="margin-top: 0; color: #1a202c; display: flex; justify-content: space-between;">
+        <div class="modal-content" style="width: 700px; max-width: 95vw;">
+            <h3 style="margin-top: 0; color: #1a202c; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
                 턴 순서 상세 설정
-                <button onclick="autoFillTurnOrder()" style="padding: 4px 10px; font-size: 12px; background: #ebf8ff; color: #2b6cb0; border: 1px solid #90cdf4;">민첩순 자동 배치</button>
+                <span style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button onclick="tempAddAll()" class="tq-top">전체 추가</button>
+                    <button onclick="tempClear()" class="tq-top">큐 비우기</button>
+                    <button onclick="autoFillTurnOrder()" class="tq-top" style="background: #ebf8ff; color: #2b6cb0; border-color: #90cdf4;">민첩순 자동 배치</button>
+                </span>
             </h3>
-            <p style="font-size:12px; color:#718096; margin-bottom:0;">전투에 참여할 개체를 클릭하여 오른쪽 큐(Queue)에 추가하세요.</p>
+            <p style="font-size:12px; color:#718096; margin:0 0 8px;">왼쪽 개체를 눌러 큐에 추가하고, 오른쪽 큐에서 <b>끌어서</b> 순서를 바꾸거나 ▲▼✕로 조정하세요. 전투 중에 적용해도 <b>지금 차례인 개체는 그대로 유지</b>됩니다.</p>
             <div class="turn-setup-container">
                 <div class="turn-setup-col" id="availableEntitiesCol"></div>
                 <div class="turn-setup-col" id="currentTurnOrderCol"></div>
@@ -757,6 +819,24 @@
             <div id="onlineList" style="max-height:320px; overflow-y:auto;"></div>
             <div style="font-size:11px; color:#a0aec0; margin-top:8px;">전투 웹앱에 캐릭터로 로그인한 사람만 표시됩니다.</div>
             <button type="button" onclick="closeOnlineModal()" style="width:100%; margin-top:10px;">닫기</button>
+        </div>
+    </div>
+
+
+    <div id="overviewModal" class="modal">
+        <div class="modal-content ov-wrap">
+            <div class="ov-head">
+                <h3 style="margin:0; color:#1a202c;">스킬 및 현황 <small id="ovSub" style="font-size:12px; font-weight:normal; color:#718096;"></small></h3>
+                <button type="button" onclick="closeOverviewModal()" class="ov-x" aria-label="닫기">✕</button>
+            </div>
+            <div class="ov-tools">
+                <button type="button" class="ov-chip on" data-t="all" onclick="ovFilter('all', this)">전체</button>
+                <button type="button" class="ov-chip" data-t="A" onclick="ovFilter('A', this)">A팀</button>
+                <button type="button" class="ov-chip" data-t="B" onclick="ovFilter('B', this)">B팀</button>
+                <label class="ov-check"><input type="checkbox" id="ovOnly" onchange="ovOnlyStatus()"> 상태이상 있는 개체만</label>
+                <span style="margin-left:auto; display:flex; gap:6px;"><button type="button" class="ov-chip" onclick="ovToggleAll(true)">모두 펼치기</button><button type="button" class="ov-chip" onclick="ovToggleAll(false)">모두 접기</button></span>
+            </div>
+            <div id="ovBody" class="ov-body"></div>
         </div>
     </div>
 
@@ -1442,7 +1522,7 @@
         // (캐릭터 카드 펼치기/접기, 아이템/장비/상태이상 도감 열람만 허용)
         // 이 목록에 없는 onclick 함수를 호출하는 버튼은 관전자에게 전부 숨김 처리됩니다.
         const SPECTATOR_ALLOWED_ACTIONS = new Set([
-            'toggleDetails', 'toggleCompact', 'openCharLoginModal', 'closeCharLoginModal', 'charLoginSubmit', 'charLogout', 'openOnlineModal', 'closeOnlineModal',
+            'toggleDetails', 'toggleCompact', 'openOverviewModal', 'closeOverviewModal', 'ovFilter', 'ovToggle', 'ovToggleAll', 'ovOnlyStatus', 'openCharLoginModal', 'closeCharLoginModal', 'charLoginSubmit', 'charLogout', 'openOnlineModal', 'closeOnlineModal',
             'openItemCatalogModal', 'closeItemCatalogModal',
             'equipCatalogModal', 'closeEquipCatalogModal',
             'openTraitCatalogModal', 'closeTraitCatalogModal',
@@ -2341,55 +2421,113 @@
         function openTurnOrderModal() { tempTurnOrder = [...turnOrder]; renderTurnOrderModal(); document.getElementById('turnOrderModal').style.display = 'block'; }
         function closeTurnOrderModal() { document.getElementById('turnOrderModal').style.display = 'none'; }
 
-        function renderTurnOrderModal() {
-            const availCol = document.getElementById('availableEntitiesCol'); const currCol = document.getElementById('currentTurnOrderCol');
-            availCol.innerHTML = '<div style="font-weight:bold; color:#2d3748; margin-bottom:10px; border-bottom:2px solid #edf2f7; padding-bottom:5px;">생존 개체 목록</div>';
-            currCol.innerHTML = '<div style="font-weight:bold; color:#3182ce; margin-bottom:10px; border-bottom:2px solid #ebf8ff; padding-bottom:5px;">현재 턴 설정 큐</div>';
-            
-            // 관리자 권한 확인 변수
-            const isUserAdmin = typeof isAdmin !== 'undefined' && isAdmin;
-            
-            const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
-            if(aliveEntities.length === 0) { availCol.innerHTML += '<div style="font-size:12px; color:#a0aec0;">생존한 개체가 없습니다.</div>'; } 
-            else {
-                aliveEntities.forEach(ent => {
-                    const div = document.createElement('div'); div.className = 'turn-setup-item';
-                    div.innerHTML = `<span>${ent.type === '캐릭터' ? '' : ''} ${ent.name}</span>`;
-                    
-                    // 관전자에게는 클릭 이벤트와 '추가' 텍스트를 부여하지 않음
-                    if (isUserAdmin) {
-                        div.innerHTML += ` <span style="color:#a0aec0; font-size:11px;">+ 추가</span>`;
-                        div.style.cursor = 'pointer';
-                        div.onclick = () => addTempTurn(ent.id); 
-                        div.onmouseover = () => div.style.borderColor = '#3182ce'; 
-                        div.onmouseout = () => div.style.borderColor = '#cbd5e0';
-                    }
-                    availCol.appendChild(div);
-                });
-            }
-
-            if(tempTurnOrder.length === 0) { currCol.innerHTML += '<div style="font-size:12px; color:#a0aec0;">설정된 턴이 없습니다.</div>'; } 
-            else {
-                tempTurnOrder.forEach((id, idx) => {
-                    const ent = entities.find(e => e.id === id); if(!ent) return;
-                    const div = document.createElement('div'); div.className = 'turn-setup-item';
-                    
-                    // 관전자에게는 조작 버튼(위/아래/삭제)을 숨김 처리
-                    let btnHtml = '';
-                    if (isUserAdmin) {
-                        btnHtml = `<div><button onclick="moveTempTurn(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button><button onclick="moveTempTurn(${idx}, 1)" ${idx === tempTurnOrder.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button><button onclick="removeTempTurn(${idx})" style="background:#fff5f5; color:#e53e3e; border:1px solid #fed7d7;">X</button></div>`;
-                    }
-                    
-                    div.innerHTML = `<span style="font-weight:bold;">${idx + 1}. ${ent.name}</span>${btnHtml}`;
-                    currCol.appendChild(div);
-                });
-            }
+        // ===== 턴 순서 조정 =====
+        // 어떤 방법으로 순서를 바꿔도 "지금 차례인 개체"가 계속 지금 차례가 되도록 인덱스를 다시 맞춘다.
+        function turnCurId() { return (isBattleActive && turnOrder.length) ? turnOrder[currentTurnIndex] : null; }
+        function nearestIndexOf(order, id, near) {
+            let best = -1;
+            order.forEach((x, i) => { if (x === id && (best === -1 || Math.abs(i - near) < Math.abs(best - near))) best = i; });
+            return best;
         }
+        // 전투 도중에 새로 들어온 개체는 전투를 시작할 때와 똑같이 초기화한다 (통계·공명도·특성·가호)
+        function battleJoinIfNeeded(id) {
+            const ent = entities.find(e => e.id === id);
+            if (!ent || !ent.stats || ent._battleJoined) return;
+            ent._battleJoined = true; ent.stats.currentResonance = 0; ent.battleStats = { dmgDealt: 0, dmgTaken: 0, healDone: 0 }; ent._deathSoundPlayed = false;
+            if (typeof applyTraitAutoEffects === 'function') applyTraitAutoEffects(ent);
+            if (typeof applyConstBlessBattleStartEffects === 'function') applyConstBlessBattleStartEffects(ent);
+            addLog(`<b>[시스템]</b> <b>${ent.name}</b>${josa_(ent.name, '이', '가')} 전투에 합류했습니다.`, 'log-action', true);
+        }
+        function refreshTurnUi() { updateBattleUI(); renderGrid(); if (typeof syncToFirebase === 'function') syncToFirebase(); }
+        function applyTurnOrder(newOrder) {
+            const curId = turnCurId(), oldIdx = currentTurnIndex;
+            turnOrder = newOrder.slice();
+            if (isBattleActive) {
+                turnOrder.forEach(battleJoinIfNeeded);
+                let ni = curId ? nearestIndexOf(turnOrder, curId, oldIdx) : -1;
+                if (ni === -1) ni = Math.min(oldIdx, Math.max(0, turnOrder.length - 1));   // 지금 차례였던 개체가 빠졌으면 그 자리를 이어받은 개체
+                currentTurnIndex = ni;
+            }
+            refreshTurnUi();
+        }
+        function moveTurn(from, to) {
+            if (from === to || from < 0 || to < 0 || from >= turnOrder.length || to >= turnOrder.length) return;
+            const o = turnOrder.slice(), id = o.splice(from, 1)[0]; o.splice(to, 0, id); applyTurnOrder(o);
+        }
+        function removeTurnAt(idx) {
+            if (isBattleActive && turnOrder.length <= 1) return alert('전투 중에는 턴 순서를 비울 수 없습니다. 마지막 한 명은 뺄 수 없어요.');
+            const o = turnOrder.slice(); o.splice(idx, 1); applyTurnOrder(o);
+        }
+        function insertTurn(id, pos) { const o = turnOrder.slice(); o.splice(pos === undefined ? o.length : pos, 0, id); applyTurnOrder(o); }
+        function setCurrentTurn(idx) {
+            if (!isBattleActive || idx < 0 || idx >= turnOrder.length) return;
+            const ent = entities.find(e => e.id === turnOrder[idx]); if (!ent) return;
+            currentTurnIndex = idx; if (typeof playTurnChangeSound === 'function') playTurnChangeSound();
+            addLog(`<b>[시스템]</b> <b>${ent.name}</b>의 차례로 지정되었습니다. (턴 시작 효과는 적용되지 않습니다)`, 'log-action', true);
+            refreshTurnUi();
+        }
+        // ----- 화면 위 턴 막대에서 바로 조정 -----
+        function openTurnAddMenu(ev) {
+            ev.stopPropagation(); closeTurnAddMenu();
+            const menu = document.createElement('div'); menu.className = 'turn-menu'; menu.id = 'turnAddMenu';
+            const alive = entities.filter(e => e.stats.currentHp > 0), curIdx = isBattleActive ? currentTurnIndex : -1;
+            menu.innerHTML = '<div style="font-size:11px; color:#718096; padding:2px 6px 6px;">턴 순서에 추가할 개체</div>' + (alive.length ? alive.map(e => {
+                const n = turnOrder.filter(id => id === e.id).length;
+                return `<div class="tm-row"><span>${bvEsc(e.name)}${n ? `<em class="tq-n">큐 ${n}</em>` : ''}</span><span><button onclick="insertTurn('${e.id}'); closeTurnAddMenu()">맨 뒤</button><button onclick="insertTurn('${e.id}', ${curIdx + 1}); closeTurnAddMenu()">다음 차례</button></span></div>`;
+            }).join('') : '<div style="color:#a0aec0; padding:8px;">생존 개체가 없습니다.</div>') + '<div class="tm-row"><button onclick="closeTurnAddMenu(); openTurnOrderModal()" style="width:100%;">턴 순서 창 열기</button></div>';
+            document.body.appendChild(menu);
+            const r = ev.currentTarget.getBoundingClientRect(); menu.style.left = Math.min(window.innerWidth - 260, Math.max(8, r.left)) + 'px'; menu.style.top = (r.bottom + 6) + 'px';
+            setTimeout(() => document.addEventListener('click', closeTurnAddMenu, { once: true }), 0);
+            menu.addEventListener('click', e => e.stopPropagation());
+        }
+        function closeTurnAddMenu() { const m = document.getElementById('turnAddMenu'); if (m) m.remove(); }
 
+        // ----- 턴 순서 창 -----
+        function tempCurIndex() { const id = turnCurId(); return id ? nearestIndexOf(tempTurnOrder, id, currentTurnIndex) : -1; }
+        function renderTurnOrderModal() {
+            const availCol = document.getElementById('availableEntitiesCol'), currCol = document.getElementById('currentTurnOrderCol');
+            const isUserAdmin = typeof isAdmin !== 'undefined' && isAdmin;
+            availCol.innerHTML = '<div style="font-weight:bold; color:#2d3748; margin-bottom:10px; border-bottom:2px solid #edf2f7; padding-bottom:5px;">생존 개체 목록</div>';
+            currCol.innerHTML = `<div style="font-weight:bold; color:#3182ce; margin-bottom:10px; border-bottom:2px solid #ebf8ff; padding-bottom:5px;">현재 턴 설정 큐 <small style="color:#a0aec0; font-weight:normal;">${tempTurnOrder.length}명</small></div>`;
+            const alive = entities.filter(e => e.stats.currentHp > 0), nextPos = tempCurIndex() + 1;
+            if (!alive.length) availCol.innerHTML += '<div style="font-size:12px; color:#a0aec0;">생존한 개체가 없습니다.</div>';
+            alive.forEach(ent => {
+                const n = tempTurnOrder.filter(id => id === ent.id).length;
+                const div = document.createElement('div'); div.className = 'turn-setup-item';
+                div.innerHTML = `<span>${bvEsc(ent.name)}${n ? `<em class="tq-n">큐 ${n}</em>` : ''}</span>`;
+                if (isUserAdmin) {
+                    div.innerHTML += `<span class="tq-btns"><button title="큐 맨 뒤에 추가" onclick="event.stopPropagation(); addTempTurn('${ent.id}')">＋ 뒤에</button>${isBattleActive ? `<button title="지금 차례 바로 다음으로" onclick="event.stopPropagation(); addTempTurnNext('${ent.id}')">↳ 다음 차례</button>` : ''}</span>`;
+                    div.style.cursor = 'pointer'; div.onclick = () => addTempTurn(ent.id);
+                }
+                availCol.appendChild(div);
+            });
+            if (!tempTurnOrder.length) currCol.innerHTML += '<div style="font-size:12px; color:#a0aec0;">설정된 턴이 없습니다.</div>';
+            const cur = tempCurIndex();
+            tempTurnOrder.forEach((id, idx) => {
+                const ent = entities.find(e => e.id === id); if (!ent) return;
+                const div = document.createElement('div'); div.className = 'turn-setup-item' + (idx === cur ? ' tq-is-cur' : '');
+                let btn = '';
+                if (isUserAdmin) {
+                    btn = `<div><button onclick="moveTempTurn(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button><button onclick="moveTempTurn(${idx}, 1)" ${idx === tempTurnOrder.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button><button onclick="removeTempTurn(${idx})" style="color:#e53e3e;">✕</button></div>`;
+                    div.draggable = true; div.style.cursor = 'grab';
+                    div.ondragstart = e => { e.dataTransfer.setData('text/plain', String(idx)); div.classList.add('dragging'); };
+                    div.ondragend = () => div.classList.remove('dragging');
+                    div.ondragover = e => { e.preventDefault(); div.classList.add('drop-target'); };
+                    div.ondragleave = () => div.classList.remove('drop-target');
+                    div.ondrop = e => { e.preventDefault(); const from = parseInt(e.dataTransfer.getData('text/plain'), 10); if (!isNaN(from)) dragTempTurn(from, idx); };
+                }
+                div.innerHTML = `<span style="font-weight:bold;">${idx + 1}. ${bvEsc(ent.name)}${idx === cur ? '<span class="tq-cur">▶ 지금 차례</span>' : ''}</span>${btn}`;
+                currCol.appendChild(div);
+            });
+        }
         function addTempTurn(id) { tempTurnOrder.push(id); renderTurnOrderModal(); }
+        function addTempTurnNext(id) { tempTurnOrder.splice(tempCurIndex() + 1, 0, id); renderTurnOrderModal(); }
+        function tempAddAll() { entities.filter(e => e.stats.currentHp > 0 && !tempTurnOrder.includes(e.id)).forEach(e => tempTurnOrder.push(e.id)); renderTurnOrderModal(); }
+        function tempClear() { tempTurnOrder = []; renderTurnOrderModal(); }
         function removeTempTurn(index) { tempTurnOrder.splice(index, 1); renderTurnOrderModal(); }
-        function moveTempTurn(index, dir) { if(index + dir < 0 || index + dir >= tempTurnOrder.length) return; const temp = tempTurnOrder[index]; tempTurnOrder[index] = tempTurnOrder[index+dir]; tempTurnOrder[index+dir] = temp; renderTurnOrderModal(); }
-        
+        function moveTempTurn(index, dir) { if (index + dir < 0 || index + dir >= tempTurnOrder.length) return; const x = tempTurnOrder[index]; tempTurnOrder[index] = tempTurnOrder[index + dir]; tempTurnOrder[index + dir] = x; renderTurnOrderModal(); }
+        function dragTempTurn(from, to) { if (from === to) return; const id = tempTurnOrder.splice(from, 1)[0]; tempTurnOrder.splice(to, 0, id); renderTurnOrderModal(); }
+
         function autoFillTurnOrder() { 
             const aliveEntities = entities.filter(e => e.stats.currentHp > 0); 
             aliveEntities.sort((a, b) => { return getEffectiveStat(b, 'agi') - getEffectiveStat(a, 'agi'); }); 
@@ -2397,9 +2535,12 @@
             renderTurnOrderModal(); 
         }
         
-        function saveTurnOrder() { turnOrder = [...tempTurnOrder]; if(isBattleActive && currentTurnIndex >= turnOrder.length) { currentTurnIndex = 0; } closeTurnOrderModal(); updateBattleUI(); renderGrid(); }
+        function saveTurnOrder() {
+            if (isBattleActive && tempTurnOrder.length === 0) return alert('전투 중에는 턴 순서를 비울 수 없습니다. 개체를 한 명 이상 남겨 주세요.');
+            applyTurnOrder(tempTurnOrder); closeTurnOrderModal();
+        }
 
-        function startBattle() {
+                function startBattle() {
             const aliveEntities = entities.filter(e => e.stats.currentHp > 0);
             if (aliveEntities.length === 0) return alert("전투에 참여할 생존 개체가 없습니다.");
             if (turnOrder.length === 0) { aliveEntities.sort((a, b) => { return getEffectiveStat(b, 'agi') - getEffectiveStat(a, 'agi'); }); turnOrder = aliveEntities.map(e => e.id); }
@@ -2412,6 +2553,7 @@
                     ent.stats.currentResonance = 0;
                     ent.battleStats = { dmgDealt: 0, dmgTaken: 0, healDone: 0 };
                     ent._deathSoundPlayed = false;
+                    ent._battleJoined = true;
                 }
             });
 
@@ -2762,6 +2904,7 @@
             lastBattleStatusSnapshot = {};
             entities.forEach(entity => { lastBattleStatusSnapshot[entity.id] = (entity.statusEffects || []).map(s => s && s.name).filter(Boolean); });
             entities.forEach(entity => { entity.statusEffects = []; });
+            entities.forEach(entity => { delete entity._battleJoined; });
             addLog(`<b>[시스템]</b> 전투가 강제 종료되었습니다.`, 'log-action');
             updateBattleUI(); renderGrid();
 
@@ -2938,22 +3081,37 @@
                 }
             }
 
-            if (!isBattleActive) { 
-                if (turnOrderDisplay) turnOrderDisplay.innerHTML = ""; 
-                return; 
-            }
+            if (!isBattleActive) { if (turnOrderDisplay) turnOrderDisplay.innerHTML = ""; const h0 = document.getElementById("turnHint"); if (h0) h0.textContent = ""; return; }
 
             // 턴 순서 표시 업데이트
             if (turnOrderDisplay) {
                 turnOrderDisplay.innerHTML = "";
-                turnOrder.forEach((id, index) => {
-                    const entity = entities.find(e => e.id === id); 
-                    if (!entity) return;
-                    const block = document.createElement('div'); 
-                    block.className = `turn-block ${index === currentTurnIndex ? 'active' : ''} ${entity.stats.currentHp <= 0 ? 'dead' : ''}`; 
-                    block.innerText = entity.name; 
-                    turnOrderDisplay.appendChild(block);
-                });
+                const canEdit = typeof isAdmin !== 'undefined' && isAdmin;
+            turnOrder.forEach((id, index) => {
+                const entity = entities.find(e => e.id === id);
+                if (!entity) return;
+                const block = document.createElement('div');
+                block.className = `turn-block ${index === currentTurnIndex ? 'active' : ''} ${entity.stats.currentHp <= 0 ? 'dead' : ''}`;
+                block.appendChild(document.createTextNode(entity.name));
+                if (canEdit) {
+                    block.draggable = true; block.title = '끌어서 순서 바꾸기 · 더블클릭: 이 개체의 차례로 · ✕: 순서에서 빼기';
+                    block.ondragstart = e => { e.dataTransfer.setData('text/plain', String(index)); block.classList.add('dragging'); };
+                    block.ondragend = () => block.classList.remove('dragging');
+                    block.ondragover = e => { e.preventDefault(); block.classList.add('drop-target'); };
+                    block.ondragleave = () => block.classList.remove('drop-target');
+                    block.ondrop = e => { e.preventDefault(); const from = parseInt(e.dataTransfer.getData('text/plain'), 10); if (!isNaN(from)) moveTurn(from, index); };
+                    block.ondblclick = () => setCurrentTurn(index);
+                    const x = document.createElement('span'); x.className = 'turn-x'; x.textContent = '✕'; x.title = '순서에서 빼기';
+                    x.onclick = e => { e.stopPropagation(); removeTurnAt(index); }; block.appendChild(x);
+                }
+                turnOrderDisplay.appendChild(block);
+            });
+            if (canEdit) {
+                const add = document.createElement('button'); add.className = 'turn-add'; add.textContent = '＋'; add.title = '턴 순서에 개체 추가'; add.onclick = openTurnAddMenu; turnOrderDisplay.appendChild(add);
+            }
+            let hint = document.getElementById('turnHint');
+            if (!hint) { hint = document.createElement('div'); hint.id = 'turnHint'; hint.className = 'turn-hint'; turnOrderDisplay.parentNode.insertBefore(hint, turnOrderDisplay.nextSibling); }
+            hint.textContent = canEdit ? '끌어서 순서 변경 · 더블클릭: 그 개체 차례로 · ✕: 빼기 · ＋: 추가' : '';
             }
         }
 
@@ -3249,6 +3407,85 @@
             if (itemEffectEl) itemEffectEl.insertAdjacentHTML('afterend', itemTagBuilderHtml());
 
             refreshTagBuilderStatusOptions();
+        })();
+
+        // ===== 스킬 및 현황: 모든 개체의 상태이상·스킬을 한 화면에 (마우스를 올리지 않아도 보이게) =====
+        let ovTeam = 'all', ovOnlyStat = false, ovOpen = false, ovQueued = false;
+        const ovCollapsed = new Set();
+        const OV_TYPE_TEXT = {
+            dot: v => `지속 피해: 매 턴 최대 체력의 ${v}%`, hot: v => `지속 회복: 매 턴 최대 체력의 ${v}%`, stun: () => '행동 불능 (턴 건너뜀)', shield: v => `보호막 ${v}`,
+            vampire: v => `흡혈: 가한 피해의 ${v}% 회복`, reflect: v => `반사: 받은 피해의 ${v}%`, vulnerable: v => `취약: 받는 피해 +${v}%`, reduce_damage: v => `받는 피해 -${v}%`,
+            doom: v => `즉사 예고: 끝나면 최대 체력의 ${v}% 피해`, silence: () => '침묵: 기본 스킬 사용 불가', seal: () => '봉인: 캐릭터·성좌 스킬 사용 불가', unhealable: () => '치유 불가',
+            immune: () => '면역: 새 상태이상 무시', immortal: () => '불사: 체력 0이 되면 1로 생존', taunt: () => '도발: 강제 지목', crit_up: v => `치명타 확률 +${v}%`, action_damage: v => `행동 시 ${v} 피해`
+        };
+        function statusTone(s) {
+            const v = Number(s.value) || 0, k = s.type;
+            if (['dot', 'stun', 'vulnerable', 'doom', 'silence', 'seal', 'unhealable', 'action_damage'].includes(k)) return 'bad';
+            if (['hot', 'shield', 'vampire', 'reflect', 'reduce_damage', 'immune', 'immortal', 'crit_up'].includes(k)) return 'good';
+            if (k === 'stat' || k === 'maxhp') return v >= 0 ? 'good' : 'bad';
+            if (k === 'taunt') return 'warn';
+            return 'neutral';
+        }
+        function statusEffectText(s) {
+            if (s.type === 'stat') return `${STAT_KOR_BY_KEY[s.targetStat] || s.targetStat || ''} ${(Number(s.value) || 0) >= 0 ? '+' : ''}${Number(s.value) || 0}`;
+            if (s.type === 'maxhp') return `최대 체력 ${(Number(s.value) || 0) >= 0 ? '+' : ''}${Number(s.value) || 0}`;
+            const f = OV_TYPE_TEXT[s.type]; return f ? f(Number(s.value) || 0) : '';
+        }
+        function statusTurns(s) { return s.type === 'shield' ? '소멸 전까지' : `${s.duration}턴 남음`; }
+        function openOverviewModal() { ovOpen = true; renderOverview(); document.getElementById('overviewModal').style.display = 'block'; }
+        function closeOverviewModal() { ovOpen = false; document.getElementById('overviewModal').style.display = 'none'; document.getElementById('ovBody').innerHTML = ''; }
+        function ovFilter(team, btn) { ovTeam = team; document.querySelectorAll('.ov-tools .ov-chip[data-t]').forEach(b => b.classList.toggle('on', b === btn)); renderOverview(); }
+        function ovOnlyStatus() { ovOnlyStat = document.getElementById('ovOnly').checked; renderOverview(); }
+        function ovToggle(id) { if (ovCollapsed.has(id)) ovCollapsed.delete(id); else ovCollapsed.add(id); renderOverview(); }
+        function ovToggleAll(open) { if (open) ovCollapsed.clear(); else entities.forEach(e => ovCollapsed.add(e.id)); renderOverview(); }
+        function ovSchedule() { if (!ovOpen || ovQueued) return; ovQueued = true; requestAnimationFrame(() => { ovQueued = false; if (ovOpen) renderOverview(); }); }
+        function renderOverview() {
+            const body = document.getElementById('ovBody'); if (!body) return;
+            const hideSecret = typeof isAdmin !== 'undefined' && !isAdmin, curId = (typeof turnCurId === 'function') ? turnCurId() : null, E = bvEsc;
+            const list = entities.filter(e => (ovTeam === 'all' || bulkTeam(e) === ovTeam) && (!ovOnlyStat || (e.statusEffects || []).length));
+            const all = entities.filter(e => ovTeam === 'all' || bulkTeam(e) === ovTeam);
+            // ① 상태이상 현황: 이름별로 묶어서 누구에게 몇 턴 남았는지
+            const groups = {};
+            all.forEach(e => (e.statusEffects || []).forEach(s => { const k = s.name + '|' + s.type; (groups[k] = groups[k] || { s: s, who: [] }).who.push(`${e.name} ${s.type === 'shield' ? '' : s.duration + '턴'}`.trim()); }));
+            const gl = Object.values(groups).sort((a, b) => b.who.length - a.who.length);
+            const total = all.reduce((n, e) => n + (e.statusEffects || []).length, 0), holders = all.filter(e => (e.statusEffects || []).length).length;
+            document.getElementById('ovSub').innerText = `개체 ${all.length}명 · 상태이상 ${total}건 (${holders}명)`;
+            let html = `<div class="ov-sum"><h4>상태이상 현황<small>이름별로 묶어 누구에게 걸려 있는지</small></h4>` + (gl.length ? `<div class="ov-groups">${gl.map(g => `<div class="ov-group tone-${statusTone(g.s)}"><b>${g.s.icon || ''} ${E(g.s.name)}</b> <small>× ${g.who.length}명</small><div>${E(statusEffectText(g.s))}</div><div>${g.who.map(E).join(' · ')}</div></div>`).join('')}</div>` : '<div class="ov-none">걸려 있는 상태이상이 없습니다.</div>') + '</div>';
+            // ② 개체별 카드
+            html += `<div class="ov-cards">` + list.map(e => {
+                const team = bulkTeam(e), dead = e.stats.currentHp <= 0, max = getEffectiveMaxHp(e), pct = Math.max(0, Math.min(100, e.stats.currentHp / max * 100));
+                const shield = (e.statusEffects || []).filter(s => s.type === 'shield').reduce((n, s) => n + s.value, 0), res = e.stats.currentResonance || 0, full = e.stats.currentFullness || 0;
+                const st = e.statusEffects || [], collapsed = ovCollapsed.has(e.id);
+                const mini = st.length ? st.map(s => `<span class="tone-${statusTone(s)}">${s.icon || ''} ${E(s.name)}${s.type === 'shield' ? '' : ' ' + s.duration}</span>`).join('') : '<span class="tone-neutral" style="color:#a0aec0;">상태이상 없음</span>';
+                const sec = (o, key) => (hideSecret && o && o.isSecret) ? { desc: '비공개된 스킬입니다.', effect: '비공개된 효과입니다.' } : { desc: o ? o.desc : '', effect: o ? o.effect : '' };
+                const sk = (o, cls, label, extra) => { if (!o || !o.name || o.name === '-') return ''; const x = sec(o); return `<div class="ov-sk ${cls}"><b>${label} ${E(o.name)}</b>${o.range ? `<span class="rg">${E(o.range)}</span>` : ''}${o.type ? `<span class="rg">${E(o.type)}</span>` : ''}${extra || ''}${x.desc && x.desc !== '-' ? `<p>${E(x.desc)}</p>` : ''}${x.effect && x.effect !== '-' ? `<p class="ef">▶ 효과: ${E(x.effect)}</p>` : ''}</div>`; };
+                const S = e.skills || {}, ready = res >= RESONANCE_MAX;
+                const basics = (S.extraSkills || S.enemyBasics || []).map(b => `<div class="ov-sk basic"><b>[기본 스킬] ${E(b.name)}</b>${b.range ? `<span class="rg">${E(b.range)}</span>` : ''}${b.type ? `<span class="rg">${E(b.type)}</span>` : ''}${b.effect ? `<p class="ef">▶ 효과: ${E(b.effect)}</p>` : ''}</div>`).join('');
+                const tr = (e.trait && typeof traitCatalog !== 'undefined') ? traitCatalog.find(x => x.name === e.trait) : null;
+                const skillHtml = sk(S.charSkill, '', '[캐릭터 스킬]') + sk(S.constSkill, 'const', '[성좌 스킬]', ready ? '<span class="ready">사용 가능</span>' : `<span class="lock">공명도 ${res}/${RESONANCE_MAX}</span>`) + sk(S.constBless, 'bless', '[성좌의 가호]', '<span class="rg" style="background:#e9d8fd;color:#553c9a;">패시브</span>') + basics
+                    + (tr ? `<div class="ov-sk trait"><b>[특성] ${E(tr.name)}</b><p>${E(tr.desc)}</p></div>` : '');
+                const stHtml = st.length ? [...st].reverse().map(s => `<div class="ov-st tone-${statusTone(s)}"><span class="ic">${s.icon || ''}</span><b>${E(s.name)}</b><span class="tn">${statusTurns(s)}</span><span class="ds">${E(statusEffectText(s))}${s.desc && s.desc !== statusEffectText(s) ? ' — ' + E(s.desc) : ''}</span></div>`).join('') : '<div class="ov-none">걸려 있는 상태이상이 없습니다.</div>';
+                return `<div class="ov-card ${team}${dead ? ' dead' : ''}${e.id === curId ? ' turn' : ''}${collapsed ? ' collapsed' : ''}">
+                    <div class="ov-ch" onclick="ovToggle('${e.id}')"><div class="ov-ch-top"><b>${E(e.name)}</b><span class="ov-tag">${team}팀</span>${e.position ? `<span class="ov-tag">${E(e.position)}</span>` : ''}${e.id === curId ? '<span class="ov-tag turn">지금 차례</span>' : ''}${dead ? '<span class="ov-tag">쓰러짐</span>' : ''}<span class="arrow">▾</span></div>
+                        <div class="ov-bar"><i style="width:${pct}%; background:${pct > 50 ? '#48bb78' : (pct > 25 ? '#ecc94b' : '#e53e3e')}"></i></div>
+                        <div class="ov-nums"><span>HP ${e.stats.currentHp} / ${max}${shield ? ` (+${shield})` : ''}</span><span>공명도 ${res}/${RESONANCE_MAX}</span><span>포만도 ${full}/${FULLNESS_MAX}</span></div>
+                        <div class="ov-mini">${mini}</div></div>
+                    <div class="ov-cb"><div class="ov-sec"><h5>상태이상 (${st.length})</h5>${stHtml}</div><div class="ov-sec"><h5>스킬</h5>${skillHtml || '<div class="ov-none">등록된 스킬이 없습니다.</div>'}</div></div></div>`;
+            }).join('') + '</div>' + (list.length ? '' : '<div class="ov-none" style="padding:20px; text-align:center;">조건에 맞는 개체가 없습니다.</div>');
+            const sc = body.scrollTop; body.innerHTML = html; body.scrollTop = sc;
+        }
+        // ===== 필드 크기에 맞춰 양쪽 카드 목록 높이 맞추기 + 개체가 많으면 카드를 더 촘촘하게 =====
+        function syncPanelHeights() {
+            const c = document.querySelector('.center-field-wrapper'); if (!c) return;
+            const h = Math.round(c.getBoundingClientRect().height); if (h > 200) document.documentElement.style.setProperty('--field-h', h + 'px');
+            document.querySelectorAll('.side-panel').forEach(pn => pn.classList.toggle('dense', pn.querySelectorAll('.character-card').length >= 4));
+        }
+        (function layoutHooks() {
+            const orig = window.renderGrid; if (typeof orig !== 'function') return;
+            window.renderGrid = function () { const r = orig.apply(this, arguments); try { syncPanelHeights(); ovSchedule(); } catch (e) {} return r; };
+            window.addEventListener('resize', () => syncPanelHeights());
+            document.addEventListener('DOMContentLoaded', () => { const c = document.querySelector('.center-field-wrapper'); if (c && window.ResizeObserver) new ResizeObserver(() => syncPanelHeights()).observe(c); syncPanelHeights(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape' && ovOpen) closeOverviewModal(); });
         })();
 
         // ===== 컴팩트 보기 (이 브라우저에만 저장, 기본 켬) =====
