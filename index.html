@@ -39,6 +39,8 @@
         .action-purple-btn:hover { background-color: #553c9a; }
 
         .main-battle-container { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+        .side-panel { position: sticky; top: 8px; align-self: flex-start; }
+        .character-card .card-header-top > span:first-child { min-width: 0; overflow-wrap: anywhere; padding-right: 6px; }   /* 긴 이름은 잘리지 않고 줄바꿈 */
         .side-panel { width: 22%; display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 250px); overflow-y: auto; padding: 0 10px 20px 10px; }
         .side-panel::-webkit-scrollbar { width: 6px; }
         .side-panel::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
@@ -46,26 +48,29 @@
         .center-field-wrapper { width: 56%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; position: relative; }
         .round-bookmark { position: absolute; left: -2px; top: 25px; transform: translateX(-100%); background-color: #2d3748; color: #ffffff; padding: 12px 10px; border-radius: 8px 0 0 8px; font-size: 16px; font-weight: 900; box-shadow: -3px 3px 6px rgba(0,0,0,0.15); text-align: center; line-height: 1.4; letter-spacing: 1px; z-index: 5; border: 1px solid #1a202c; border-right: none; }
 
+        /* 턴 순서: 어두운 띠 위에 칩으로. 지금 차례는 노랑으로 크게, 다음은 표시, 지난 차례는 흐리게 */
+        .turn-row { display: flex; align-items: center; gap: 8px; width: 100%; }
+        .turn-strip { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; background: #1a202c; border-radius: 10px; padding: 2px 10px; box-shadow: inset 0 0 0 1px #2d3748; }
+        .ts-label { font-size: 10px; font-weight: 800; color: #a0aec0; letter-spacing: .5px; white-space: nowrap; }
+        .turn-order-container { position: relative; flex: 1; min-width: 0; display: flex; gap: 5px; align-items: center; overflow-x: auto; scrollbar-width: none; padding: 1px 0; scroll-behavior: smooth; }
+        .turn-order-container::-webkit-scrollbar { display: none; }
+        .turn-block { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px 2px 3px; border-radius: 999px; background: #2d3748; color: #cbd5e0; border: 1px solid #4a5568; font-size: 12px; font-weight: 700; white-space: nowrap; transition: opacity .2s; }
+        .turn-block .tb-no { width: 19px; height: 19px; border-radius: 50%; background: #4a5568; color: #fff; font-size: 10px; display: grid; place-items: center; }
+        .turn-block.team-A .tb-no { background: #c53030; } .turn-block.team-B .tb-no { background: #2b6cb0; }
+        .turn-block.next { border-color: #90cdf4; color: #fff; }
+        .turn-block .tb-next { font-style: normal; font-size: 10px; color: #90cdf4; font-weight: 800; }
+        .turn-block.done { opacity: .45; }
+        .turn-block.dead { opacity: .35; } .turn-block.dead .tb-name { text-decoration: line-through; }
+        .turn-block.active { background: #f6e05e; color: #1a202c; border-color: #faf089; font-size: 13.5px; font-weight: 800; padding: 2px 13px 2px 3px; box-shadow: 0 0 0 2px rgba(246,224,94,.35), 0 0 14px rgba(246,224,94,.65); animation: tbPulse 1.6s ease-in-out infinite; }
+        .turn-block.active .tb-no { width: 21px; height: 21px; background: #1a202c; color: #f6e05e; font-size: 11px; }
+        @keyframes tbPulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(246,224,94,.35), 0 0 10px rgba(246,224,94,.5); } 50% { box-shadow: 0 0 0 3px rgba(246,224,94,.5), 0 0 18px rgba(246,224,94,.85); } }
         .battle-tracker { width: 100%; margin-bottom: 10px; text-align: center; padding-bottom: 10px; border-bottom: 2px dashed #edf2f7; }
-        .turn-order-container { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; justify-content: center; align-items: center; min-height: 35px; }
-        .turn-block { padding: 8px 14px; border-radius: 20px; background: #edf2f7; border: 1px solid #cbd5e0; font-size: 13px; font-weight: 700; white-space: nowrap; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #4a5568; }
-        .turn-block { position: relative; }
-        .turn-block[draggable="true"] { cursor: grab; } .turn-block.dragging { opacity: .4; } .turn-block.drop-target { outline: 2px dashed #3182ce; outline-offset: 2px; }
-        .turn-block .turn-x { display: none; position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; border-radius: 50%; background: #e53e3e; color: #fff; font-size: 11px; line-height: 18px; text-align: center; cursor: pointer; }
-        .turn-block:hover .turn-x { display: block; }
-        .turn-add { border: 1px dashed #a0aec0; background: #fff; color: #4a5568; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 14px; font-weight: 700; }
-        .turn-add:hover { border-color: #3182ce; color: #3182ce; }
-        .turn-hint { text-align: center; font-size: 11px; color: #a0aec0; margin-top: -2px; min-height: 0; }
-        .turn-menu { position: fixed; z-index: 2000; background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 6px; min-width: 240px; max-height: 320px; overflow: auto; }
-        .turn-menu .tm-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 5px 6px; font-size: 13px; border-top: 1px solid #edf2f7; }
-        .turn-menu .tm-row:first-of-type { border-top: 0; } .turn-menu button, .tq-btns button, .tq-top { padding: 3px 8px; font-size: 11px; border: 1px solid #cbd5e0; background: #f7fafc; border-radius: 5px; cursor: pointer; margin-left: 3px; }
+        .turn-block { position: relative; } .turn-block.dragging { opacity: .4; } .turn-block.drop-target { outline: 2px dashed #3182ce; outline-offset: 2px; } .tq-btns button, .tq-top { padding: 3px 8px; font-size: 11px; border: 1px solid #cbd5e0; background: #f7fafc; border-radius: 5px; cursor: pointer; margin-left: 3px; }
         .tq-top { margin-left: 0; padding: 4px 10px; font-size: 12px; }
         .tq-cur { background: #3182ce; color: #fff; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-left: 8px; font-weight: 600; }
         .tq-n { font-style: normal; font-size: 11px; color: #3182ce; background: #ebf8ff; padding: 0 6px; border-radius: 8px; margin-left: 6px; }
         .turn-setup-item.tq-is-cur { border-color: #3182ce; box-shadow: 0 0 0 2px rgba(49,130,206,.18); }
         .turn-setup-item.dragging { opacity: .4; } .turn-setup-item.drop-target { border-style: dashed; border-color: #3182ce; }
-        .turn-block.active { background: #3182ce; color: white; border-color: #2b6cb0; transform: scale(1.15); box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4); z-index: 2; }
-        .turn-block.dead { text-decoration: line-through; opacity: 0.4; background: #e2e8f0; }
 
         .grid-coordinate-wrapper { display: flex; flex-direction: column; width: 100%; max-width: 800px; margin: 0 auto; }
         .grid-col-labels { display: flex; margin-left: 25px; margin-bottom: 5px; }
@@ -373,11 +378,10 @@
         body.compact .tool-row { margin: 0 0 8px; }
         body.compact .top-bar > div[style*="flex-shrink: 0"] { padding: 4px 12px !important; min-width: 70px !important; }  /* 현재 라운드 상자 */
         body.compact .main-battle-container { gap: 12px; margin-bottom: 10px; }
-        body.compact .side-panel { width: 23%; gap: 6px; padding: 0 4px 12px; box-sizing: border-box; height: var(--field-h, auto); max-height: var(--field-h, calc(100vh - 160px)); }
+        body.compact .side-panel { width: 23%; gap: 6px; padding: 0 4px 12px; box-sizing: border-box; height: var(--panel-h, var(--field-h, auto)); max-height: var(--panel-h, var(--field-h, calc(100vh - 160px))); }
         body.compact .center-field-wrapper { width: 52%; padding: 10px 14px; }
         body.compact .panel-header { font-size: 15px; padding-bottom: 3px; }
         body.compact .battle-tracker { margin-bottom: 6px; padding-bottom: 6px; }
-        body.compact .turn-order-container { padding: 4px; min-height: 28px; }
         body.compact .grid-coordinate-wrapper { max-width: 700px; }
         body.compact .battle-log-container { height: 130px; padding: 8px 12px; font-size: 12px; }
         body.compact .character-card { padding: 9px 11px; border-radius: 10px; }
@@ -400,7 +404,7 @@
         body.compact .side-panel.dense .character-card > .toggle-btn { display: inline-block !important; width: calc(50% - 5px) !important; vertical-align: top; margin: 4px 0 0 !important; padding: 3px !important; font-size: 11px; box-sizing: border-box; }
         body.compact .side-panel.dense .character-card div[style*="margin-top: 6px"] { margin-top: 2px !important; }
         #weatherCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 800; display: none; } /* 패널 위, 팝업창(1000) 아래 */
-        .weather-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 999px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 700; color: #2d3748; margin-bottom: 6px; }
+        /* 턴 줄에 함께 들어가므로 길면 줄임표 */ .weather-badge { flex: 0 1 auto; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 0 !important; display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 999px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 700; color: #2d3748; margin-bottom: 6px; }
         .weather-badge small { font-weight: 500; color: #718096; font-size: 11px; }
     </style>
 </head>
@@ -494,9 +498,11 @@
         <div class="center-field-wrapper">
             
             <div class="battle-tracker">
-                <div><span class="weather-badge" id="weatherBadge"></span></div>
-                    <div class="turn-order-container" id="turnOrderDisplay"></div>
-            </div>
+                    <div class="turn-row">
+                        <div class="turn-strip" id="turnStrip" style="display:none;"><span class="ts-label">턴 순서</span><div class="turn-order-container" id="turnOrderDisplay"></div></div>
+                        <span class="weather-badge" id="weatherBadge"></span>
+                    </div>
+                </div>
 
             <div class="grid-coordinate-wrapper">
                 <div class="grid-col-labels" id="gridColLabels"></div>
@@ -2445,58 +2451,6 @@
             }
             refreshTurnUi();
         }
-        function moveTurn(from, to) {
-            if (from === to || from < 0 || to < 0 || from >= turnOrder.length || to >= turnOrder.length) return;
-            const o = turnOrder.slice(), id = o.splice(from, 1)[0]; o.splice(to, 0, id); applyTurnOrder(o);
-        }
-        function removeTurnAt(idx) {
-            if (isBattleActive && turnOrder.length <= 1) return alert('전투 중에는 턴 순서를 비울 수 없습니다. 마지막 한 명은 뺄 수 없어요.');
-            const o = turnOrder.slice(); o.splice(idx, 1); applyTurnOrder(o);
-        }
-        function insertTurn(id, pos) { const o = turnOrder.slice(); o.splice(pos === undefined ? o.length : pos, 0, id); applyTurnOrder(o); }
-        function setCurrentTurn(idx) {
-            if (!isBattleActive || idx < 0 || idx >= turnOrder.length) return;
-            const ent = entities.find(e => e.id === turnOrder[idx]); if (!ent) return;
-            currentTurnIndex = idx; if (typeof playTurnChangeSound === 'function') playTurnChangeSound();
-            addLog(`<b>[시스템]</b> <b>${ent.name}</b>의 차례로 지정되었습니다. (턴 시작 효과는 적용되지 않습니다)`, 'log-action', true);
-            refreshTurnUi();
-        }
-        // ----- 화면 위 턴 막대에서 바로 조정 -----
-        function openTurnAddMenu(ev) {
-            ev.stopPropagation(); closeTurnAddMenu();
-            const menu = document.createElement('div'); menu.className = 'turn-menu'; menu.id = 'turnAddMenu';
-            const alive = entities.filter(e => e.stats.currentHp > 0), curIdx = isBattleActive ? currentTurnIndex : -1;
-            menu.innerHTML = '<div style="font-size:11px; color:#718096; padding:2px 6px 6px;">턴 순서에 추가할 개체</div>' + (alive.length ? alive.map(e => {
-                const n = turnOrder.filter(id => id === e.id).length;
-                return `<div class="tm-row"><span>${bvEsc(e.name)}${n ? `<em class="tq-n">큐 ${n}</em>` : ''}</span><span><button onclick="insertTurn('${e.id}'); closeTurnAddMenu()">맨 뒤</button><button onclick="insertTurn('${e.id}', ${isBattleActive ? curIdx + 1 : 0}); closeTurnAddMenu()">${isBattleActive ? '다음 차례' : '맨 앞'}</button></span></div>`;
-            }).join('') : '<div style="color:#a0aec0; padding:8px;">생존 개체가 없습니다.</div>') + '<div class="tm-row"><button onclick="closeTurnAddMenu(); openTurnOrderModal()" style="width:100%;">턴 순서 창 열기</button></div>';
-            document.body.appendChild(menu);
-            const r = ev.currentTarget.getBoundingClientRect(); menu.style.left = Math.min(window.innerWidth - 260, Math.max(8, r.left)) + 'px'; menu.style.top = (r.bottom + 6) + 'px';
-            setTimeout(() => document.addEventListener('click', closeTurnAddMenu, { once: true }), 0);
-            menu.addEventListener('click', e => e.stopPropagation());
-        }
-        function autoPlaceTurnOrder() {
-            const alive = entities.filter(e => e.stats.currentHp > 0).sort((a, b) => getEffectiveStat(b, 'agi') - getEffectiveStat(a, 'agi'));
-            if (!alive.length) return alert('생존한 개체가 없습니다.');
-            applyTurnOrder(alive.map(e => e.id));
-        }
-        // 블록을 한 번 누르면 나오는 메뉴: 이 개체를 앞뒤로 옮기거나, 지금 차례로 지정하거나, 순서에서 뺀다
-        function openTurnBlockMenu(ev, idx) {
-            ev.stopPropagation(); closeTurnAddMenu();
-            const ent = entities.find(e => e.id === turnOrder[idx]); if (!ent) return;
-            const last = turnOrder.length - 1, item = (label, js, off) => `<button ${off ? 'disabled style="opacity:.35;cursor:default"' : `onclick="${js}; closeTurnAddMenu()"`}>${label}</button>`;
-            const menu = document.createElement('div'); menu.className = 'turn-menu'; menu.id = 'turnAddMenu'; menu.style.minWidth = '210px';
-            menu.innerHTML = `<div style="font-size:12px; font-weight:700; padding:2px 6px 6px;">${bvEsc(ent.name)} <span style="color:#a0aec0; font-weight:400;">${idx + 1}번째</span></div>`
-                + (isBattleActive ? `<div class="tm-row">${item('▶ 이 개체의 차례로 지정', `setCurrentTurn(${idx})`, idx === currentTurnIndex)}</div>` : '')
-                + `<div class="tm-row">${item('◀ 앞으로', `moveTurn(${idx}, ${idx - 1})`, idx === 0)}${item('뒤로 ▶', `moveTurn(${idx}, ${idx + 1})`, idx === last)}</div>`
-                + `<div class="tm-row">${item('맨 앞으로', `moveTurn(${idx}, 0)`, idx === 0)}${item('맨 뒤로', `moveTurn(${idx}, ${last})`, idx === last)}</div>`
-                + `<div class="tm-row">${item('✕ 순서에서 빼기', `removeTurnAt(${idx})`)}</div>`;
-            document.body.appendChild(menu);
-            const r = ev.currentTarget.getBoundingClientRect(); menu.style.left = Math.min(window.innerWidth - 240, Math.max(8, r.left)) + 'px'; menu.style.top = (r.bottom + 6) + 'px';
-            setTimeout(() => document.addEventListener('click', closeTurnAddMenu, { once: true }), 0);
-            menu.addEventListener('click', e => e.stopPropagation());
-        }
-        function closeTurnAddMenu() { const m = document.getElementById('turnAddMenu'); if (m) m.remove(); }
 
         // ----- 턴 순서 창 -----
         function tempCurIndex() { const id = turnCurId(); return id ? nearestIndexOf(tempTurnOrder, id, currentTurnIndex) : -1; }
@@ -3097,40 +3051,26 @@
                 }
             }
 
-            if (!isBattleActive && !(typeof isAdmin !== "undefined" && isAdmin)) { if (turnOrderDisplay) turnOrderDisplay.innerHTML = ""; const h0 = document.getElementById("turnHint"); if (h0) h0.textContent = ""; return; }   // 관전자는 전투가 시작돼야 보이고, 진행자는 시작 전에도 순서를 만질 수 있다
-
-            // 턴 순서 표시 업데이트
+            const strip = document.getElementById('turnStrip');
+            if (!isBattleActive) { if (turnOrderDisplay) turnOrderDisplay.innerHTML = ''; if (strip) strip.style.display = 'none'; return; }
+            if (strip) strip.style.display = 'flex';
             if (turnOrderDisplay) {
-                turnOrderDisplay.innerHTML = "";
-                const canEdit = typeof isAdmin !== 'undefined' && isAdmin;
-            turnOrder.forEach((id, index) => {
-                const entity = entities.find(e => e.id === id);
-                if (!entity) return;
-                const block = document.createElement('div');
-                block.className = `turn-block ${isBattleActive && index === currentTurnIndex ? 'active' : ''} ${entity.stats.currentHp <= 0 ? 'dead' : ''}`;
-                block.appendChild(document.createTextNode(entity.name));
-                if (canEdit) {
-                    block.draggable = true; block.title = '클릭: 메뉴 · 끌어서 순서 바꾸기 · ✕: 순서에서 빼기';
-                    block.ondragstart = e => { e.dataTransfer.setData('text/plain', String(index)); block.classList.add('dragging'); };
-                    block.ondragend = () => block.classList.remove('dragging');
-                    block.ondragover = e => { e.preventDefault(); block.classList.add('drop-target'); };
-                    block.ondragleave = () => block.classList.remove('drop-target');
-                    block.ondrop = e => { e.preventDefault(); const from = parseInt(e.dataTransfer.getData('text/plain'), 10); if (!isNaN(from)) moveTurn(from, index); };
-                    block.onclick = e => openTurnBlockMenu(e, index);
-                    const x = document.createElement('span'); x.className = 'turn-x'; x.textContent = '✕'; x.title = '순서에서 빼기';
-                    x.onclick = e => { e.stopPropagation(); removeTurnAt(index); }; block.appendChild(x);
-                }
-                turnOrderDisplay.appendChild(block);
-            });
-            if (canEdit) {
-                const add = document.createElement('button'); add.className = 'turn-add'; add.textContent = '＋'; add.title = '턴 순서에 개체 추가'; add.onclick = openTurnAddMenu; turnOrderDisplay.appendChild(add);
-                if (!isBattleActive) {   // 시작 전: 민첩 순서로 한 번에 채우기
-                    const auto = document.createElement('button'); auto.className = 'turn-add'; auto.textContent = '민첩순 자동 배치'; auto.title = '생존 개체를 민첩 순서로 채웁니다'; auto.onclick = e => { e.stopPropagation(); autoPlaceTurnOrder(); }; turnOrderDisplay.appendChild(auto);
-                }
-            }
-            let hint = document.getElementById('turnHint');
-            if (!hint) { hint = document.createElement('div'); hint.id = 'turnHint'; hint.className = 'turn-hint'; turnOrderDisplay.parentNode.insertBefore(hint, turnOrderDisplay.nextSibling); }
-            hint.textContent = canEdit ? (isBattleActive ? '블록 클릭: 메뉴(차례 지정·앞뒤 이동·빼기) · 끌어서 순서 변경 · ✕: 빼기 · ＋: 추가' : '전투 시작 전: 순서를 미리 정해 둘 수 있어요. 비워 두고 시작하면 민첩순으로 자동 배치됩니다.') : '';
+                turnOrderDisplay.innerHTML = '';
+                const nextIdx = turnOrder.length > 1 ? (currentTurnIndex + 1) % turnOrder.length : -1;
+                let activeEl = null;
+                turnOrder.forEach((id, index) => {
+                    const entity = entities.find(e => e.id === id); if (!entity) return;
+                    const dead = entity.stats.currentHp <= 0, isCur = index === currentTurnIndex;
+                    const block = document.createElement('div');
+                    block.className = 'turn-block team-' + bulkTeam(entity) + (isCur ? ' active' : '') + (index === nextIdx ? ' next' : '') + (index < currentTurnIndex ? ' done' : '') + (dead ? ' dead' : '');
+                    block.title = (index + 1) + '번째 · ' + entity.name + (isCur ? ' (지금 차례)' : '');
+                    const no = document.createElement('span'); no.className = 'tb-no'; no.textContent = isCur ? '▶' : String(index + 1);
+                    const nm = document.createElement('span'); nm.className = 'tb-name'; nm.textContent = entity.name;
+                    block.appendChild(no); block.appendChild(nm);
+                    if (index === nextIdx && !isCur) { const nx = document.createElement('em'); nx.className = 'tb-next'; nx.textContent = '다음'; block.appendChild(nx); }
+                    turnOrderDisplay.appendChild(block); if (isCur) activeEl = block;
+                });
+                if (activeEl) turnOrderDisplay.scrollLeft = Math.max(0, activeEl.offsetLeft - turnOrderDisplay.clientWidth / 2 + activeEl.offsetWidth / 2);   // 지금 차례가 항상 보이게
             }
         }
 
@@ -3499,12 +3439,16 @@
             syncOverviewBtn();
             const c = document.querySelector('.center-field-wrapper'); if (!c) return;
             const h = Math.round(c.getBoundingClientRect().height); if (h > 200) document.documentElement.style.setProperty('--field-h', h + 'px');
+            // 카드 목록은 필드 높이에 맞추되, 화면(창) 높이를 넘지 않게 한다. 목록 끝이 창 밖으로 걸치면 마지막 카드가 잘려 보인다.
+            const sp = document.querySelector('.side-panel');
+            if (sp && h > 200) { const top = Math.max(8, sp.getBoundingClientRect().top); document.documentElement.style.setProperty('--panel-h', Math.round(Math.min(h, Math.max(260, window.innerHeight - top - 12))) + 'px'); }
             document.querySelectorAll('.side-panel').forEach(pn => pn.classList.toggle('dense', pn.querySelectorAll('.character-card').length >= 4));
         }
         (function layoutHooks() {
             const orig = window.renderGrid; if (typeof orig !== 'function') return;
             window.renderGrid = function () { const r = orig.apply(this, arguments); try { syncPanelHeights(); ovSchedule(); } catch (e) {} return r; };
             window.addEventListener('resize', () => syncPanelHeights());
+            let _ph = 0; window.addEventListener('scroll', () => { if (_ph) return; _ph = requestAnimationFrame(() => { _ph = 0; syncPanelHeights(); }); }, { passive: true });   // 페이지를 내리면 목록이 화면에 붙어 따라오며 높이를 다시 맞춘다
             document.addEventListener('DOMContentLoaded', () => { const c = document.querySelector('.center-field-wrapper'); if (c && window.ResizeObserver) new ResizeObserver(() => syncPanelHeights()).observe(c); syncPanelHeights(); });
             document.addEventListener('keydown', e => { if (e.key === 'Escape' && ovOpen) closeOverviewModal(); });
         })();
@@ -5820,7 +5764,7 @@
         function updateWeatherBadge(name) {
             const el = document.getElementById('weatherBadge'); if (!el) return;
             const info = WEATHER_INFO[name] || WEATHER_INFO['맑음'];
-            el.innerHTML = `${info.icon} ${name}${info.desc ? ` <small>· ${info.desc}</small>` : ''}`;
+            el.innerHTML = `${info.icon} ${name}${info.desc ? ` <small>· ${info.desc}</small>` : ''}`; el.title = name + (info.desc ? ' — ' + info.desc : '');
         }
         function changeWeather() {
             const name = document.getElementById('weatherSelect').value;
