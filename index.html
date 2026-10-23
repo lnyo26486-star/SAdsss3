@@ -57,6 +57,12 @@
         .turn-block { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px 2px 3px; border-radius: 999px; background: #2d3748; color: #cbd5e0; border: 1px solid #4a5568; font-size: 12px; font-weight: 700; white-space: nowrap; transition: opacity .2s; }
         .turn-block .tb-no { width: 19px; height: 19px; border-radius: 50%; background: #4a5568; color: #fff; font-size: 10px; display: grid; place-items: center; }
         .turn-block.team-A .tb-no { background: #c53030; } .turn-block.team-B .tb-no { background: #2b6cb0; }
+        .main-battle-container.has-mob .side-panel { width: 18%; } .main-battle-container.has-mob .center-field-wrapper { width: 46%; }   /* 에너미가 있으면 3번째 패널이 생기므로 폭을 나눈다 */
+        body.compact .main-battle-container.has-mob .side-panel { width: 19%; } body.compact .main-battle-container.has-mob .center-field-wrapper { width: 40%; }
+        .mob-panel-header { color: #6b46c1; border-bottom-color: #d6bcfa; }
+        .token.mob-token { border: 2px solid #6b46c1; }
+        .type-badge.mob { background-color: #e9d8fd; color: #553c9a; }
+        .turn-block.team-E .tb-no { background: #6b46c1; }
         .turn-block.next { border-color: #90cdf4; color: #fff; }
         .turn-block .tb-next { font-style: normal; font-size: 10px; color: #90cdf4; font-weight: 800; }
         .turn-block.done { opacity: .45; }
@@ -523,6 +529,7 @@
         </div>
 
         <div class="side-panel" id="apostlePanel"></div>
+<div class="side-panel" id="mobPanel" style="display:none;"></div>
     </div>
 
     <div class="battle-log-container" id="battleLog"></div>
@@ -557,7 +564,7 @@
                     <button type="button" class="action-blue-btn" style="width:100%;" onclick="importStatsFromSheet()">시트에서 능력치 불러오기 (이름 기준)</button>
                     <div id="importStatsStatus" style="font-size:11px; color:#718096; margin-top:6px; white-space:pre-wrap; word-break:keep-all;"></div>
                 </div>
-                <div class="form-group" id="typeGroup"><label>분류</label><select id="inputGroup" onchange="onGroupChange()"><option value="A">A팀</option><option value="B">B팀</option><option value="char">캐릭터 (목록에 저장)</option><option value="enemy">에너미 (목록에 저장)</option></select><select id="inputType" style="display:none;"><option value="캐릭터">캐릭터</option><option value="에너미">에너미</option></select><div id="groupHint" style="font-size:11px; color:#718096; margin-top:4px;"></div></div>
+                <div class="form-group" id="typeGroup"><label>분류</label><select id="inputGroup" onchange="onGroupChange()"><option value="A">A팀</option><option value="B">B팀</option><option value="mob">에너미 (팀 없이 전투에 참여)</option><option value="char">캐릭터 (목록에 저장)</option><option value="enemy">에너미 (목록에 저장)</option></select><select id="inputType" style="display:none;"><option value="캐릭터">캐릭터</option><option value="에너미">에너미</option></select><div id="groupHint" style="font-size:11px; color:#718096; margin-top:4px;"></div></div>
                 <div class="form-group"><label>캐릭터 등급</label><select id="inputCharGrade"><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F" selected>F</option></select></div>
                 <div class="form-group"><label>포지션</label><select id="inputPosition" onchange="togglePositionUI()">
                     <option value="">없음</option>
@@ -786,7 +793,7 @@
             <div id="bvList" class="bv-list"></div>
             <div class="bv-form">
                 <div class="bv-row"><input id="bvName" placeholder="변수 이름 (예: 독안개)" maxlength="30">
-                    <select id="bvScope"><option value="all">전원 (생존자)</option><option value="A">A팀</option><option value="B">B팀</option><option value="pick">적용할 때 고르기</option></select>
+                    <select id="bvScope"><option value="all">전원 (생존자)</option><option value="A">A팀</option><option value="B">B팀</option><option value="E">에너미</option><option value="pick">적용할 때 고르기</option></select>
                     <select id="bvAuto" title="자동 적용"><option value="off">자동 적용 안 함</option><option value="round">매 라운드 시작마다</option></select></div>
                 <textarea id="bvEffect" rows="2" placeholder="효과 키워드 — 예: [스탯:전체:-10:3] [최대체력:+30:3]"></textarea>
                 <div class="bv-chips">
@@ -811,7 +818,7 @@
     <div id="targetPickModal" class="modal">
         <div class="modal-content" style="width: 460px; max-width: 94vw;">
             <h3 id="tpTitle" style="margin-top:0;">대상 고르기</h3>
-            <div id="tpList" class="bulk-targets" style="grid-template-columns:1fr 1fr;"></div>
+            <div id="tpList" class="bulk-targets" style="grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));"></div>
             <div style="display:flex; gap:8px; margin-top:14px;"><button type="button" onclick="document.getElementById('targetPickModal').style.display='none'" style="flex:1;">취소</button>
                 <button type="button" onclick="tpOk()" style="flex:2; background:#805ad5; color:#fff;">적용</button></div>
         </div>
@@ -856,6 +863,7 @@
                 <button type="button" class="ov-chip on" data-t="all" onclick="ovFilter('all', this)">전체</button>
                 <button type="button" class="ov-chip" data-t="A" onclick="ovFilter('A', this)">A팀</button>
                 <button type="button" class="ov-chip" data-t="B" onclick="ovFilter('B', this)">B팀</button>
+<button type="button" class="ov-chip" data-t="E" onclick="ovFilter('E', this)">에너미</button>
                 <label class="ov-check"><input type="checkbox" id="ovOnly" onchange="ovOnlyStatus()"> 상태이상 있는 개체만</label>
                 <span style="margin-left:auto; display:flex; gap:6px;"><button type="button" class="ov-chip" onclick="ovToggleAll(true)">모두 펼치기</button><button type="button" class="ov-chip" onclick="ovToggleAll(false)">모두 접기</button></span>
             </div>
@@ -1089,6 +1097,7 @@
                     <select id="globalHpTarget" style="flex: 1;">
                         <option value="all">전원</option>
                         <option value="apostle">B팀만</option>
+<option value="mob">에너미만</option>
                         <option value="enemy">A팀만</option>
                     </select>
                     <select id="globalHpType" style="flex: 1;">
@@ -2143,13 +2152,15 @@
                     const tile = document.getElementById(`tile-${ent.x}-${ent.y}`);
                     if (tile) {
                         const token = document.createElement('div');
-                        token.className = `token ${entTeam(ent) === 'A' ? 'enemy-token' : 'apostle-token'}`;
+                        token.className = `token ${entGroup(ent) === 'A' ? 'enemy-token' : (entGroup(ent) === 'mob' ? 'mob-token' : 'apostle-token')}`;
                         token.innerText = ent.name;
                         
                         if (ent.tokenColor) {
                             token.style.backgroundColor = ent.tokenColor;
-                        } else if (entTeam(ent) === 'A') {
+                        } else if (entGroup(ent) === 'A') {
 token.style.backgroundColor = '#e53e3e';
+} else if (entGroup(ent) === 'mob') {
+token.style.backgroundColor = '#805ad5';
                         }
 
                         const tokenHasShield = (ent.statusEffects || []).some(s => s.type === 'shield' && s.value > 0);
@@ -2458,7 +2469,7 @@ token.style.backgroundColor = '#e53e3e';
             };
             if (currentSkill && currentSkill.fx) fxPreload(currentSkill.fx);
             
-            if (entTeam(owner) === 'A') {
+            if (entGroup(owner) === 'mob') {
 loadedEnemySkill = activeSkill;
                 addLog(`다음 턴에 <b>${owner.name}</b>이(가) <b>[${skillName}]</b>을(를) 사용합니다.`, 'log-action');
             } else {
@@ -3027,8 +3038,14 @@ loadedEnemySkill = activeSkill;
         // A팀·B팀은 전투 필드에서 싸우는 팀(둘 다 "캐릭터")이고, 캐릭터·에너미는 팀과 별개인 "목록(도감)"이다.
         // 목록의 개체는 전투 개체(entities)에 들어 있지 않아서 턴·판정·효과에 전혀 섞이지 않고, 필요할 때 A팀/B팀으로 "보내서" 쓴다. (관전자에게도 보내지 않는다)
         // 예전 저장 데이터(group 없음)는 유형으로 팀을 추정한다: 에너미 → A팀, 그 밖 → B팀.
-        function entGroup(e) { return (e && e.group) || (e && e.type === '에너미' ? 'A' : 'B'); }
-        function entTeam(e) { const g = entGroup(e); return (g === 'A' || g === 'B') ? g : null; }
+        // 소속(진영): 'A'팀 / 'B'팀 / 'mob'(에너미 — 팀이 아닌 별도 세력). 소속이 다르면 서로 적군이고, 같으면 아군이다.
+        // (같은 "캐릭터"여도 A팀과 B팀이면 적군. 에너미는 A팀·B팀 모두의 적군이고, 에너미끼리는 아군이다.)
+        // 예전 저장 데이터(group 없음)는 유형으로 추정한다: 에너미 → 에너미 세력, 그 밖 → B팀.
+        function entGroup(e) { return (e && e.group) || (e && e.type === '에너미' ? 'mob' : 'B'); }
+        function entTeam(e) { const g = entGroup(e); return (g === 'A' || g === 'B') ? g : null; }   // 팀(A/B)만. 에너미 세력은 null
+        function isSameSide_(a, b) { return entGroup(a) === entGroup(b); }
+        function groupLabel_(g) { return g === 'A' ? 'A팀' : (g === 'mob' ? '에너미' : 'B팀'); }
+        function panelIdOf(e) { const g = entGroup(e); return g === 'A' ? 'enemyPanel' : (g === 'mob' ? 'mobPanel' : 'apostlePanel'); }
         const ROSTER_STORE = 'battleRosterV1';
         let rosterChars = [], rosterEnemies = [], editingRosterKind = null, rosterOpenKind = 'char', modalOrigType = null;
         function rosterLoad() { try { const v = JSON.parse(localStorage.getItem(ROSTER_STORE) || 'null'); if (v) { rosterChars = Array.isArray(v.chars) ? v.chars : []; rosterEnemies = Array.isArray(v.enemies) ? v.enemies : []; } } catch (e) {} }
@@ -3051,7 +3068,7 @@ loadedEnemySkill = activeSkill;
             let n = 2; while (names.has(base + ' ' + n)) n++;
             return base + ' ' + n;
         }
-        const GROUP_HINTS = { A: 'A팀: 전투 필드의 A팀에 바로 들어가요.', B: 'B팀: 전투 필드의 B팀에 바로 들어가요.', char: '캐릭터 목록에 저장돼요. 필요할 때 [A팀으로] / [B팀으로]로 보내 써요.', enemy: '에너미 목록에 저장돼요. 필요할 때 [A팀으로] / [B팀으로]로 보내 써요. (수동 체력·L등급 사용 가능)' };
+        const GROUP_HINTS = { A: 'A팀: 전투 필드의 A팀에 바로 들어가요.', B: 'B팀: 전투 필드의 B팀에 바로 들어가요.', mob: '에너미: 팀이 아닌 별도 세력으로 전투에만 참여해요. A팀·B팀 모두의 적군이에요.', char: '캐릭터 목록에 저장돼요. 필요할 때 [A팀으로] / [B팀으로]로 보내 써요.', enemy: '에너미 목록에 저장돼요. 필요할 때 [A팀으로] / [B팀으로]로 보내 써요. (수동 체력·L등급 사용 가능)' };
         function groupHintUpdate() { const g = (document.getElementById('inputGroup') || {}).value, h = document.getElementById('groupHint'); if (h) h.innerText = GROUP_HINTS[g] || ''; }
         function onGroupChange() {
             const g = document.getElementById('inputGroup').value, typeEl = document.getElementById('inputType');
@@ -3059,16 +3076,16 @@ loadedEnemySkill = activeSkill;
             // 폼 종류: 에너미 분류 = 에너미 폼(수동 체력 등), 캐릭터 분류 = 캐릭터 폼. A/B팀은 새로 만들 땐 캐릭터 폼, 수정 중이면 원래 유형을 유지한다
             if (g === 'enemy') typeEl.value = '에너미';
             else if (g === 'char') typeEl.value = '캐릭터';
-            else typeEl.value = (editing && modalOrigType) ? modalOrigType : '캐릭터';
+            else typeEl.value = (editing && modalOrigType) ? modalOrigType : (g === 'mob' ? '에너미' : '캐릭터');
             groupHintUpdate();
             toggleType();
             const tc = document.getElementById('inputTokenColor');   // 새로 만들 땐 토큰 기본 색을 팀에 맞춘다 (A팀 빨강 / 그 밖 파랑)
-            if (tc && !editing) { if (g === 'A' && tc.value === '#3182ce') tc.value = '#e53e3e'; else if (g !== 'A' && g !== 'enemy' && tc.value === '#e53e3e') tc.value = '#3182ce'; }
+            if (tc && !editing) { if (g === 'A' && tc.value === '#3182ce') tc.value = '#e53e3e'; else if (g !== 'A' && g !== 'enemy' && g !== 'mob' && tc.value === '#e53e3e') tc.value = '#3182ce'; }
         }
         function openRosterModal(kind) {
             rosterOpenKind = kind === 'enemy' ? 'enemy' : 'char';
             document.getElementById('rosterTitle').innerText = rosterOpenKind === 'enemy' ? '에너미 목록' : '캐릭터 목록';
-            document.getElementById('rosterDesc').innerText = '전투 필드와 별개로 보관하는 목록이에요. [A팀으로] / [B팀으로]를 누르면 복사본이 팀에 들어가고, 목록에는 그대로 남아요. 수량을 정하면 여러 마리를 한 번에 보낼 수 있어요.';
+            document.getElementById('rosterDesc').innerText = '전투 필드와 별개로 보관하는 목록이에요. [A팀으로] / [B팀으로]는 팀에, [에너미로]는 팀 없이 전투에만 참여하는 에너미로 복사본이 들어가고, 목록에는 그대로 남아요. 수량을 정하면 여러 마리를 한 번에 보낼 수 있어요.';
             document.getElementById('rosterSearch').value = ''; document.getElementById('rosterNotice').innerText = '';
             renderRoster();
             document.getElementById('rosterModal').style.display = 'block';
@@ -3087,7 +3104,7 @@ loadedEnemySkill = activeSkill;
                     + '<div class="roster-meta">체력 ' + (s.maxHp || 0) + ' · 근' + (g.str || 'F') + ' 민' + (g.agi || 'F') + ' 지' + (g.int || 'F') + ' 정' + (g.men || 'F') + ' 행' + (g.luk || 'F') + (e.trait ? ' · ' + rosterEsc(e.trait) : '') + '</div>'
                     + '<div class="roster-skill">' + (names.length ? '스킬: ' + rosterEsc(names.join(', ')) : '스킬 없음') + '</div>'
                     + '<div class="roster-actions"><input type="number" class="roster-qty" id="rq_' + id + '" min="1" max="20" value="1" title="보낼 수량">'
-                    + '<button style="background:#c53030;" onclick="rosterSend(\'' + id + '\',\'A\')">A팀으로</button><button style="background:#2b6cb0;" onclick="rosterSend(\'' + id + '\',\'B\')">B팀으로</button>'
+                    + '<button style="background:#c53030;" onclick="rosterSend(\'' + id + '\',\'A\')">A팀으로</button><button style="background:#2b6cb0;" onclick="rosterSend(\'' + id + '\',\'B\')">B팀으로</button><button style="background:#6b46c1;" onclick="rosterSend(\'' + id + '\',\'mob\')" title="팀 없이 전투에만 참여">에너미로</button>'
                     + '<button style="background:#718096;" onclick="rosterEdit(\'' + id + '\')">수정</button><button style="background:#805ad5;" onclick="rosterCopy(\'' + id + '\')">복사</button><button style="background:#e53e3e;" onclick="rosterDelete(\'' + id + '\')">삭제</button></div></div>';
             }).join('');
         }
@@ -3100,7 +3117,7 @@ loadedEnemySkill = activeSkill;
                 entities.push(c);
             }
             renderGrid();
-            const n = document.getElementById('rosterNotice'); if (n) n.innerText = src.name + (count > 1 ? ' ×' + count : '') + ' → ' + team + '팀에 추가했어요.';
+            const n = document.getElementById('rosterNotice'); if (n) n.innerText = src.name + (count > 1 ? ' ×' + count : '') + ' → ' + (team === 'mob' ? '에너미(전투 참여)' : team + '팀') + '에 추가했어요.';
         }
         function rosterEdit(id) { closeModal('rosterModal'); editCharacter(id); }
         function rosterCopy(id) {
@@ -3119,7 +3136,7 @@ loadedEnemySkill = activeSkill;
         }
         rosterLoad();
 
-        function ssTeam(e) { return entTeam(e) || 'B'; }
+        function ssTeam(e) { const g = entGroup(e); return g === 'mob' ? 'E' : g; }
         // 체력은 캐릭터의 stats 안에 있다 (stats.currentHp / stats.maxHp)
         function ssHp(e) { return Number((e.stats && e.stats.currentHp !== undefined) ? e.stats.currentHp : e.currentHp) || 0; }
         function ssMaxHp(e) { return Number((e.stats && e.stats.maxHp !== undefined) ? e.stats.maxHp : e.maxHp) || 0; }
@@ -3152,8 +3169,9 @@ loadedEnemySkill = activeSkill;
         // 자동 판정: 한쪽 팀이 모두 쓰러졌고 다른 쪽에 살아 있는 사람이 있으면 그쪽이 승리
         function sheetSyncAutoWinner() {
             const has = t => ssList.some(e => ssTeam(e) === t), alive = t => ssList.filter(e => ssTeam(e) === t && ssHp(e) > 0).length;
-            if (has('A') && has('B')) { if (!alive('A') && alive('B')) return 'B'; if (!alive('B') && alive('A')) return 'A'; }
-            return '';
+const sides = ['A', 'B', 'E'].filter(has), left = sides.filter(alive);
+if (sides.length >= 2 && left.length === 1) return left[0] === 'E' ? '' : left[0];   // 한 세력만 남으면 그쪽 승리 (에너미 세력이 이기면 캐릭터 팀은 승리 없음)
+return '';
         }
         function sheetSyncApplyWinner() {
             let w = document.getElementById('ssWinner').value;
@@ -3724,7 +3742,7 @@ gsShown.forEach((status) => {
         function bvLoad() { try { const v = JSON.parse(localStorage.getItem(BV_STORE) || '[]'); battleVars = Array.isArray(v) ? v : []; } catch (e) { battleVars = []; } }
         function bvSave() { try { localStorage.setItem(BV_STORE, JSON.stringify(battleVars)); } catch (e) {} }
         bvLoad();
-        const BV_SCOPE_LABEL = { all: '전원', A: 'A팀', B: 'B팀', pick: '고르기' };
+        const BV_SCOPE_LABEL = { all: '전원', A: 'A팀', B: 'B팀', E: '에너미', pick: '고르기' };
         function bvDescribe(str) {   // 키워드를 사람이 읽는 문장으로
             const out = [], s = String(str || ''), kor = k => STAT_KOR_BY_KEY[STAT_KEY_BY_KOR[k.trim()] || k.trim()] || k.trim();
             const sg = n => (parseInt(n, 10) >= 0 ? '+' : '') + parseInt(n, 10);
@@ -3784,7 +3802,7 @@ gsShown.forEach((status) => {
             battleVars = battleVars.filter(x => x.id !== id); bvSave(); bvRender();
         }
         function bvTargets(v, pickedIds) {
-            return entities.filter(e => e.stats && e.stats.currentHp > 0 && (v.scope === 'all' || (v.scope === 'A' && bulkTeam(e) === 'A') || (v.scope === 'B' && bulkTeam(e) === 'B') || (v.scope === 'pick' && (pickedIds || []).includes(e.id))));
+            return entities.filter(e => e.stats && e.stats.currentHp > 0 && (v.scope === 'all' || (v.scope === 'A' && bulkTeam(e) === 'A') || (v.scope === 'B' && bulkTeam(e) === 'B') || (v.scope === 'E' && bulkTeam(e) === 'E') || (v.scope === 'pick' && (pickedIds || []).includes(e.id))));
         }
         function applyBattleVar(id, pickedIds, quiet) {
             const v = battleVars.find(x => x.id === id); if (!v) return 0;
@@ -3806,8 +3824,8 @@ gsShown.forEach((status) => {
         // ----- 적용할 때 대상 고르기 -----
         function tpOpen(title) {
             document.getElementById('tpTitle').innerText = `[${title}] 적용할 대상`;
-            const col = (team, label) => `<div class="bulk-col"><h4 style="color:${team === 'A' ? '#c53030' : '#2b6cb0'};">${label}</h4>` + entities.filter(e => bulkTeam(e) === team && e.stats.currentHp > 0).map(e => `<label class="bulk-row"><input type="checkbox" class="tp-cb" data-id="${e.id}"> ${bvEsc(e.name)}</label>`).join('') + '</div>';
-            document.getElementById('tpList').innerHTML = col('A', 'A팀') + col('B', 'B팀');
+            const col = (team, label) => `<div class="bulk-col"><h4 style="color:${team === 'A' ? '#c53030' : (team === 'E' ? '#6b46c1' : '#2b6cb0')};">${label}</h4>` + entities.filter(e => bulkTeam(e) === team && e.stats.currentHp > 0).map(e => `<label class="bulk-row"><input type="checkbox" class="tp-cb" data-id="${e.id}"> ${bvEsc(e.name)}</label>`).join('') + '</div>';
+            document.getElementById('tpList').innerHTML = col('A', 'A팀') + col('B', 'B팀') + (entities.some(e => entGroup(e) === 'mob') ? col('E', '에너미') : '');
             document.getElementById('targetPickModal').style.display = 'block';
         }
         function tpOk() {
@@ -3818,19 +3836,19 @@ gsShown.forEach((status) => {
         document.addEventListener('input', e => { if (e.target && e.target.id === 'bvEffect') bvPreview(); });
 
         // ===== 상태이상 일괄 부여 =====
-        function bulkTeam(e) { return entTeam(e) || 'B'; }
+        function bulkTeam(e) { const g = entGroup(e); return g === 'mob' ? 'E' : g; }
         function openBulkStatusModal() {
             const sel = document.getElementById('bulkStatusSelect');
             sel.innerHTML = globalStatusList.length ? globalStatusList.map(s => `<option value="${s.id}">${s.icon || ''} ${s.name}</option>`).join('') : '<option value="">(상태이상 목록이 비어 있습니다)</option>';
             const box = document.getElementById('bulkTargets');
             const col = (team, title) => {
                 const list = entities.filter(e => bulkTeam(e) === team);
-                return `<div class="bulk-col"><h4 style="color:${team === 'A' ? '#c53030' : '#2b6cb0'};">${title}</h4>` + (list.length ? list.map(e => {
+                return `<div class="bulk-col"><h4 style="color:${team === 'A' ? '#c53030' : (team === 'E' ? '#6b46c1' : '#2b6cb0')};">${title}</h4>` + (list.length ? list.map(e => {
                     const dead = e.stats.currentHp <= 0;
                     return `<label class="bulk-row${dead ? ' dead' : ''}"><input type="checkbox" class="bulk-cb" data-id="${e.id}" data-team="${team}" data-dead="${dead ? 1 : 0}" onchange="bulkCount()"> ${e.name}<small>${e.stats.currentHp}/${getEffectiveMaxHp(e)}${dead ? ' 쓰러짐' : ''}</small></label>`;
                 }).join('') : '<div style="color:#a0aec0; font-size:12px;">없음</div>') + '</div>';
             };
-            box.innerHTML = col('A', 'A팀') + col('B', 'B팀');
+            box.innerHTML = col('A', 'A팀') + col('B', 'B팀') + (entities.some(e => entGroup(e) === 'mob') ? col('E', '에너미') : '');
             bulkCount();
             document.getElementById('bulkStatusModal').style.display = 'block';
         }
@@ -4114,7 +4132,7 @@ gsShown.forEach((status) => {
         function editCharacter(id) {
             const entity = entities.find(e => e.id === id) || rosterFind(id); if (!entity) return;
 const rk = rosterKindOf(id); editingRosterKind = rk; modalOrigType = entity.type;
-editingId = id; document.getElementById('modalTitle').innerText = '정보 수정 · ' + (rk === 'enemy' ? '에너미 목록' : (rk === 'char' ? '캐릭터 목록' : (entGroup(entity) + '팀')));
+editingId = id; document.getElementById('modalTitle').innerText = '정보 수정 · ' + (rk === 'enemy' ? '에너미 목록' : (rk === 'char' ? '캐릭터 목록' : groupLabel_(entGroup(entity))));
 document.getElementById('inputName').value = entity.name; document.getElementById('inputType').value = entity.type;
 const gEl = document.getElementById('inputGroup'); if (gEl) { gEl.value = rk || entGroup(entity); groupHintUpdate(); }
 toggleType(); 
@@ -4309,7 +4327,7 @@ toggleType();
             const caster = entities.find(e => e.id === pendingPurifyCasterId);
             if (!caster) return;
 
-            const allies = entities.filter(e => entTeam(e) === entTeam(caster) && e.stats.currentHp > 0);
+            const allies = entities.filter(e => isSameSide_(e, caster) && e.stats.currentHp > 0);
             list.innerHTML = '';
             if (allies.length === 0) {
                 list.innerHTML = '<div style="color:#a0aec0; font-size:13px; padding:10px 0;">대상이 될 아군이 없습니다.</div>';
@@ -4501,6 +4519,7 @@ toggleType();
             const apostlePanel = document.getElementById('apostlePanel');
             if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">A팀</h3>`;
             if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">B팀</h3>`;
+const mobPanel = document.getElementById('mobPanel'); if (mobPanel) mobPanel.innerHTML = `<h3 class="panel-header mob-panel-header">에너미</h3>`;
 
             if (typeof entities === 'undefined' || !Array.isArray(entities)) return;
 
@@ -4534,7 +4553,7 @@ toggleType();
                         if (entity.statusEffects.some(s => s.type === 'shield' && s.value > 0)) cardClass += ' panel-shielded';
                     }
 
-                    const badgeClass = entTeam(entity) === 'A' ? 'type-badge enemy' : 'type-badge apostle'; 
+                    const badgeClass = entGroup(entity) === 'A' ? 'type-badge enemy' : (entGroup(entity) === 'mob' ? 'type-badge mob' : 'type-badge apostle'); 
                     const hpColorClass = 'hp-color-apostle'; 
                     const isDead = entity.stats.currentHp <= 0;
                     const hpRatioForWarning = getEffectiveMaxHp(entity) > 0 ? entity.stats.currentHp / getEffectiveMaxHp(entity) : 1;
@@ -4736,7 +4755,7 @@ toggleType();
                         blessEffect = " 비공개된 효과입니다.";
                     }
 
-                    card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${(typeof onlineNames !== 'undefined' && onlineNames.has(entity.name)) ? '<i class="on-dot" title="접속 중"></i>' : ''}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">캐릭터</span>${gradeBadge}${positionBadge}${traitBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
+                    card.innerHTML = `<div class="card-header"><div class="card-header-top"><span style="${isDead ? 'text-decoration: line-through; color: #a0aec0;' : ''}">${entity.name}${(typeof onlineNames !== 'undefined' && onlineNames.has(entity.name)) ? '<i class="on-dot" title="접속 중"></i>' : ''}${isDead ? '<span class="type-badge dead-badge">사망</span>' : ''}</span><span><span class="${badgeClass}">${entGroup(entity) === 'mob' ? '에너미' : '캐릭터'}</span>${gradeBadge}${positionBadge}${traitBadge}</span></div><div class="card-header-mid"><div class="status-container">${statusHtml}</div>
                     <div class="card-actions">
                         <button class="action-btn" onclick="togglePlacement('${entity.id}')" style="background:#ebf8ff; color:#2b6cb0; border-color:#90cdf4;">배치</button>
                         <button class="action-btn" onclick="removeToken('${entity.id}')" style="background:#fff5f5; color:#c53030; border-color:#fed7d7;">회수</button>
@@ -4798,8 +4817,11 @@ toggleType();
                     }
                     card.innerHTML += equipHtml;
 
-                    if (entTeam(entity) === 'A') { 
+                    const gOfCard = entGroup(entity);
+if (gOfCard === 'A') { 
 if(enemyPanel) enemyPanel.appendChild(card); 
+} else if (gOfCard === 'mob') { 
+if(mobPanel) mobPanel.appendChild(card); 
 } else { 
 if(apostlePanel) apostlePanel.appendChild(card); 
 }
@@ -4808,8 +4830,9 @@ if(apostlePanel) apostlePanel.appendChild(card);
                 }
             });
             
-            try { if (typeof updateSkillDisplay === 'function') updateSkillDisplay(); } catch(e){}
-            try { if (typeof renderTokens === 'function') renderTokens(); } catch(e){}
+            { const hasMob = entities.some(e => entGroup(e) === 'mob'); if (mobPanel) mobPanel.style.display = hasMob ? 'flex' : 'none'; const mbc = document.querySelector('.main-battle-container'); if (mbc) mbc.classList.toggle('has-mob', hasMob); }
+try { if (typeof updateSkillDisplay === 'function') updateSkillDisplay(); } catch(e){}
+try { if (typeof renderTokens === 'function') renderTokens(); } catch(e){}
             try { if (typeof renderTerrains === 'function') renderTerrains(); } catch(e){}
         }
 
@@ -5256,7 +5279,7 @@ if(apostlePanel) apostlePanel.appendChild(card);
 
             const validTargets = affectedEntities.filter(target => {
                 if (target.id === attacker.id && activeSkill.skillType === '공격' && activeSkill.targetType !== 'all') return false; 
-                const isSameTeam = target.type === attacker.type;
+                const isSameTeam = isSameSide_(target, attacker);   // 소속이 다르면 적군 (같은 캐릭터여도 A팀 ↔ B팀은 서로 적)
                 if (activeSkill.targetType === 'ally') return isSameTeam;
                 if (activeSkill.targetType === 'enemy') return !isSameTeam;
                 return true; 
@@ -5399,7 +5422,7 @@ if(apostlePanel) apostlePanel.appendChild(card);
                             totalDamageDealtThisAction += actualDamageDealt;
                             
                             if (actualDamageDealt > 0) {
-                                const panelId = entTeam(target) === 'A' ? 'enemyPanel' : 'apostlePanel';
+                                const panelId = panelIdOf(target);
                                 const panel = document.getElementById(panelId);
                                 if (panel) {
                                     panel.classList.remove('shake-anim');
@@ -6280,8 +6303,9 @@ if (toRoster) { try { openRosterModal(dest); } catch (e) {} }   // 목록에 저
 
             const targets = entities.filter(e => {
                 if (e.x === undefined || e.x === null || e.stats.currentHp <= 0) return false;
-                if (targetGroup === 'apostle' && entTeam(e) === 'A') return false;
-if (targetGroup === 'enemy' && entTeam(e) !== 'A') return false;
+                if (targetGroup === 'apostle' && entGroup(e) !== 'B') return false;
+if (targetGroup === 'enemy' && entGroup(e) !== 'A') return false;
+if (targetGroup === 'mob' && entGroup(e) !== 'mob') return false;
                 return true;
             });
 
@@ -6290,7 +6314,7 @@ if (targetGroup === 'enemy' && entTeam(e) !== 'A') return false;
                 return;
             }
 
-            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? 'B팀 전원' : 'A팀 전원');
+            const groupName = targetGroup === 'all' ? '필드 전원' : (targetGroup === 'apostle' ? 'B팀 전원' : (targetGroup === 'mob' ? '에너미 전원' : 'A팀 전원'));
 
             targets.forEach(ent => {
                 const maxHp = typeof getEffectiveMaxHp === 'function' ? getEffectiveMaxHp(ent) : ent.stats.maxHp;
@@ -6312,7 +6336,7 @@ if (targetGroup === 'enemy' && entTeam(e) !== 'A') return false;
                         if (ent.stats.currentHp < 0) ent.stats.currentHp = 0;
                     }
                     
-                    const panelId = entTeam(ent) === 'A' ? 'enemyPanel' : 'apostlePanel';
+                    const panelId = panelIdOf(ent);
                     const panel = document.getElementById(panelId);
                     if (panel) {
                         panel.classList.remove('shake-anim');
