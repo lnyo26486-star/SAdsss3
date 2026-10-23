@@ -60,6 +60,13 @@
         .main-battle-container.has-mob .side-panel { width: 18%; } .main-battle-container.has-mob .center-field-wrapper { width: 46%; }   /* 에너미가 있으면 3번째 패널이 생기므로 폭을 나눈다 */
         body.compact .main-battle-container.has-mob .side-panel { width: 19%; } body.compact .main-battle-container.has-mob .center-field-wrapper { width: 40%; }
         .mob-panel-header { color: #6b46c1; border-bottom-color: #d6bcfa; }
+        .mob-panel-header { cursor: pointer; user-select: none; }
+        #mobPanel.collapsed { width: 46px !important; padding: 0; overflow: hidden; }
+        #mobPanel.collapsed > :not(.panel-header) { display: none !important; }
+        #mobPanel.collapsed .panel-header { writing-mode: vertical-rl; margin: 0 auto; padding: 10px 0; font-size: 14px; border-bottom: 0; }
+        .main-battle-container.has-mob.mob-collapsed .side-panel:not(#mobPanel) { width: 21%; } .main-battle-container.has-mob.mob-collapsed .center-field-wrapper { width: 52%; }   /* 접으면 필드가 다시 넓어진다 */
+        body.compact .main-battle-container.has-mob.mob-collapsed .side-panel:not(#mobPanel) { width: 22%; } body.compact .main-battle-container.has-mob.mob-collapsed .center-field-wrapper { width: 48%; }
+        .mob-panel-header.mob-turn { color: #c05621; }
         .token.mob-token { border: 2px solid #6b46c1; }
         .type-badge.mob { background-color: #e9d8fd; color: #553c9a; }
         .turn-block.team-E .tb-no { background: #6b46c1; }
@@ -3038,6 +3045,18 @@ loadedEnemySkill = activeSkill;
         // A팀·B팀은 전투 필드에서 싸우는 팀(둘 다 "캐릭터")이고, 캐릭터·에너미는 팀과 별개인 "목록(도감)"이다.
         // 목록의 개체는 전투 개체(entities)에 들어 있지 않아서 턴·판정·효과에 전혀 섞이지 않고, 필요할 때 A팀/B팀으로 "보내서" 쓴다. (관전자에게도 보내지 않는다)
         // 예전 저장 데이터(group 없음)는 유형으로 팀을 추정한다: 에너미 → A팀, 그 밖 → B팀.
+        // ===== 에너미 패널 접기 / 펼치기 (이 브라우저에만 기억 · 관전자도 자기 화면에서 접을 수 있다) =====
+        let mobCollapsed = false; try { mobCollapsed = localStorage.getItem('mobPanelCollapsed') === '1'; } catch (e) {}
+        function applyMobCollapse() {
+            const panel = document.getElementById('mobPanel'), mbc = document.querySelector('.main-battle-container'); if (!panel) return;
+            const mobs = entities.filter(e => entGroup(e) === 'mob'), n = mobs.length, collapsed = mobCollapsed && n > 0;
+            panel.classList.toggle('collapsed', collapsed); if (mbc) mbc.classList.toggle('mob-collapsed', collapsed);
+            const hd = panel.querySelector('.mob-panel-header'); if (!hd) return;
+            const curId = (typeof turnCurId === 'function') ? turnCurId() : null, mobTurn = !!curId && mobs.some(e => e.id === curId && e.stats.currentHp > 0);   // 접혀 있어도 에너미 차례인 걸 알 수 있게
+            hd.innerText = (collapsed ? '▸ ' : '▾ ') + '에너미 ' + n + (mobTurn ? ' ▶' : '');
+            hd.classList.toggle('mob-turn', mobTurn);
+        }
+        function toggleMobPanel() { mobCollapsed = !mobCollapsed; try { localStorage.setItem('mobPanelCollapsed', mobCollapsed ? '1' : '0'); } catch (e) {} applyMobCollapse(); }
         // 소속(진영): 'A'팀 / 'B'팀 / 'mob'(에너미 — 팀이 아닌 별도 세력). 소속이 다르면 서로 적군이고, 같으면 아군이다.
         // (같은 "캐릭터"여도 A팀과 B팀이면 적군. 에너미는 A팀·B팀 모두의 적군이고, 에너미끼리는 아군이다.)
         // 예전 저장 데이터(group 없음)는 유형으로 추정한다: 에너미 → 에너미 세력, 그 밖 → B팀.
@@ -3116,6 +3135,7 @@ loadedEnemySkill = activeSkill;
                 c.id = 'entity_' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + '_' + i; c.group = team; c.name = uniqueFieldName(src.name);
                 entities.push(c);
             }
+            if (team === 'mob' && mobCollapsed) { mobCollapsed = false; try { localStorage.setItem('mobPanelCollapsed', '0'); } catch (e) {} }   // 새로 넣은 에너미가 보이게 펼친다
             renderGrid();
             const n = document.getElementById('rosterNotice'); if (n) n.innerText = src.name + (count > 1 ? ' ×' + count : '') + ' → ' + (team === 'mob' ? '에너미(전투 참여)' : team + '팀') + '에 추가했어요.';
         }
@@ -4519,7 +4539,7 @@ toggleType();
             const apostlePanel = document.getElementById('apostlePanel');
             if(enemyPanel) enemyPanel.innerHTML = `<h3 class="panel-header enemy-panel-header">A팀</h3>`;
             if(apostlePanel) apostlePanel.innerHTML = `<h3 class="panel-header apostle-panel-header">B팀</h3>`;
-const mobPanel = document.getElementById('mobPanel'); if (mobPanel) mobPanel.innerHTML = `<h3 class="panel-header mob-panel-header">에너미</h3>`;
+const mobPanel = document.getElementById('mobPanel'); if (mobPanel) mobPanel.innerHTML = `<h3 class="panel-header mob-panel-header" onclick="toggleMobPanel()" title="누르면 접기 / 펼치기">에너미</h3>`;
 
             if (typeof entities === 'undefined' || !Array.isArray(entities)) return;
 
@@ -4830,7 +4850,7 @@ if(apostlePanel) apostlePanel.appendChild(card);
                 }
             });
             
-            { const hasMob = entities.some(e => entGroup(e) === 'mob'); if (mobPanel) mobPanel.style.display = hasMob ? 'flex' : 'none'; const mbc = document.querySelector('.main-battle-container'); if (mbc) mbc.classList.toggle('has-mob', hasMob); }
+            { const hasMob = entities.some(e => entGroup(e) === 'mob'); if (mobPanel) mobPanel.style.display = hasMob ? 'flex' : 'none'; const mbc = document.querySelector('.main-battle-container'); if (mbc) mbc.classList.toggle('has-mob', hasMob); applyMobCollapse(); }
 try { if (typeof updateSkillDisplay === 'function') updateSkillDisplay(); } catch(e){}
 try { if (typeof renderTokens === 'function') renderTokens(); } catch(e){}
             try { if (typeof renderTerrains === 'function') renderTerrains(); } catch(e){}
