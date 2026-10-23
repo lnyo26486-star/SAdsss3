@@ -61,7 +61,7 @@
         body.compact .main-battle-container.has-mob .side-panel { width: 19%; } body.compact .main-battle-container.has-mob .center-field-wrapper { width: 40%; }
         .mob-panel-header { color: #6b46c1; border-bottom-color: #d6bcfa; }
         /* 카드의 "장착된 장비": 라벨은 위, 이름은 아래로 쌓은 칸 (좁아도 글자가 세로로 꺾이지 않는다) */
-        .eq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 6px; }
+        .eq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(max(118px, calc((100% - 6px) / 2)), 1fr)); gap: 6px; }   /* 폭이 넉넉하면 항상 2열(3열 이상은 안 됨), 아주 좁을 때만 1열 */
         .eq-cell { background: #f7fafc; border: 1px solid #edf2f7; border-radius: 6px; padding: 5px 7px; min-width: 0; }
         .eq-label { font-size: 10px; color: #718096; margin-bottom: 2px; white-space: nowrap; }
         .eq-name { font-size: 11px; color: #2d3748; line-height: 1.45; word-break: keep-all; overflow-wrap: anywhere; }
@@ -429,6 +429,7 @@
         body.compact .side-panel.dense .card-header { margin-bottom: 4px; padding-bottom: 4px; }
         body.compact .side-panel.dense .character-card > div[style*="border-top"] { display: inline-block !important; width: calc(50% - 5px) !important; vertical-align: top; margin: 4px 0 0 !important; padding: 0 !important; border-top: 0 !important; box-sizing: border-box; }
         body.compact .side-panel.dense .character-card > div[style*="border-top"] button { width: 100% !important; padding: 3px !important; font-size: 11px !important; margin: 0 0 2px !important; }
+        body.compact .side-panel.dense .character-card > div.eq-block.eq-block { display: block !important; width: auto !important; margin: 6px 0 0 !important; padding: 6px 0 0 !important; border-top: 1px dashed #e2e8f0 !important; }   /* 장비 블록은 반쪽 폭 규칙에서 제외 */
         body.compact .side-panel.dense .character-card > .toggle-btn { display: inline-block !important; width: calc(50% - 5px) !important; vertical-align: top; margin: 4px 0 0 !important; padding: 3px !important; font-size: 11px; box-sizing: border-box; }
         body.compact .side-panel.dense .character-card div[style*="margin-top: 6px"] { margin-top: 2px !important; }
         #weatherCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 800; display: none; } /* 패널 위, 팝업창(1000) 아래 */
@@ -4829,7 +4830,7 @@ const mobPanel = document.getElementById('mobPanel'); if (mobPanel) mobPanel.inn
                                 return equipName;
                             };
 
-                            equipHtml = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-size:11px;">
+                            equipHtml = `<div class="eq-block" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-size:11px;">
                                 <div style="font-weight:bold; color:#4a5568; margin-bottom:6px;">장착된 장비</div>
                                 <div class="eq-grid">
 <div class="eq-cell"><div class="eq-label">머리</div><div class="eq-name">${getEquipDisplay('head')}</div></div>
